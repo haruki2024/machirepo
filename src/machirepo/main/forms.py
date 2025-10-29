@@ -12,57 +12,101 @@ Resident = get_user_model()
 # -----------------------------------------------------
 # 1. 新規登録フォーム (ResidentCreationForm)
 # -----------------------------------------------------
-class ResidentCreationForm(forms.ModelForm):
-    """新規ユーザー登録フォーム (Userモデルが基本)"""
-    # ★ここにパスワードフィールドが必須です★
-    password = forms.CharField(label='パスワード', widget=forms.PasswordInput)
-    password_confirm = forms.CharField(label='パスワード確認', widget=forms.PasswordInput)
-    
-    class Meta:
-        model = Resident
-        fields = ('username', 'email') # ユーザーモデルに依存
-        labels = {
-            'username': 'ユーザー名',
-            'email': 'メールアドレス',
-        }
-    
-    full_name = forms.CharField(
-        label='氏名', 
+class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
+    # Userモデルのusernameフィールドを氏名として再定義（ニックネームとして使用）
+    username = forms.CharField(
+        label='氏名',
         max_length=50,
+        help_text='50文字以内で入力してください。',
         error_messages={
-            'required': '入力に誤りがあります。内容を確認してください。',
-            'max_length': '入力に誤りがあります。内容を確認してください.' 
+            'required': '氏名は必須です。',
+            'max_length': '氏名は50文字以内で入力してください。' 
         }
     )
+
+    email = forms.EmailField(
+        label='メールアドレス', 
+        max_length=254, 
+        required=True
+    )
     
-    class Meta(UserCreationForm.Meta):
+    # パスワードフィールドをカスタムで追加
+    password = forms.CharField(label='パスワード', widget=forms.PasswordInput)
+
+    class Meta:
         model = User
-        # 'username'は親クラスが持つ。ここでは'email'とカスタムの'full_name'を追加
-        fields = ('email', 'full_name') 
+        # last_name, first_name を完全にfieldsから削除。
+        fields = ('username', 'email') 
 
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("入力に誤りがあります。内容を確認してください。")
-        return email
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # 💡 新規作成時のみ、last_name/first_nameのフィールドをバリデーションリストから除外する。
+        # (これにより、フォームがモデルの必須チェックをスキップしようとする)
+        if not self.instance.pk:
+            if 'last_name' in self.fields:
+                self.fields['last_name'].required = False
+            if 'first_name' in self.fields:
+                self.fields['first_name'].required = False
+        
+        # スタイル設定
+        password_attrs = {
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
+        }
+        self.fields['password'].widget.attrs.update(password_attrs)
+        
+        # その他のフィールドにスタイルを適用
+        for name, field in self.fields.items():
+            if name not in ['password', 'password2']:
+                field.widget.attrs.update({
+                    'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
+                })
 
+    # ------------------------------------------------------------------
+    # clean(): バリデーションとパスワードの一致チェック
+    # ------------------------------------------------------------------
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password2 = cleaned_data.get('password2')
+        email = cleaned_data.get('email')
+
+        # 💡 パスワード一致チェック
+        if password and password2 and password != password2:
+            self.add_error('password2', 'パスワードが一致しません。')
+
+        # 💡 emailの重複チェック
+        if email and User.objects.filter(email__iexact=email).exists():
+            # ModelFormは既にこのチェックを行う場合があるが、明示的に再度チェック
+            self.add_error('email', "このメールアドレスは既に使用されています。")
+
+        return cleaned_data
+        
+    # ------------------------------------------------------------------
+    # save()メソッド: パスワードのハッシュ化とUserモデルの保存 (強制ロジック)
+    # ------------------------------------------------------------------
     def save(self, commit=True):
-        # パスワードのハッシュ化（暗号化）は親クラスに任せるため、まず親のsave()を実行
-        user = super().save(commit=False)
+        # ModelFormのsave()に頼らず、Userインスタンスを直接作成
+        # これにより、ModelFormの自動バリデーションとクリーンアップを完全に回避し、
+        # 必要なフィールドだけを渡すことができる。
+        user = User(
+            username=self.cleaned_data["username"], 
+            email=self.cleaned_data["email"],
+            # last_name, first_name が必須な場合を考慮し、空文字をセットしてインスタンスを作成
+            last_name="", 
+            first_name="", 
+            is_staff=False,
+            is_superuser=False,
+        )
         
-        # カスタムフィールドの値を標準フィールドに割り当てる
-        # usernameは認証に使用されるため、ここでは氏名を設定
-        user.username = self.cleaned_data["full_name"] 
-        user.last_name = self.cleaned_data["full_name"]
-        user.first_name = "" 
-        user.email = self.cleaned_data["email"] 
-        user.is_staff = False
-        user.is_superuser = False
+        # パスワードをハッシュ化して設定
+        password = self.cleaned_data["password"]
+        user.set_password(password)
         
+        # データベースに保存
         if commit:
-            user.save()
+            user.save() 
         return user
-
 
 # -----------------------------------------------------
 # 2. ログインフォーム (EmailAuthenticationForm)

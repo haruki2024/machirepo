@@ -19,10 +19,10 @@
         {% endif %}
 
         <div class="form-group">
-            <label for="{{ form.full_name.id_for_label }}">氏名</label>
-            {{ form.full_name }}
-            {% if form.full_name.errors %}
-                <p style="color: red; font-size: 0.85rem;">{{ form.full_name.errors.as_text }}</p>
+            <label for="{{ form.username.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">氏名</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.username.errors }}</p>
             {% endif %}
         </div>
         

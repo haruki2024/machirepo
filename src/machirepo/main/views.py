@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 import logging
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile 
+from django.db.models import Q 
 
 # ロガーの設定
 logger = logging.getLogger(__name__)
@@ -57,7 +58,15 @@ class ResidentRegisterView(CreateView):
     model = get_user_model()
     success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
-
+    
+    # 💡 【デバッグ追加】フォームバリデーション失敗時にエラー内容をログに出力
+    def form_invalid(self, form):
+        logger.error("--- 🚨 ResidentCreationForm バリデーション失敗エラー詳細 🚨 ---")
+        for field, errors in form.errors.items():
+            logger.error(f"フィールド '{field}': {errors}")
+        logger.error("---------------------------------------------------------------")
+        return super().form_invalid(form)
+    
 def user_logout_view(request):
     """ユーザーログアウト (urls.pyの'logout/'に対応)"""
     logout(request)
@@ -132,10 +141,10 @@ def photo_post_create(request):
             # forms.pyでModelChoiceFieldを使用している場合、tags_dataは単一のTagインスタンスである
             tag_instance = cleaned_data.get('tags')
             if tag_instance:
-                 # 単一のPKをセッションに保存
-                 cleaned_data['tags'] = tag_instance.pk
+                # 単一のPKをセッションに保存
+                cleaned_data['tags'] = tag_instance.pk
             else:
-                 cleaned_data['tags'] = None
+                cleaned_data['tags'] = None
             
             # --- フォームデータをセッションに保存 ---
             # cleaned_dataから、JSONシリアライズできないphotoオブジェクトと、不要なtitleを削除
@@ -164,12 +173,12 @@ def photo_post_create(request):
         # ★修正: セッションに保存された単一のPKをModelChoiceFieldが期待するインスタンスに変換し直す★
         tag_pk = initial_data.get('tags')
         if tag_pk:
-             try:
-                 # ModelChoiceFieldがPKを受け付けるので、Tagインスタンスを渡す
-                 initial_data['tags'] = models.Tag.objects.get(pk=tag_pk)
-             except models.Tag.DoesNotExist:
-                 initial_data['tags'] = None
-                 
+            try:
+                # ModelChoiceFieldがPKを受け付けるので、Tagインスタンスを渡す
+                initial_data['tags'] = models.Tag.objects.get(pk=tag_pk)
+            except models.Tag.DoesNotExist:
+                initial_data['tags'] = None
+                
         form = PhotoPostForm(initial=initial_data)
     
     # ② システムは投稿画面を表示する
@@ -280,15 +289,15 @@ def photo_post_confirm(request):
                     # set() メソッドは単一の要素でもリストで渡す
                     new_post.tags.set([tag_instance]) 
                 except models.Tag.DoesNotExist:
-                     logger.warning(f"投稿保存時にタグID {tag_pk} が見つかりませんでした。タグなしで保存されます。")
-                     new_post.tags.clear()
+                    logger.warning(f"投稿保存時にタグID {tag_pk} が見つかりませんでした。タグなしで保存されます。")
+                    new_post.tags.clear()
             else:
-                 new_post.tags.clear()
+                new_post.tags.clear()
             
             # 5. 成功したらセッションデータをクリア
             del request.session['post_data']
             if 'post_photo_data' in request.session:
-                 del request.session['post_photo_data']
+                del request.session['post_photo_data']
             
             # 6. 完了画面へリダイレクト（基本フロー⑧）
             messages.success(request, "報告を送信しました。")
@@ -365,20 +374,53 @@ def admin_user_delete_complete(request):
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_list(request):
+    """
+    管理者向けの報告一覧ビュー。
+    ステータス、タグ、優先度で絞り込みを可能にする。
+    """
     status_filter = request.GET.get('status', None)
+    tag_filter = request.GET.get('tag', None) 
+    priority_filter = request.GET.get('priority', None) 
     
-    posts = models.PhotoPost.objects.all().select_related('user').prefetch_related('tags')
+    # PhotoPostをベースに、ユーザーとタグのデータをプリフェッチして効率化
+    posts = models.PhotoPost.objects.all().select_related('user').prefetch_related('tags').order_by('-posted_at') 
     
+    # 1. ステータスによる絞り込み
     valid_statuses = dict(models.PhotoPost.STATUS_CHOICES).keys()
     if status_filter in valid_statuses:
         posts = posts.filter(status=status_filter)
     
+    # 2. タグによる絞り込み
+    if tag_filter:
+        try:
+            # タグIDが整数であることを確認
+            tag_id = int(tag_filter)
+            posts = posts.filter(tags__id=tag_id)
+        except ValueError:
+            # フィルター値が無効な場合は無視
+            pass
+    
+    # 3. 優先度による絞り込み (未設定（__none__）に対応)
+    if priority_filter:
+        if priority_filter == '__none__':
+            # 優先度が未設定（NULL）の投稿をフィルタリング
+            posts = posts.filter(priority__isnull=True)
+        else:
+            # 'low', 'medium', 'high'のいずれかでフィルタリング
+            posts = posts.filter(priority=priority_filter)
+            
+    # 全タグを取得（フォームの選択肢用）
+    all_tags = models.Tag.objects.all().order_by('name')
+
     context = {
         'posts': posts,
-        'status_filter': status_filter
+        'status_filter': status_filter,
+        'tag_filter': tag_filter, 
+        'priority_filter': priority_filter, 
+        'all_tags': all_tags, 
     }
-    return render(request, 'main/admin_reports.html', context)
-
+    # テンプレート名を 'admin_post_list.html' に変更
+    return render(request, 'main/admin_post_list.html', context)
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_detail(request, post_id):
@@ -403,10 +445,10 @@ def admin_post_status_edit(request, post_id):
             
             # completed_atフィールドがないため、このロジックはコメントアウトするか、モデルにcompleted_atフィールドを追加してください
             # if updated_post.status == 'completed' and not updated_post.completed_at:
-            #     updated_post.completed_at = timezone.now()
+            #      updated_post.completed_at = timezone.now()
             # 
             # elif updated_post.status != 'completed' and updated_post.completed_at:
-            #     updated_post.completed_at = None 
+            #      updated_post.completed_at = None 
 
             updated_post.save()
             messages.success(request, f"報告 (ID: {post_id}) のステータスを更新しました。")
