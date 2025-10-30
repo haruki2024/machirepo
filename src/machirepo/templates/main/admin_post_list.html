@@ -35,9 +35,8 @@
                     </select>
                 </div>
 
-                <!-- TODO: タグでの絞り込みは実装が必要なため、一旦ダミーのまま -->
                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="filter-tag">タグで絞り込み (TODO)</label>
+                    <label for="filter-tag">タグで絞り込み</label>
                     <select id="filter-tag" name="tag" class="form-select">
                     <option value="">すべて</option>
                         {% for tag in all_tags %}
@@ -48,7 +47,7 @@
                 
                 <!-- TODO: 優先度での絞り込みは実装が必要なため、一旦ダミーのまま -->
                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="filter-priority">優先度で絞り込み (TODO)</label>
+                    <label for="filter-priority">優先度で絞り込み</label>
                     <select id="filter-priority" name="priority" class="form-select">
                         <option value="">すべて</option>
                         {% for value, label in posts.model.PRIORITY_CHOICES %}
@@ -59,7 +58,7 @@
 
                 <!-- 絞り込みボタンのクラスも外部CSS依存に変更 -->
                 <div class="form-group flex items-end" style="flex: 1; margin-bottom: 0;">
-                    <button type="submit" class="w-full button-primary">
+                    <button type="submit" class="btn btn-primary">
                         絞り込む
                     </button>
                 </div>
@@ -149,5 +148,29 @@
             {% endif %}
         </main>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 絞り込みを行うセレクトボックスの要素を取得
+            const filterSelect = document.getElementById('filter-select');
+            
+            // 絞り込み対象のフォームの要素を取得
+            const filterForm = document.getElementById('filter-form');
+
+            // 両方の要素がページ内に存在するか確認
+            if (filterSelect && filterForm) {
+                // セレクトボックスの値が変更されたときのイベントリスナーを設定
+                filterSelect.addEventListener('change', function() {
+                    // セレクトボックスの値が変わったら、即座にフォームを送信する
+                    // これにより、サーバー側で絞り込み処理が実行され、ページが再読み込みされる
+                    filterForm.submit();
+                });
+                
+                console.log("セレクトボックス自動送信イベントリスナーを設定しました。");
+                
+            } else {
+                console.error("ID 'filter-select' または 'filter-form' の要素が見つかりませんでした。HTMLを確認してください。");
+            }
+        });
+    </script>
 </body>
 {% endblock %}

@@ -95,11 +95,14 @@ body.form-page-bg {
     transition: background-color 0.3s;
     cursor: pointer;
     box-sizing: border-box;
+    
+	border: none;
 }
 .btn-primary {
     background-color: var(--primary-color);
     color: #ffffff;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    
 }
 .btn-primary:hover {
     background-color: var(--primary-hover-color);
@@ -319,12 +322,12 @@ body.form-page-bg {
     color: #333;
     border: 1px solid #ccc;
 }
-/*
+
 .btn-danger {
     background-color: #ef4444;
     color: white;
     border-color: #ef4444;
-} */
+} 
 
 /*
 ==================================================
