@@ -184,6 +184,12 @@ body.form-page-bg {
     box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 
+
+.post-photo {
+    width: 500px;
+    height: auto;
+}
+
 /* ステータスと優先度のバッジ */
 .status-badge {
     padding: 0.3em 0.8em;
@@ -278,6 +284,12 @@ body.form-page-bg {
 }
 .admin-table a:hover {
     text-decoration: underline;
+}
+
+
+.post-photo {
+    width: 300px;
+    height: auto;
 }
 
 /* ===== 確認モーダル ===== */
@@ -417,6 +429,10 @@ body.form-page-bg {
     .admin-table {
         width: 100%; /* コンテナいっぱいに広げる */
         min-width: initial;
+    }       
+    .post-photo {
+        width: 400px;
+        height: auto;
     }
 }
 

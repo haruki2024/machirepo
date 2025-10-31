@@ -26,7 +26,7 @@
                 <label class="block text-gray-700 font-medium mb-2">写真:</label>
                 <div class="bg-gray-200 rounded-md overflow-hidden border border-gray-300 h-64">
                     {% if post.photo %}
-                        <img src="{{ post.photo.url }}" alt="報告写真: {{ post.title }}" class="w-full h-full object-cover">
+                        <img src="{{ post.photo.url }}" alt="報告写真: {{ post.title }}" class="post-photo">
                     {% else %}
                         <div class="w-full h-full flex items-center justify-center text-gray-500">
                             写真がありません
