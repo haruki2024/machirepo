@@ -15,6 +15,7 @@ from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile 
 from django.db.models import Q 
 
+
 # ロガーの設定
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,7 @@ class ResidentRegisterView(CreateView):
     model = get_user_model()
     success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
+
     
     # 💡 【デバッグ追加】フォームバリデーション失敗時にエラー内容をログに出力
     def form_invalid(self, form):
@@ -72,7 +74,6 @@ def user_logout_view(request):
     logout(request)
     messages.success(request, "ログアウトしました。")
     return redirect('index')
-
 
 # -----------------------------------------------------
 # 2. ユーザー画面ビュー
