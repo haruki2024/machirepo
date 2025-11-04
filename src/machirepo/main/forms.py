@@ -158,49 +158,62 @@ class EmailAuthenticationForm(AuthenticationForm):
 # 3. 投稿作成フォーム (PhotoPostForm)
 # -----------------------------------------------------
 class PhotoPostForm(forms.ModelForm):
-   
+    # titleフィールドを明示的に定義し、必須チェックとカスタムエラーメッセージを設定
+    title = forms.CharField(
+        label="報告のタイトル", 
+        max_length=100,
+        required=True, 
+        widget=forms.TextInput(attrs={'placeholder': '報告のタイトル (必須)', 'maxlength': 100}),
+        error_messages={
+            'required': '報告のタイトルは必須です。', 
+            'max_length': 'タイトルは100文字以内で入力してください。'
+        }
+    )
+
     tags = forms.ModelChoiceField(
         queryset=models.Tag.objects.all().order_by('name'),
         empty_label="カテゴリーを選択してください",
         label="カテゴリ",
         widget=forms.Select(attrs={'class': 'form-select'}),
-        required=True # 必須にする場合はTrue
+        required=True 
     )
-    # commentフィールドを必須として再定義
+    
     comment = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 4, 'placeholder': '状況を詳しく説明してください (必須)'}),
-        required=True, # コメントは必須
+        required=True, 
         label="状況説明"
     )
 
     class Meta:
-        model = PhotoPost
-        # Step 1で必要なフィールドのみを含める
-        # ★titleフィールドをfieldsから削除★
-        fields = ('photo', 'tags', 'comment', 'latitude', 'longitude')
+        model = models.PhotoPost 
+        # photoは必須。latitude, longitudeは次のステップで入力されるため、ここでは非必須扱い。
+        fields = ('title', 'photo', 'tags', 'comment', 'latitude', 'longitude')
         
-        # photoフィールドはModelFormのデフォルトでrequired=True (null=False) のはず
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # エラーログに表示された、必須ではないフィールドを明示的に非必須にする
+        # 緯度・経度は後のステップで入力されるため、ここでは非必須
         self.fields['latitude'].required = False 
         self.fields['longitude'].required = False 
-        # ★titleフィールドの非必須設定を削除★ (Meta.fieldsから削除したため)
         
-        # フォームのスタイル設定
+        # photoフィールドのラベルを修正
+        self.fields['photo'].label = "写真 (必須)"
+        self.fields['photo'].error_messages = {'required': '写真をアップロードしてください。'}
+
+        # CSSクラスの適用
         for name, field in self.fields.items():
-            if name != 'tags':
+            if name not in ['tags', 'photo', 'latitude', 'longitude']:
                 field.widget.attrs.update({
                     'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
                 })
-        
-        # photo inputのクラスを上書き
-        if 'photo' in self.fields:
-            self.fields['photo'].widget.attrs.update({
-                'class': 'w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none'
-            })
+            elif name == 'photo':
+                field.widget.attrs.update({
+                    'class': 'w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none'
+                })
+            elif name == 'tags':
+                field.widget.attrs.update({
+                    'class': 'form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
+                })
 
 
 class ManualLocationForm(forms.Form):

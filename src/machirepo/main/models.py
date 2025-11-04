@@ -71,11 +71,11 @@ class PhotoPost(models.Model):
     
     # ★修正点: titleを非必須にする (null=True, blank=Trueを設定)★
     title = models.CharField(
-        max_length=200, 
+        max_length=100, 
         verbose_name="タイトル",
-        null=True, 
-        blank=True 
+        blank=True # フォームで空入力を許可（Step 1通過のため）
     )
+    
     
     comment = models.TextField(
         blank=True, 

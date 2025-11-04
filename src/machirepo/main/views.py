@@ -101,88 +101,115 @@ def post_list(request):
 # -----------------------------------------------------
 @login_required
 def photo_post_create(request):
-    """基本フロー②/③/④ - 報告作成ステップ1: 写真/コメント入力 (タイトル処理を削除)"""
+    """基本フロー②/③/④ - 報告作成ステップ1: 写真/コメント入力"""
     post_data = request.session.get('post_data', {})
     
     # 【ステップ1クリーンアップ】
     if request.method == 'GET':
-        # ★修正: titleとtagsをセッションクリア対象に追加★
-        keys_to_remove = ['latitude', 'longitude', 'title', 'tags']
+        # ★修正: titleとtagsをセッションクリア対象に追加★ (元々あったロジックを保持)
+        keys_to_remove = ['latitude', 'longitude', 'title', 'tags', 'comment'] # commentも追加
         if any(k in post_data for k in keys_to_remove):
+            # post_dataから指定キーを除外してセッションに再保存
             post_data = {k: v for k, v in post_data.items() if k not in keys_to_remove}
             request.session['post_data'] = post_data
-            logger.info("--- SESSION CLEANUP: Old location, title, and tags data cleared from session on Step 1 GET. ---")
+            logger.info("--- SESSION CLEANUP: Old location, title, tags, and comment data cleared from session on Step 1 GET. ---")
 
     if request.method == 'POST':
+        # --- POSTリクエストを受信したことを確認 ---
+        print("--- DEBUG: POST Request received on Step 1 (photo_post_create) ---")
+        
+        # GETリクエストでセッションに保持していたデータを使って初期化
         form = PhotoPostForm(request.POST, request.FILES, initial=post_data)
         
         if form.is_valid():
-            cleaned_data = form.cleaned_data
+            # =================================================================
+            # ★★★ 修正箇所: tagsのセッション保存方法を単一PKに変更 ★★★
+            # =================================================================
             
-            # --- 画像ファイルのセッション保存 ---
+            # 1. フォームデータをセッションに保存
+            
+            # tagsを処理: 単一のTagオブジェクトの場合はそのPKを保存
+            cleaned_tag = form.cleaned_data['tags']
+            tag_pk_to_save = cleaned_tag.pk if cleaned_tag else None
+            
+            request.session['post_data'] = {
+                'title': form.cleaned_data['title'],
+                'comment': form.cleaned_data['comment'],
+                'tags': tag_pk_to_save, # ここが修正されました
+                'latitude': '0.0', # 仮の値。次のステップで上書きされる
+                'longitude': '0.0', # 仮の値。次のステップで上書きされる
+            }
+
+            # 2. 画像ファイルをセッションに保存 (前回のロジックを保持)
             photo_file = request.FILES.get('photo')
             if photo_file:
-                # ファイルオブジェクトをシリアライズ可能なデータに変換し、別枠で保存
-                file_content = photo_file.read() 
-                request.session['post_photo_data'] = {
-                    'content': file_content.decode('latin-1'), 
-                    'name': photo_file.name,
-                    'content_type': photo_file.content_type,
-                    'size': photo_file.size,
-                }
-            elif 'post_photo_data' in request.session:
-                pass
-            else:
-                if 'post_photo_data' in request.session:
-                    del request.session['post_photo_data']
+                # ファイルストレージのインポートと処理
+                from django.core.files.storage import FileSystemStorage
+                fs = FileSystemStorage()
+                
+                # 既存のファイルがあれば削除
+                if 'photo_path' in post_data and post_data['photo_path']:
+                    # ファイルURLからファイル名を取得し削除 (環境依存の処理なので慎重に)
+                    try:
+                        # fs.delete()はファイル名/パスを期待するため、URLを元に戻す処理が必要な場合があります。
+                        # ここでは簡単のため、ファイルパスがセッションに保存されていると仮定します。
+                        if post_data['photo_path'].startswith(fs.base_url):
+                             old_filename = post_data['photo_path'].replace(fs.base_url, '', 1)
+                             fs.delete(old_filename)
+                        else:
+                            # base_urlがない場合、ファイルパス自体が相対パスだと仮定
+                            fs.delete(post_data['photo_path'])
+                    except Exception:
+                        logger.warning("Failed to delete old session photo file: %s", post_data.get('photo_path'))
+                
+                # 新しいファイルを保存
+                filename = fs.save(photo_file.name, photo_file)
+                # セッションには相対パス(filename)を保存
+                request.session['post_data']['photo_path'] = filename
+                
             
+            logger.info("--- SESSION SAVE: Form data and photo path saved to session. ---")
             
-            # ★修正: tagsデータをセッションに安全に保存するため、単一のPKに変換★
-            # forms.pyでModelChoiceFieldを使用している場合、tags_dataは単一のTagインスタンスである
-            tag_instance = cleaned_data.get('tags')
-            if tag_instance:
-                # 単一のPKをセッションに保存
-                cleaned_data['tags'] = tag_instance.pk
-            else:
-                cleaned_data['tags'] = None
-            
-            # --- フォームデータをセッションに保存 ---
-            # cleaned_dataから、JSONシリアライズできないphotoオブジェクトと、不要なtitleを削除
-            post_data_to_save = {k: v for k, v in cleaned_data.items() if k not in ['photo', 'title']} 
-            
-            # 緯度・経度の既存値があれば保持
-            if post_data.get('latitude'):
-                post_data_to_save['latitude'] = post_data.get('latitude')
-            if post_data.get('longitude'):
-                post_data_to_save['longitude'] = post_data.get('longitude')
-            
-            request.session['post_data'] = post_data_to_save
+            # =================================================================
+            # リダイレクトは 'photo_post_location' のままで続行
+            # =================================================================
             
             # 基本フロー⑤の起点へ: 位置情報取得の起点となるステップ2へリダイレクト
-            return redirect('photo_post_manual_location')
+            return redirect('photo_post_location')
+        
         else:
             # === DEBUG/代替フロー①：必須項目未入力エラー処理 ===
+            print("--- DEBUG: FORM IS NOT VALID. ERRORS BELOW ---")
+            print(form.errors) 
+            print("---------------------------------------------")
+            
             logger.error("PhotoPostForm validation failed: %s", form.errors)
-            messages.error(request, "投稿内容にエラーがあります。不足している必須項目（写真、カテゴリ、コメント）を確認するか、写真のファイルサイズ（最大5MB）を確認してください。")
+            messages.error(request, "投稿内容にエラーがあります。不足している必須項目（写真、カテゴリ、タイトル）を確認するか、写真のファイルサイズ（最大5MB）を確認してください。")
     
     # GETリクエスト、またはPOST失敗時
     else:
-        # GETリクエストの場合、セッションからデータを取得してフォームに設定
-        initial_data = {k: v for k, v in post_data.items() if k != 'title'}
+        # ... (中略：initialデータ設定ロジック - 変更なし)
+        
+        initial_data = post_data.copy()
         
         # ★修正: セッションに保存された単一のPKをModelChoiceFieldが期待するインスタンスに変換し直す★
-        tag_pk = initial_data.get('tags')
+        tag_pk = initial_data.get('tags') # 修正: 単一PKとして取得
         if tag_pk:
             try:
                 # ModelChoiceFieldがPKを受け付けるので、Tagインスタンスを渡す
-                initial_data['tags'] = models.Tag.objects.get(pk=tag_pk)
+                # ModelChoiceFieldは単一のインスタンスを期待する
+                initial_data['tags'] = models.Tag.objects.get(pk=tag_pk) # ここも修正
             except models.Tag.DoesNotExist:
+                initial_data['tags'] = None
+            except Exception:
                 initial_data['tags'] = None
                 
         form = PhotoPostForm(initial=initial_data)
+        print("--- DEBUG: Rendering Step 1 Form ---") # GETリクエストの確認
     
     # ② システムは投稿画面を表示する
     return render(request, 'main/photo_post_create.html', {'form': form, 'step': 1})
+
 
 @login_required
 def photo_post_manual_location(request):
@@ -258,8 +285,8 @@ def photo_post_confirm(request):
             # 1. セッションデータからインスタンスを作成
             new_post = models.PhotoPost(
                 user=request.user,
-                # ★修正: titleはセッションから取得せず、Noneを設定 (モデルがnull=Trueなので安全)★
-                title=None, 
+                # ★修正: セッションに保存されたtitleを利用する
+                title=post_data.get('title'), 
                 comment=post_data.get('comment'),
                 latitude=latitude_val, 
                 longitude=longitude_val, 
@@ -268,6 +295,7 @@ def photo_post_confirm(request):
             
             # 2. 画像ファイルの再構築とインスタンスへのセット
             if photo_file_data:
+                # Latin-1でエンコードされた文字列を再度バイトに変換
                 file_content = photo_file_data['content'].encode('latin-1') 
                 reconstructed_file = SimpleUploadedFile(
                     name=photo_file_data['name'],
@@ -357,17 +385,67 @@ def admin_home(request):
     return render(request, 'main/admin_home.html', context)
 
 
+
+
 @user_passes_test(is_staff_user, login_url='/')
 def admin_user_list(request):
-    return HttpResponse("<h2>管理者: ユーザー一覧</h2>")
+    """管理者向けユーザー一覧表示画面"""
+    User = get_user_model()
+    # 自分自身（リクエストユーザー）以外の全ユーザーを取得し、登録が新しい順に並べ替え
+    users = User.objects.exclude(pk=request.user.pk).order_by('-date_joined')
+    
+    context = {
+        'users': users,
+        'app_name': 'ユーザー一覧'
+    }
+    # テンプレートは admin_user_list.html を使用
+    return render(request, 'main/admin_user_list.html', context)
+
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_user_delete_confirm(request, user_id):
-    return HttpResponse(f"<h2>管理者: ユーザー削除確認 (ID: {user_id})</h2>")
+    """特定のユーザーを削除する処理 (POSTのみ許可)"""
+    User = get_user_model()
+
+    # GETリクエストは一覧に戻す (削除確認はモーダルで行うため)
+    if request.method == 'GET':
+        return redirect('admin_user_list')
+    
+    # POSTリクエスト: 削除処理を実行
+    if request.method == 'POST':
+        # 削除対象のユーザーを取得 (存在しない場合は404)
+        user_to_delete = get_object_or_404(User, pk=user_id)
+        
+        # 自身を削除しようとしていないかチェック
+        if user_to_delete.pk == request.user.pk:
+            messages.error(request, "自分自身のアカウントをこの画面から削除することはできません。")
+            return redirect('admin_user_list')
+        
+        try:
+            # ユーザーを削除
+            username = user_to_delete.username
+            user_to_delete.delete()
+            
+            messages.success(request, f"ユーザー「{username}」を削除しました。")
+            # 成功したら削除完了画面へリダイレクト
+            return redirect('admin_user_delete_complete')
+            
+        except Exception as e:
+            # データの整合性エラーやその他の予期せぬエラー
+            logger.error(f"ユーザーID {user_id} の削除中にエラーが発生: {e}", exc_info=True)
+            messages.error(request, f"削除中に予期せぬエラーが発生しました。詳細: {e}")
+            return redirect('admin_user_list')
+
+# NOTE: ここにあった admin_user_delete_confirm の重複定義を削除しました。
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_user_delete_complete(request):
-    return HttpResponse("<h2>管理者: ユーザー削除完了</h2>")
+    """ユーザー削除完了画面"""
+    # テンプレートは admin_user_delete_complete.html を使用
+    context = {
+        'app_name': '削除完了'
+    }
+    return render(request, 'main/admin_user_delete_complete.html', context)
 
 
 # --- 管理者向け：報告の確認・記録機能 ---
@@ -379,17 +457,17 @@ def admin_post_list(request):
     ステータス、タグ、優先度で絞り込みを可能にする。
     """
     status_filter = request.GET.get('status', None)
-    tag_filter = request.GET.get('tag', None) 
-    priority_filter = request.GET.get('priority', None) 
-    
+    tag_filter = request.GET.get('tag', None)
+    priority_filter = request.GET.get('priority', None)
+
     # PhotoPostをベースに、ユーザーとタグのデータをプリフェッチして効率化
-    posts = models.PhotoPost.objects.all().select_related('user').prefetch_related('tags').order_by('-posted_at') 
-    
+    posts = models.PhotoPost.objects.all().select_related('user').prefetch_related('tags').order_by('-posted_at')
+
     # 1. ステータスによる絞り込み
     valid_statuses = dict(models.PhotoPost.STATUS_CHOICES).keys()
     if status_filter in valid_statuses:
         posts = posts.filter(status=status_filter)
-    
+
     # 2. タグによる絞り込み
     if tag_filter:
         try:
@@ -399,7 +477,7 @@ def admin_post_list(request):
         except ValueError:
             # フィルター値が無効な場合は無視
             pass
-    
+
     # 3. 優先度による絞り込み (未設定（__none__）に対応)
     if priority_filter:
         if priority_filter == '__none__':
@@ -408,16 +486,16 @@ def admin_post_list(request):
         else:
             # 'low', 'medium', 'high'のいずれかでフィルタリング
             posts = posts.filter(priority=priority_filter)
-            
+
     # 全タグを取得（フォームの選択肢用）
     all_tags = models.Tag.objects.all().order_by('name')
 
     context = {
         'posts': posts,
         'status_filter': status_filter,
-        'tag_filter': tag_filter, 
-        'priority_filter': priority_filter, 
-        'all_tags': all_tags, 
+        'tag_filter': tag_filter,
+        'priority_filter': priority_filter,
+        'all_tags': all_tags,
     }
     # テンプレート名を 'admin_post_list.html' に変更
     return render(request, 'main/admin_post_list.html', context)
@@ -437,25 +515,25 @@ def admin_post_detail(request, post_id):
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_status_edit(request, post_id):
     post = get_object_or_404(models.PhotoPost, pk=post_id)
-    
+
     if request.method == 'POST':
         form = StatusUpdateForm(request.POST, instance=post)
         if form.is_valid():
             updated_post = form.save(commit=False)
-            
+
             # completed_atフィールドがないため、このロジックはコメントアウトするか、モデルにcompleted_atフィールドを追加してください
             # if updated_post.status == 'completed' and not updated_post.completed_at:
-            #      updated_post.completed_at = timezone.now()
-            # 
+            #     updated_post.completed_at = timezone.now()
+            #
             # elif updated_post.status != 'completed' and updated_post.completed_at:
-            #      updated_post.completed_at = None 
+            #     updated_post.completed_at = None
 
             updated_post.save()
             messages.success(request, f"報告 (ID: {post_id}) のステータスを更新しました。")
             return redirect('admin_status_edit_done', post_id=post.pk)
     else:
         form = StatusUpdateForm(instance=post)
-        
+
     context = {
         'form': form,
         'post': post
@@ -469,3 +547,44 @@ def admin_status_edit_done(request, post_id):
     post = get_object_or_404(models.PhotoPost, pk=post_id)
     context = {'post': post}
     return render(request, 'main/admin_status_complete.html', context)
+
+
+@user_passes_test(is_staff_user, login_url='/')
+def admin_post_delete(request, post_id):
+    """管理者向け：報告の削除処理 (POST専用)"""
+    post = get_object_or_404(models.PhotoPost, pk=post_id)
+
+    if request.method == 'POST':
+        # 削除前の報告情報を取得し、メッセージに利用
+        post_pk = post.pk
+        # コメントの先頭20文字を報告タイトルとして使用
+        post_title = (post.comment[:20] + '...') if post.comment and len(post.comment) > 20 else post.comment or f"ID:{post_pk}の報告"
+
+        try:
+            post.delete()
+
+            messages.success(request, f"報告「{post_title}」を削除しました。")
+
+            # ★修正: 削除完了後、一覧ではなく新しい完了画面にリダイレクト★
+            return redirect('admin_post_delete_complete')
+
+        except Exception as e:
+            logger.error(f"報告ID {post_id} の削除中にエラーが発生: {e}", exc_info=True)
+            messages.error(request, "報告の削除中に予期せぬエラーが発生しました。")
+            return redirect('admin_post_detail', post_id=post_id)
+
+    # POST以外のリクエストは詳細画面に戻す
+    messages.error(request, "報告の削除にはPOSTリクエストが必要です。")
+    return redirect('admin_post_detail', post_id=post_id)
+
+
+@user_passes_test(is_staff_user, login_url='/')
+def admin_post_delete_complete(request):
+    """
+    ★新規追加: 管理者向け：報告削除完了画面
+    ユーザー削除完了画面(admin_user_delete_complete)に倣い、シンプルな完了画面とします。
+    """
+    context = {
+        'app_name': '報告削除完了'
+    }
+    return render(request, 'main/admin_post_delete_complete.html', context)

@@ -54,7 +54,7 @@
         <div class="modal-box">
             <h3 style="margin-top: 0;">本当にこのユーザーを削除しますか？</h3>
             <!-- 削除対象のユーザー名を表示するプレースホルダー -->
-            <p id="userNameDisplay" style="font-weight: bold; margin-bottom: 0.5rem;"></p>
+            
             <p style="color: #6b7280; margin-bottom: 1.5rem;">この操作は取り消せません。</p>
             
             <div class="modal-actions">
@@ -78,13 +78,11 @@
     <!-- ★★★ JavaScript (モーダル制御) ★★★ -->
     <script>
         const modal = document.getElementById('deleteModal');
-        const userNameDisplay = document.getElementById('userNameDisplay');
         const deleteForm = document.getElementById('deleteForm');
 
         // モーダルを表示する関数
         function confirmDelete(userName, deleteUrl) {
             // ユーザー名を表示するテキストを更新
-            userNameDisplay.textContent = '対象ユーザー: ' + userName;
             
             // フォームの送信先URLを設定 (admin_user_delete_confirmへ)
             deleteForm.action = deleteUrl;
