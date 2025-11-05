@@ -14,7 +14,8 @@ import logging
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile 
 from django.db.models import Q 
-
+from django.core.files.storage import FileSystemStorage # FileSystemStorageのインポート
+import os # ファイルパス操作用にosをインポート
 
 # ロガーの設定
 logger = logging.getLogger(__name__)
@@ -22,6 +23,9 @@ logger = logging.getLogger(__name__)
 # モデルとフォームのインポート
 from . import models 
 from .forms import StatusUpdateForm, ResidentCreationForm, PhotoPostForm, ManualLocationForm 
+
+# FileSystemStorageのインスタンス化（一時ファイルの操作に使用）
+fs = FileSystemStorage()
 
 # -----------------------------------------------------
 # 権限チェックヘルパー
@@ -107,19 +111,33 @@ def photo_post_create(request):
     
     # 【ステップ1クリーンアップ】
     if request.method == 'GET':
-        # ★修正: titleとtagsをセッションクリア対象に追加★ (元々あったロジックを保持)
-        keys_to_remove = ['latitude', 'longitude', 'title', 'tags', 'comment'] # commentも追加
+        # ★修正: セッションクリア対象に'post_photo_data'と一時ファイル削除を追加★
+        keys_to_remove = ['latitude', 'longitude', 'title', 'tags', 'comment', 'photo_path'] 
+        
+        # 1. post_dataのクリーンアップ
         if any(k in post_data for k in keys_to_remove):
+            if 'photo_path' in post_data and post_data['photo_path']:
+                try:
+                    # 既に一時ファイルが存在し、再開ではなく最初からやり直す場合、一時ファイルを削除
+                    fs.delete(post_data['photo_path'])
+                    logger.info(f"--- TEMP FILE CLEANUP: {post_data['photo_path']} deleted on Step 1 GET. ---")
+                except Exception:
+                    logger.warning("Failed to delete old session photo file.")
+            
             # post_dataから指定キーを除外してセッションに再保存
             post_data = {k: v for k, v in post_data.items() if k not in keys_to_remove}
             request.session['post_data'] = post_data
-            logger.info("--- SESSION CLEANUP: Old location, title, tags, and comment data cleared from session on Step 1 GET. ---")
+            logger.info("--- SESSION CLEANUP: Old form data cleared from post_data. ---")
+
+        # 2. 過去のphoto_file_dataも念のため削除
+        if 'post_photo_data' in request.session:
+            del request.session['post_photo_data']
+            logger.info("--- SESSION CLEANUP: 'post_photo_data' cleared. ---")
+
 
     if request.method == 'POST':
-        # --- POSTリクエストを受信したことを確認 ---
         print("--- DEBUG: POST Request received on Step 1 (photo_post_create) ---")
         
-        # GETリクエストでセッションに保持していたデータを使って初期化
         form = PhotoPostForm(request.POST, request.FILES, initial=post_data)
         
         if form.is_valid():
@@ -133,47 +151,42 @@ def photo_post_create(request):
             cleaned_tag = form.cleaned_data['tags']
             tag_pk_to_save = cleaned_tag.pk if cleaned_tag else None
             
-            request.session['post_data'] = {
+            # post_dataを初期化し、photo_path（もしあれば）を保持
+            current_photo_path = post_data.get('photo_path')
+            
+            new_post_data = {
                 'title': form.cleaned_data['title'],
                 'comment': form.cleaned_data['comment'],
-                'tags': tag_pk_to_save, # ここが修正されました
+                'tags': tag_pk_to_save, 
                 'latitude': '0.0', # 仮の値。次のステップで上書きされる
                 'longitude': '0.0', # 仮の値。次のステップで上書きされる
             }
-
-            # 2. 画像ファイルをセッションに保存 (前回のロジックを保持)
+            # 既存のphoto_pathがある場合は引き継ぐ（フォームで写真が上書きされない場合）
+            if current_photo_path and 'photo' not in request.FILES:
+                 new_post_data['photo_path'] = current_photo_path
+            
+            
+            # 2. 画像ファイルをセッションに保存 (新しい写真がアップロードされた場合)
             photo_file = request.FILES.get('photo')
             if photo_file:
-                # ファイルストレージのインポートと処理
-                from django.core.files.storage import FileSystemStorage
-                fs = FileSystemStorage()
                 
                 # 既存のファイルがあれば削除
                 if 'photo_path' in post_data and post_data['photo_path']:
-                    # ファイルURLからファイル名を取得し削除 (環境依存の処理なので慎重に)
                     try:
-                        # fs.delete()はファイル名/パスを期待するため、URLを元に戻す処理が必要な場合があります。
-                        # ここでは簡単のため、ファイルパスがセッションに保存されていると仮定します。
-                        if post_data['photo_path'].startswith(fs.base_url):
-                             old_filename = post_data['photo_path'].replace(fs.base_url, '', 1)
-                             fs.delete(old_filename)
-                        else:
-                            # base_urlがない場合、ファイルパス自体が相対パスだと仮定
-                            fs.delete(post_data['photo_path'])
+                        # ファイルパスがセッションに保存されていると仮定し、削除
+                        fs.delete(post_data['photo_path'])
+                        logger.info(f"--- OLD TEMP FILE DELETED: {post_data['photo_path']} ---")
                     except Exception:
-                        logger.warning("Failed to delete old session photo file: %s", post_data.get('photo_path'))
+                        logger.warning("Failed to delete old session photo file.")
                 
                 # 新しいファイルを保存
                 filename = fs.save(photo_file.name, photo_file)
                 # セッションには相対パス(filename)を保存
-                request.session['post_data']['photo_path'] = filename
+                new_post_data['photo_path'] = filename
                 
-            
+            request.session['post_data'] = new_post_data
+
             logger.info("--- SESSION SAVE: Form data and photo path saved to session. ---")
-            
-            # =================================================================
-            # リダイレクトは 'photo_post_location' のままで続行
-            # =================================================================
             
             # 基本フロー⑤の起点へ: 位置情報取得の起点となるステップ2へリダイレクト
             return redirect('photo_post_location')
@@ -189,20 +202,15 @@ def photo_post_create(request):
     
     # GETリクエスト、またはPOST失敗時
     else:
-        # ... (中略：initialデータ設定ロジック - 変更なし)
-        
         initial_data = post_data.copy()
         
         # ★修正: セッションに保存された単一のPKをModelChoiceFieldが期待するインスタンスに変換し直す★
-        tag_pk = initial_data.get('tags') # 修正: 単一PKとして取得
+        tag_pk = initial_data.get('tags') 
         if tag_pk:
             try:
                 # ModelChoiceFieldがPKを受け付けるので、Tagインスタンスを渡す
-                # ModelChoiceFieldは単一のインスタンスを期待する
-                initial_data['tags'] = models.Tag.objects.get(pk=tag_pk) # ここも修正
-            except models.Tag.DoesNotExist:
-                initial_data['tags'] = None
-            except Exception:
+                initial_data['tags'] = models.Tag.objects.get(pk=tag_pk) 
+            except (models.Tag.DoesNotExist, ValueError):
                 initial_data['tags'] = None
                 
         form = PhotoPostForm(initial=initial_data)
@@ -252,11 +260,11 @@ def photo_post_manual_location(request):
 def photo_post_confirm(request):
     """基本フロー⑥/⑦/⑧ - 報告作成ステップ3: 最終確認と保存"""
     post_data = request.session.get('post_data')
-    photo_file_data = request.session.get('post_photo_data') 
-
-    # データを取得できていない場合、ステップ1に戻る
-    if not post_data:
-        messages.error(request, "データが不足しています。最初からやり直してください。")
+    # photo_file_data = request.session.get('post_photo_data') # <-- 削除: 不要なため
+    
+    # 1. データを取得できていない場合、ステップ1に戻る
+    if not post_data or 'photo_path' not in post_data:
+        messages.error(request, "データが不足しています。写真と必須項目を確認し、最初からやり直してください。")
         return redirect('photo_post_create')
     
     # 【位置情報の上書き/確認】
@@ -271,6 +279,8 @@ def photo_post_confirm(request):
     
     # 基本フロー⑦: POSTリクエスト（「この内容で投稿する」）
     if request.method == 'POST':
+        photo_path = post_data.get('photo_path') # ステップ1で保存した一時ファイルパスを取得
+        
         try:
             # 緯度・経度の値を取得
             def safe_float(value):
@@ -286,7 +296,6 @@ def photo_post_confirm(request):
             # 1. セッションデータからインスタンスを作成
             new_post = models.PhotoPost(
                 user=request.user,
-                # ★修正: セッションに保存されたtitleを利用する
                 title=post_data.get('title'), 
                 comment=post_data.get('comment'),
                 latitude=latitude_val, 
@@ -294,18 +303,21 @@ def photo_post_confirm(request):
                 location_name=post_data.get('location_name', '')
             )
             
-            # 2. 画像ファイルの再構築とインスタンスへのセット
-            if photo_file_data:
-                # Latin-1でエンコードされた文字列を再度バイトに変換
-                file_content = photo_file_data['content'].encode('latin-1') 
-                reconstructed_file = SimpleUploadedFile(
-                    name=photo_file_data['name'],
-                    content=file_content,
-                    content_type=photo_file_data['content_type']
-                )
-                new_post.photo = reconstructed_file
-            
-            # 3. モデルの検証と保存
+            # 2. 画像ファイルをファイルパスから読み込み、インスタンスにセット
+            if photo_path and fs.exists(fs.path(photo_path)):
+                # 一時ファイルを開いて、ContentFileとしてモデルのphotoフィールドにアタッチ
+                with fs.open(photo_path, 'rb') as f:
+                    # ファイル名は元々のファイル名を使用するか、パスから抽出
+                    file_name = os.path.basename(photo_path)
+                    new_post.photo.save(file_name, ContentFile(f.read()), save=False)
+                logger.info(f"--- PHOTO LOAD SUCCESS: Temporary photo loaded from disk at {photo_path} ---")
+            else:
+                # 写真ファイルが見つからない、またはパスが不正な場合
+                logger.error(f"FATAL: Temporary photo file not found at path: {photo_path}")
+                # ValidationErrorを発生させ、ユーザーにフィードバック
+                raise ValidationError({'photo': '一時的な写真ファイルが見つからないか、有効期限切れです。'})
+
+            # 3. モデルの検証と保存 (ここで title, comment, photo などの必須項目をチェック)
             new_post.full_clean()
             new_post.save()
             
@@ -323,10 +335,12 @@ def photo_post_confirm(request):
             else:
                 new_post.tags.clear()
             
-            # 5. 成功したらセッションデータをクリア
+            # 5. 成功したらセッションデータをクリアし、一時ファイルを削除
             del request.session['post_data']
-            if 'post_photo_data' in request.session:
-                del request.session['post_photo_data']
+            # 一時ファイルを削除
+            if photo_path and fs.exists(fs.path(photo_path)):
+                fs.delete(photo_path)
+                logger.info(f"--- TEMP FILE DELETED: {photo_path} ---")
             
             # 6. 完了画面へリダイレクト（基本フロー⑧）
             messages.success(request, "報告を送信しました。")
@@ -335,6 +349,7 @@ def photo_post_confirm(request):
         except ValidationError as e:
             # データ検証エラー：緯度経度以外のエラー
             error_messages = "\n".join([f"「{k}」: {v[0]}" for k, v in e.message_dict.items()])
+            logger.error("投稿のfull_clean()が失敗しました: %s", error_messages)
             messages.error(request, f"**データ検証エラー**：投稿の保存に必要な情報が不足しています。不足フィールド:\n{error_messages}")
             
             # エラー発生時はステップ1に戻す
@@ -436,8 +451,6 @@ def admin_user_delete_confirm(request, user_id):
             logger.error(f"ユーザーID {user_id} の削除中にエラーが発生: {e}", exc_info=True)
             messages.error(request, f"削除中に予期せぬエラーが発生しました。詳細: {e}")
             return redirect('admin_user_list')
-
-# NOTE: ここにあった admin_user_delete_confirm の重複定義を削除しました。
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_user_delete_complete(request):

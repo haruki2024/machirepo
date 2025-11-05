@@ -59,8 +59,15 @@
 
             <!-- 報告タイトル (視認性向上のため追加) -->
             <h1 class="text-3xl font-bold text-gray-900 mb-6">報告詳細</h1>
+            
 
+            <div class="form-group mb-6">
+                <label class="block text-gray-700 font-medium mb-1">タイトル:</label>
+                <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap">{{ post.title|default:"(タイトルなし)" }}</p>
+                
+            </div>
 
+            
             <!-- 写真 -->
             <div class="form-group mb-6">
                 <label class="block text-gray-700 font-medium mb-2">写真:</label>
@@ -220,6 +227,9 @@
         });
     }
 </script>
+
+
+
 
 
 {% endblock %}
