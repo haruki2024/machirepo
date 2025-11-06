@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.edit import CreateView
 from django.contrib.auth import get_user_model
@@ -16,7 +17,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedF
 from django.db.models import Q 
 from django.core.files.storage import FileSystemStorage # FileSystemStorageのインポート
 import os # ファイルパス操作用にosをインポート
-
+import decimal
 # ロガーの設定
 logger = logging.getLogger(__name__)
 
@@ -154,13 +155,17 @@ def photo_post_create(request):
             # post_dataを初期化し、photo_path（もしあれば）を保持
             current_photo_path = post_data.get('photo_path')
             
+		
+
+
             new_post_data = {
                 'title': form.cleaned_data['title'],
                 'comment': form.cleaned_data['comment'],
                 'tags': tag_pk_to_save, 
-                'latitude': '0.0', # 仮の値。次のステップで上書きされる
-                'longitude': '0.0', # 仮の値。次のステップで上書きされる
-            }
+                # ↓↓↓ 💡 修正点1: POSTデータから緯度・経度を取得し、セッションに保存 ↓↓↓
+                'latitude': request.POST.get('latitude', '0.0'),   # form.cleaned_dataには含まれないため、request.POSTから直接取得
+                'longitude': request.POST.get('longitude', '0.0'),
+			}
             # 既存のphoto_pathがある場合は引き継ぐ（フォームで写真が上書きされない場合）
             if current_photo_path and 'photo' not in request.FILES:
                  new_post_data['photo_path'] = current_photo_path
@@ -229,10 +234,35 @@ def photo_post_manual_location(request):
     if not post_data:
         messages.error(request, "報告のデータが見つかりませんでした。最初からやり直してください。")
         return redirect('photo_post_create')
+    def is_valid_coord(val):
+        try:
+            # Noneまたは空文字列はFalse。数値に変換できるかチェック
+            f_val = float(val)
+            # 初期値の '0.0' や 0.0 ではない有効な数値かを判定（微小な誤差も考慮）
+            return abs(f_val) > 0.000001
+        except (ValueError, TypeError):
+            return False
+
+    session_lat = post_data.get('latitude')
+    session_lng = post_data.get('longitude')
     
+
+
+    if is_valid_coord(session_lat) and is_valid_coord(session_lng):
+        # 自動取得が成功し、有効な座標がセッションに保存されている！
+        logger.info("--- GEOLOCATION SUCCESS: Skipping manual step and redirecting to CONFIRM. ---")
+        
+        # messages.info(request, "位置情報が自動取得されました。確認画面に進みます。") # メッセージは確認画面で表示
+        
+        # セッションデータは既に有効な緯度経度で更新済みなので、そのまま確認画面へ
+        return redirect('photo_post_confirm')
+    
+
+
     if request.method == 'POST':
         # 代替フロー④-2: 手動入力フォームからのPOST
         # ManualLocationFormはlocation_nameを扱うフォームとして想定します。
+		
         form = ManualLocationForm(request.POST)
         if form.is_valid():
             # location_nameをセッションデータに追加・更新
@@ -246,7 +276,7 @@ def photo_post_manual_location(request):
             messages.error(request, "入力された地名が正しくありません。") 
 
     else:
-        # GETリクエストの場合
+        # GETリクエストの場合 (自動取得に失敗、またはスキップしたためフォーム表示)
         form = ManualLocationForm(initial=post_data)
         
     context = {
@@ -260,74 +290,81 @@ def photo_post_manual_location(request):
 def photo_post_confirm(request):
     """基本フロー⑥/⑦/⑧ - 報告作成ステップ3: 最終確認と保存"""
     post_data = request.session.get('post_data')
-    # photo_file_data = request.session.get('post_photo_data') # <-- 削除: 不要なため
     
     # 1. データを取得できていない場合、ステップ1に戻る
     if not post_data or 'photo_path' not in post_data:
         messages.error(request, "データが不足しています。写真と必須項目を確認し、最初からやり直してください。")
         return redirect('photo_post_create')
-    
-    # 【位置情報の上書き/確認】
-    latitude_query = request.GET.get('latitude')
-    longitude_query = request.GET.get('longitude')
-    
-    if latitude_query and longitude_query:
-        post_data['latitude'] = latitude_query
-        post_data['longitude'] = longitude_query
-        request.session['post_data'] = post_data
-        logger.info("--- GEOLOCATION SUCCESS: Location data updated from query params. ---")
-    
+        
+    # 緯度・経度の値を取得・変換する関数を定義
+    def safe_float(value):
+        # Noneや空文字列はNoneを返す
+        if value is None or (isinstance(value, str) and value.strip() == ''):
+            return None
+        
+        try:
+            # 💡 修正ロジック: floatの不正確さを回避するため、Decimalに変換し丸める
+            # 1. 値を一旦文字列に変換し、Decimalオブジェクトを作成
+            value_as_str = str(value) 
+            decimal_val = decimal.Decimal(value_as_str) 
+            
+            # 2. 小数点以下13桁に丸める (モデルの25桁以内に確実に収める)
+            rounded_val = decimal_val.quantize(decimal.Decimal('0.0000000000001'), rounding=decimal.ROUND_HALF_UP)
+            
+            return rounded_val # Decimalオブジェクトを返す
+            
+        except (decimal.InvalidOperation, TypeError, ValueError):
+            logger.error(f"Failed to convert or quantize coordinate value: {value}")
+            return None
+
+    # 初期化: スコープエラー回避のため
+    latitude_val = None
+    longitude_val = None
+
     # 基本フロー⑦: POSTリクエスト（「この内容で投稿する」）
     if request.method == 'POST':
         photo_path = post_data.get('photo_path') # ステップ1で保存した一時ファイルパスを取得
         
         try:
-            # 緯度・経度の値を取得
-            def safe_float(value):
-                try:
-                    return float(value)
-                except (ValueError, TypeError):
-                    # null=True, blank=Trueなので、Noneを返すことでDBのNULLを許容する
-                    return None 
-            
+            # safe_float() を使用して値を Decimal 型で取得
             latitude_val = safe_float(post_data.get('latitude'))
             longitude_val = safe_float(post_data.get('longitude'))
+            
+            # 💡 デバッグログ: full_clean()実行直前の値を確認
+            print(f"--- DEBUG: full_clean()直前の座標値 (Confirm View) ---")
+            print(f"Lattitude: {latitude_val} (Type: {type(latitude_val)})")
+            print(f"Longitude: {longitude_val} (Type: {type(longitude_val)})")
+            print("------------------------------------------------------")
             
             # 1. セッションデータからインスタンスを作成
             new_post = models.PhotoPost(
                 user=request.user,
                 title=post_data.get('title'), 
                 comment=post_data.get('comment'),
-                latitude=latitude_val, 
-                longitude=longitude_val, 
+                latitude=latitude_val, # Decimalオブジェクトが渡される
+                longitude=longitude_val, # Decimalオブジェクトが渡される
                 location_name=post_data.get('location_name', '')
             )
             
             # 2. 画像ファイルをファイルパスから読み込み、インスタンスにセット
             if photo_path and fs.exists(fs.path(photo_path)):
-                # 一時ファイルを開いて、ContentFileとしてモデルのphotoフィールドにアタッチ
                 with fs.open(photo_path, 'rb') as f:
-                    # ファイル名は元々のファイル名を使用するか、パスから抽出
                     file_name = os.path.basename(photo_path)
                     new_post.photo.save(file_name, ContentFile(f.read()), save=False)
                 logger.info(f"--- PHOTO LOAD SUCCESS: Temporary photo loaded from disk at {photo_path} ---")
             else:
-                # 写真ファイルが見つからない、またはパスが不正な場合
                 logger.error(f"FATAL: Temporary photo file not found at path: {photo_path}")
-                # ValidationErrorを発生させ、ユーザーにフィードバック
                 raise ValidationError({'photo': '一時的な写真ファイルが見つからないか、有効期限切れです。'})
 
-            # 3. モデルの検証と保存 (ここで title, comment, photo などの必須項目をチェック)
+            # 3. モデルの検証と保存 (ここで full_clean() が実行され、エラーが解消されるはず)
             new_post.full_clean()
             new_post.save()
             
-            # 4. ManyToManyField (タグ) を保存 (単一選択ロジック)
+            # 4. ManyToManyField (タグ) を保存
             tag_pk = post_data.get('tags') 
             if tag_pk:
                 try:
-                    # 単一のPKからTagインスタンスを取得
                     tag_instance = models.Tag.objects.get(pk=tag_pk)
-                    # set() メソッドは単一の要素でもリストで渡す
                     new_post.tags.set([tag_instance]) 
                 except models.Tag.DoesNotExist:
                     logger.warning(f"投稿保存時にタグID {tag_pk} が見つかりませんでした。タグなしで保存されます。")
@@ -337,7 +374,6 @@ def photo_post_confirm(request):
             
             # 5. 成功したらセッションデータをクリアし、一時ファイルを削除
             del request.session['post_data']
-            # 一時ファイルを削除
             if photo_path and fs.exists(fs.path(photo_path)):
                 fs.delete(photo_path)
                 logger.info(f"--- TEMP FILE DELETED: {photo_path} ---")
@@ -347,7 +383,7 @@ def photo_post_confirm(request):
             return redirect('photo_post_done')
             
         except ValidationError as e:
-            # データ検証エラー：緯度経度以外のエラー
+            # データ検証エラー：緯度経度や必須項目などのエラー
             error_messages = "\n".join([f"「{k}」: {v[0]}" for k, v in e.message_dict.items()])
             logger.error("投稿のfull_clean()が失敗しました: %s", error_messages)
             messages.error(request, f"**データ検証エラー**：投稿の保存に必要な情報が不足しています。不足フィールド:\n{error_messages}")
@@ -356,7 +392,7 @@ def photo_post_confirm(request):
             return redirect('photo_post_create')
             
         except Exception as e:
-            # 代替フロー②：投稿時に通信エラーが発生した場合
+            # 予期せぬ一般エラー
             logger.error("--- FATAL ERROR: 報告保存時の予期せぬ一般エラーが発生 ---", exc_info=True)
             messages.error(request, f"**投稿通信エラー**：報告の保存中に予期せぬエラーが発生しました。再度投稿してください。エラー: {e}")
             return redirect('photo_post_create')

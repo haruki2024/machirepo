@@ -95,21 +95,24 @@ class PhotoPost(models.Model):
         verbose_name="カテゴリ"
     )
     
-    # 地理情報
     latitude = models.DecimalField(
-        max_digits=9, 
-        decimal_places=6, 
-        verbose_name='緯度', 
-        null=True, 
-        blank=True 
+        max_digits=30,
+        decimal_places=25,
+        null=True,        # データベースレベルでNULLを許可
+        blank=True,       # フォームレベルで空を許可
+        verbose_name="緯度"
     )
+
+    # 経度 (Longitude):
+    # 同様に、null=True, blank=True を追加します。
     longitude = models.DecimalField(
-        max_digits=9, 
-        decimal_places=6, 
-        verbose_name='経度', 
-        null=True, 
-        blank=True 
+        max_digits=30,
+        decimal_places=25,
+        null=True,        # データベースレベルでNULLを許可
+        blank=True,       # フォームレベルで空を許可
+        verbose_name="経度"
     )
+    
     
     # 地名（手動入力または取得した地名）
     location_name = models.CharField(
