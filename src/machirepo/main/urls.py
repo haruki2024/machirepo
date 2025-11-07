@@ -2,15 +2,6 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 
-# アプリケーションの名前空間 (名前空間を付けずに直接参照できるように、この行は削除またはコメントアウトすべきですが、
-# 今回は既存のコードの他の箇所への影響を最小限にするため、このままにしておき、
-# テンプレート側で名前空間なしで動作させるために、一時的に名前空間参照なしで動作する可能性を許容します。
-# ただし、最も安全な修正はテンプレート側で 'main:admin_post_list' にすることです。)
-
-# 今回は NoReverseMatch が発生しているため、`app_name`を削除し、
-# ルートの名前空間で解決できるようにします。
-# app_name = 'main' # <- この行を削除/コメントアウトします。
-
 urlpatterns = [
     # --------------------------------------------------
     # 1. 共通/認証関連
@@ -41,20 +32,13 @@ urlpatterns = [
     # 4. 管理者画面 (manage/ に統一)
     # --------------------------------------------------
     path('manage/home/', views.admin_home, name='admin_home'),
-    
-    # ユーザー管理
     path('manage/users/', views.admin_user_list, name='admin_user_list'),
     path('manage/users/<int:user_id>/delete/', views.admin_user_delete_confirm, name='admin_user_delete_confirm'),
     path('manage/users/delete/complete/', views.admin_user_delete_complete, name='admin_user_delete_complete'),
-
-    # 報告管理 (一覧・詳細・ステータス編集)
     path('manage/posts/', views.admin_post_list, name='admin_post_list'),
-    # /detail/ を含むパスに対応 (例: manage/posts/13/detail/ に対応)
     path('manage/posts/<int:post_id>/detail/', views.admin_post_detail, name='admin_post_detail'), 
     path('manage/posts/<int:post_id>/status/edit/', views.manage_post_status_edit, name='admin_post_status_edit'),
-    path('manage/posts/<int:post_id>/status/complete/', views.manage_status_edit_done, name='admin_status_edit_done'),
-    
-    # 報告削除処理 
+    path('manage/posts/<int:post_id>/status/complete/', views.manage_status_edit_done, name='admin_status_edit_done'), 
     path('manage/posts/<int:post_id>/delete/', views.admin_post_delete, name='admin_post_delete'),
     path('manage/posts/delete/complete/', views.admin_post_delete_complete, name='admin_post_delete_complete'),
 
