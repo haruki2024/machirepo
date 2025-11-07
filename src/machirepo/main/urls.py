@@ -58,4 +58,9 @@ urlpatterns = [
     path('manage/posts/<int:post_id>/delete/', views.admin_post_delete, name='admin_post_delete'),
     path('manage/posts/delete/complete/', views.admin_post_delete_complete, name='admin_post_delete_complete'),
 
+    # path('manage/posts/<int:post_id>/status/edit/', views.admin_post_status_edit, name='admin_post_status_edit'),
+    # # 💡 完了画面のURLを追加
+    # path('manage/posts/<int:post_id>/status/complete/', views.admin_post_status_complete, name='admin_post_status_complete'),
+
+
 ]

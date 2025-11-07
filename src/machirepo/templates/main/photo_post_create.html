@@ -28,7 +28,8 @@
         
         .form-group { margin-bottom: 1.5rem; }
         .input-style, .textarea-style, select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; transition: all 150ms; }
-        .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #ffffff; padding: 1rem; border-top: 1px solid #e5e7eb; box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1); z-index: 100; }
+        {% comment %} .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #ffffff; padding: 1rem; border-top: 1px solid #e5e7eb; box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1); z-index: 100; } {% endcomment %}
+        .app-footer { padding: 1rem 1rem; background-color: #ffffff; border-top: 1px solid #e5e7eb; box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1), 0 -2px 4px -2px rgb(0 0 0 / 0.1); position: sticky; bottom: 0; z-index: 100; }
         .file-select-button { display: inline-block; padding: 0.5rem 1rem; margin-top: 1rem; background-color: #10b981; color: white; border-radius: 0.5rem; cursor: pointer; font-weight: 600; transition: background-color 0.15s; position: relative; overflow: hidden; }
         .file-select-button:hover { background-color: #059669; }
         .file-select-button input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; font-size: 100px; height: 100%; width: 100%; }
@@ -236,7 +237,7 @@
                     
                 latitudeInput.value = newLat;
                 longitudeInput.value = newLng;
-                statusMessage.textContent = `📍 投稿場所が変更されました: ${newLat.toFixed(5)}, ${newLng.toFixed(5)} (マップをクリックで再設定可能)`;
+                statusMessage.textContent = `投稿場所が変更されました: ${newLat.toFixed(5)}, ${newLng.toFixed(5)} (マップをクリックで再設定可能)`;
                 statusMessage.style.color = '#3b82f6'; 
             });
             

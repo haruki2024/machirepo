@@ -1,86 +1,130 @@
-<!-- 管理者向けステータス編集画面 (admin_post_status_edit.html) -->
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ステータス編集 | 管理者</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+{% extends 'top_base.html' %} 
+
+{% load static %}
+
+{% block title %}ステータス記録・更新 | 管理者{% endblock %}
+
+{% block extra_head %}
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+        /* 💡 共通のスタイルとTailwindのユーティリティを統合 */
+        .page-container { max-width: 800px; margin: 0 auto; padding: 0 1rem; }
         .form-label { display: block; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; }
-        .form-input, .form-select {
+        .form-input-style {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid #d1d5db;
             border-radius: 0.5rem;
             font-size: 1rem;
+            transition: border-color 0.15s;
         }
-        .form-textarea { height: 150px; }
+        .form-input-style:focus {
+            outline: none;
+            border-color: #4f46e5; /* indigo-600 */
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
         .error-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; }
-    </style>
-</head>
-<body class="p-4 md:p-8">
-    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-lg p-6">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">報告ステータスの記録</h1>
+        
+        /* ステータスバッジのスタイル */
+        .status-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; }
+        .status-0 { background-color: #fee2e2; color: #b91c1c; } /* 未対応: 赤系 */
+        .status-1 { background-color: #fffbeb; color: #b45309; } /* 対応中: 黄系 */
+        .status-2 { background-color: #d1fae5; color: #047857; } /* 対応完了: 緑系 */
 
-        <!-- 報告情報の概要 -->
-        <div class="mb-6 p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-lg">
-            <p class="text-sm text-indigo-700 font-semibold">対象報告: {{ post.title }}</p>
-            <p class="text-xs text-indigo-600">報告者: {{ post.user.last_name }} | 報告日時: {{ post.posted_at|date:"Y/m/d H:i" }}</p>
-            <p class="text-xs mt-1 text-indigo-600">位置情報: {% if post.location_name %}{{ post.location_name }}{% else %}{{ post.latitude }}, {{ post.longitude }}{% endif %}</p>
+        /* 優先度バッジのスタイル */
+        .priority-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; margin-left: 0.5rem; }
+        .priority-0 { background-color: #e0f2fe; color: #075985; } /* 低: 青系 */
+        .priority-1 { background-color: #fef9c3; color: #a16207; } /* 中: 黄系 */
+        .priority-2 { background-color: #fecaca; color: #b91c1c; } /* 高: 赤系 */
+
+    </style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-container">
+    
+    <header class="flex justify-between items-center py-4 border-b">
+        <h1 class="text-2xl font-bold text-gray-800">報告ステータスの記録</h1>
+        <a href="{% url 'main:admin_post_detail' post.id %}" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold">
+            &lt; 詳細に戻る
+        </a>
+    </header>
+
+    <main class="mt-6">
+        
+        <div class="mb-6 p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-lg shadow-sm">
+            <h2 class="text-lg text-indigo-700 font-bold mb-1">{{ post.title }}</h2>
+            <p class="text-sm text-indigo-600">報告者: {{ post.user.last_name }} 様 | 報告日時: {{ post.posted_at|date:"Y/m/d H:i" }}</p>
+        </div>
+
+        <div class="flex space-x-4 mb-8">
+            <div class="flex-1 p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <p class="text-sm font-medium text-gray-500 mb-1">現在のステータス</p>
+                <span class="status-badge status-{{ post.status|default:0 }}">
+                    {{ post.get_status_display|default:"未対応" }}
+                </span>
+            </div>
+            <div class="flex-1 p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <p class="text-sm font-medium text-gray-500 mb-1">現在の優先順位</p>
+                <span class="priority-badge priority-{{ post.priority|default:0 }}">
+                    {{ post.get_priority_display|default:"低" }}
+                </span>
+            </div>
         </div>
 
         <form method="post" action="{% url 'main:admin_post_status_edit' post.id %}" class="space-y-6">
             {% csrf_token %}
             
-            <!-- 代替フロー②：ステータス未入力エラー表示 -->
             {% if form.non_field_errors %}
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <strong class="font-bold">エラー！</strong>
-                    <span class="block sm:inline">報告ステータスは必須入力です。内容を確認してください。</span>
+                    <strong class="font-bold mr-2">入力エラー:</strong>
+                    {% for error in form.non_field_errors %}
+                        <span class="block sm:inline">{{ error }}</span>
+                    {% endfor %}
                 </div>
             {% endif %}
 
-            <!-- ステータス入力 (status) -->
             <div>
                 <label for="{{ form.status.id_for_label }}" class="form-label">
                     {{ form.status.label }} <span class="text-red-500">*</span>
                 </label>
-                {{ form.status }}
+                {{ form.status|add_class:"form-input-style form-select" }}
                 {% if form.status.errors %}
                     <div class="error-message">{{ form.status.errors.0 }}</div>
                 {% endif %}
             </div>
 
-            <!-- 対応優先順位入力 (priority) -->
             <div>
                 <label for="{{ form.priority.id_for_label }}" class="form-label">{{ form.priority.label }}</label>
-                {{ form.priority }}
+                {{ form.priority|add_class:"form-input-style form-select" }}
                 {% if form.priority.errors %}
                     <div class="error-message">{{ form.priority.errors.0 }}</div>
                 {% endif %}
             </div>
 
-            <!-- 対応内容/判断結果（管理者メモ）入力 (admin_note) -->
             <div>
-                <label for="{{ form.admin_note.id_for_label }}" class="form-label">{{ form.admin_note.label }}</label>
-                {{ form.admin_note }}
+                <label for="{{ form.admin_note.id_for_label }}" class="form-label">
+                    {{ form.admin_note.label }} <span class="text-red-500">*</span>
+                </label>
+                {{ form.admin_note|add_class:"form-input-style form-textarea" }}
                 {% if form.admin_note.errors %}
                     <div class="error-message">{{ form.admin_note.errors.0 }}</div>
                 {% endif %}
+                <p class="text-sm text-red-600 mt-2 p-2 bg-red-50 border border-red-200 rounded">
+                    🚨 **注意:** このコメントは、**報告者（住民）の投稿詳細画面にも表示されます。** 公開されても問題のない内容を記述してください。
+                </p>
             </div>
 
-            <div class="flex justify-between items-center pt-4 border-t">
-                <a href="{% url 'main:admin_post_detail' post.id %}" class="text-gray-600 hover:text-gray-800 text-sm py-2 px-4 rounded-lg border">
+            <div class="flex justify-between items-center pt-6 border-t mt-8">
+                <a href="{% url 'main:admin_post_detail' post.id %}" class="text-gray-600 hover:text-gray-800 text-base py-2 px-4 rounded-lg border border-gray-300 hover:bg-gray-50 transition duration-150">
                     キャンセル
                 </a>
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-150">
-                    記録する
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-150">
+                    ステータスを記録する
                 </button>
             </div>
         </form>
-    </div>
-</body>
-</html>
+    </main>
+</div>
+
+{% endblock %}

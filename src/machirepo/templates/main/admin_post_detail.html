@@ -17,7 +17,7 @@
         right: 0;
         bottom: 0;
         left: 0;
-        z-index: 50; /* 他の要素より前面に表示 (z-indexは十分高い値が望ましい) */
+        z-index: 50;
         background-color: rgba(0, 0, 0, 0.6); /* 半透明の黒背景 */
         display: flex;
         align-items: center;
@@ -58,11 +58,11 @@
 
     /* 必須: 地図コンテナの高さ設定とZ-index - !importantで高さを強制適用 */
     #mapid {
-        height: 400px !important; /* 💡 修正済み: 高さを強制適用 💡 */
+        height: 400px !important;
         width: 100%;
         border-radius: 0.5rem;
         border: 1px solid #ccc;
-        z-index: 9999; 
+        z-index: 10;
     }
 </style>
 
