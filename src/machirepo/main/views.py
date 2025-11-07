@@ -555,41 +555,40 @@ def admin_post_detail(request, post_id):
 
 
 @user_passes_test(is_staff_user, login_url='/')
-def admin_post_status_edit(request, post_id):
+def manage_post_status_edit(request, post_id): # 💡 関数名を 'admin_post_status_edit' から 'manage_post_status_edit' に変更
+    """
+    管理者向け：ステータス記録ビュー（優先度・コメント対応版）
+    """
     post = get_object_or_404(models.PhotoPost, pk=post_id)
 
     if request.method == 'POST':
-        form = StatusUpdateForm(request.POST, instance=post)
+        # StatusUpdateFormはPostモデルに紐づくModelFormと仮定
+        form = StatusUpdateForm(request.POST, instance=post) 
         if form.is_valid():
-            updated_post = form.save(commit=False)
-
-            # completed_atフィールドがないため、このロジックはコメントアウトするか、モデルにcompleted_atフィールドを追加してください
-            # if updated_post.status == 'completed' and not updated_post.completed_at:
-            #     updated_post.completed_at = timezone.now()
-            #
-            # elif updated_post.status != 'completed' and updated_post.completed_at:
-            #     updated_post.completed_at = None
-
-            updated_post.save()
-            messages.success(request, f"報告 (ID: {post_id}) のステータスを更新しました。")
-            return redirect('admin_status_edit_done', post_id=post.pk)
+            # 💡 優先度、ステータス、管理者コメントが一括で更新される
+            updated_post = form.save() 
+            messages.success(request, f"報告 (ID: {post_id}) のステータスと優先順位を更新しました。")
+            
+            # 💡 リダイレクト先を 'manage_status_edit_done' に修正
+            return redirect('admin_status_edit_done', post_id=updated_post.pk) 
     else:
+        # GETリクエストの場合、現在の値でフォームを初期化
         form = StatusUpdateForm(instance=post)
 
     context = {
         'form': form,
         'post': post
     }
+    # テンプレート名は 'admin_post_status_edit.html' のままとし、ファイル名との整合性を維持
     return render(request, 'main/admin_post_status_edit.html', context)
 
 
 @user_passes_test(is_staff_user, login_url='/')
-def admin_status_edit_done(request, post_id):
+def manage_status_edit_done(request, post_id): # 💡 関数名を 'admin_status_edit_done' から 'manage_status_edit_done' に変更
     """ステータス編集完了画面"""
     post = get_object_or_404(models.PhotoPost, pk=post_id)
     context = {'post': post}
-    return render(request, 'main/admin_status_complete.html', context)
-
+    return render(request, 'main/admin_post_status_complete.html', context) # テンプレート名は維持
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_delete(request, post_id):

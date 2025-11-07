@@ -51,16 +51,12 @@ urlpatterns = [
     path('manage/posts/', views.admin_post_list, name='admin_post_list'),
     # /detail/ を含むパスに対応 (例: manage/posts/13/detail/ に対応)
     path('manage/posts/<int:post_id>/detail/', views.admin_post_detail, name='admin_post_detail'), 
-    path('manage/posts/<int:post_id>/status_edit/', views.admin_post_status_edit, name='admin_post_status_edit'),
-    path('manage/posts/<int:post_id>/status_edit/done/', views.admin_status_edit_done, name='admin_status_edit_done'),
+    path('manage/posts/<int:post_id>/status/edit/', views.manage_post_status_edit, name='admin_post_status_edit'),
+    path('manage/posts/<int:post_id>/status/complete/', views.manage_status_edit_done, name='admin_status_edit_done'),
     
     # 報告削除処理 
     path('manage/posts/<int:post_id>/delete/', views.admin_post_delete, name='admin_post_delete'),
     path('manage/posts/delete/complete/', views.admin_post_delete_complete, name='admin_post_delete_complete'),
-
-    # path('manage/posts/<int:post_id>/status/edit/', views.admin_post_status_edit, name='admin_post_status_edit'),
-    # # 💡 完了画面のURLを追加
-    # path('manage/posts/<int:post_id>/status/complete/', views.admin_post_status_complete, name='admin_post_status_complete'),
 
 
 ]

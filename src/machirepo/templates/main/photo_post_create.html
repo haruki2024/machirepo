@@ -157,7 +157,7 @@
             const photoUrl = MEDIA_URL_PREFIX + photoFileName;
             photoElement.src = photoUrl;
             photoElement.style.display = 'block'; 
-            if (fileNameDisplay) { fileNameDisplay.textContent = `✅ 過去の投稿データから写真を読み込みました。`; }
+            if (fileNameDisplay) { fileNameDisplay.textContent = `過去の投稿データから写真を読み込みました。`; }
         } else {
             photoElement.style.display = 'none';
             if (fileNameDisplay) { fileNameDisplay.textContent = 'ファイルが選択されていません。'; }

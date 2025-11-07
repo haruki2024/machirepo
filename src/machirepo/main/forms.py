@@ -5,7 +5,6 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .models import PhotoPost, Tag 
 from . import models 
 
-
 # settings.pyで指定されたユーザーモデルを取得
 User = get_user_model() 
 Resident = get_user_model()
@@ -248,12 +247,16 @@ class StatusUpdateForm(forms.ModelForm):
     """
     class Meta:
         model = PhotoPost
+        # 💡 PhotoPostモデルのフィールドを参照
         fields = ('status', 'priority', 'admin_note')
         labels = {
             'status': '対応ステータス',
             'priority': '対応優先順位',
-            'admin_note': '対応内容/判断結果（メモ）',
+            'admin_note': '対応内容/判断結果（住民公開用コメント）', # ラベルを詳細化
         }
         widgets = {
-            'admin_note': forms.Textarea(attrs={'rows': 5}),
+            'admin_note': forms.Textarea(attrs={'rows': 5, 'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg'}),
+            'status': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg'}),
+            'priority': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg'}),
         }
+

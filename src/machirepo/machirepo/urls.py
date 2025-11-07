@@ -16,7 +16,6 @@ from main.forms import EmailAuthenticationForm
 urlpatterns = [
     # ここで admin が使用されています
     path('admin/', admin.site.urls),
-    
     path('', include('main.urls')),
     
     # ログインビューのオーバーライド

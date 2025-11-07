@@ -42,37 +42,17 @@
 {% block content %}
 
 <div class="page-container">
-    
-    <header class="flex justify-between items-center py-4 border-b">
-        <h1 class="text-2xl font-bold text-gray-800">報告ステータスの記録</h1>
-        <a href="{% url 'main:admin_post_detail' post.id %}" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold">
-            &lt; 詳細に戻る
-        </a>
-    </header>
+        <header class="app-header">
+            <div class="title">まちレポ 管理者ページ</div>
+            <a href="{% url 'admin_post_detail' post.id %}" class="header-link">ログアウト</a>
+        </header>
 
-    <main class="mt-6">
+    <main class="main-content">
         
-        <div class="mb-6 p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-lg shadow-sm">
-            <h2 class="text-lg text-indigo-700 font-bold mb-1">{{ post.title }}</h2>
-            <p class="text-sm text-indigo-600">報告者: {{ post.user.last_name }} 様 | 報告日時: {{ post.posted_at|date:"Y/m/d H:i" }}</p>
-        </div>
+        
 
-        <div class="flex space-x-4 mb-8">
-            <div class="flex-1 p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
-                <p class="text-sm font-medium text-gray-500 mb-1">現在のステータス</p>
-                <span class="status-badge status-{{ post.status|default:0 }}">
-                    {{ post.get_status_display|default:"未対応" }}
-                </span>
-            </div>
-            <div class="flex-1 p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
-                <p class="text-sm font-medium text-gray-500 mb-1">現在の優先順位</p>
-                <span class="priority-badge priority-{{ post.priority|default:0 }}">
-                    {{ post.get_priority_display|default:"低" }}
-                </span>
-            </div>
-        </div>
-
-        <form method="post" action="{% url 'main:admin_post_status_edit' post.id %}" class="space-y-6">
+      
+        <form method="post" action="{% url 'admin_post_status_edit' post.id %}" class="space-y-6">
             {% csrf_token %}
             
             {% if form.non_field_errors %}
@@ -84,45 +64,36 @@
                 </div>
             {% endif %}
 
-            <div>
+            <div class="form-group">
                 <label for="{{ form.status.id_for_label }}" class="form-label">
-                    {{ form.status.label }} <span class="text-red-500">*</span>
+                    対応状況<span class="text-red-500">*</span>
                 </label>
-                {{ form.status|add_class:"form-input-style form-select" }}
+                {{ form.status }}
                 {% if form.status.errors %}
                     <div class="error-message">{{ form.status.errors.0 }}</div>
                 {% endif %}
             </div>
 
-            <div>
+            <div class="form-group" id="priority-group">
                 <label for="{{ form.priority.id_for_label }}" class="form-label">{{ form.priority.label }}</label>
-                {{ form.priority|add_class:"form-input-style form-select" }}
+                {{ form.priority }}
                 {% if form.priority.errors %}
                     <div class="error-message">{{ form.priority.errors.0 }}</div>
                 {% endif %}
             </div>
 
-            <div>
+            <div class="form-group">
                 <label for="{{ form.admin_note.id_for_label }}" class="form-label">
-                    {{ form.admin_note.label }} <span class="text-red-500">*</span>
+                    管理者コメント（任意）
                 </label>
-                {{ form.admin_note|add_class:"form-input-style form-textarea" }}
-                {% if form.admin_note.errors %}
-                    <div class="error-message">{{ form.admin_note.errors.0 }}</div>
-                {% endif %}
-                <p class="text-sm text-red-600 mt-2 p-2 bg-red-50 border border-red-200 rounded">
-                    🚨 **注意:** このコメントは、**報告者（住民）の投稿詳細画面にも表示されます。** 公開されても問題のない内容を記述してください。
-                </p>
+                {{ form.admin_note }}
+                
             </div>
 
-            <div class="flex justify-between items-center pt-6 border-t mt-8">
-                <a href="{% url 'main:admin_post_detail' post.id %}" class="text-gray-600 hover:text-gray-800 text-base py-2 px-4 rounded-lg border border-gray-300 hover:bg-gray-50 transition duration-150">
-                    キャンセル
-                </a>
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-150">
-                    ステータスを記録する
-                </button>
-            </div>
+             
+
+            
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">記録する</button>
         </form>
     </main>
 </div>
