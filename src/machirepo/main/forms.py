@@ -163,7 +163,7 @@ class PhotoPostForm(forms.ModelForm):
         label="報告のタイトル", 
         max_length=100,
         required=True, 
-        widget=forms.TextInput(attrs={'placeholder': '報告のタイトル (必須)', 'maxlength': 100}),
+        widget=forms.TextInput(attrs={'placeholder': '例：〇〇公園のベンチが壊れている', 'maxlength': 100}),
         error_messages={
             'required': '報告のタイトルは必須です。', 
             'max_length': 'タイトルは100文字以内で入力してください。'
@@ -179,7 +179,7 @@ class PhotoPostForm(forms.ModelForm):
     )
     
     comment = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 4, 'placeholder': '状況を詳しく説明してください (必須)'}),
+        widget=forms.Textarea(attrs={'rows': 4, 'placeholder': '例：座る部分が壊れていて危険です。'}),
         required=True, 
         label="状況説明"
     )

@@ -168,7 +168,7 @@ def photo_post_create(request):
 			}
             # 既存のphoto_pathがある場合は引き継ぐ（フォームで写真が上書きされない場合）
             if current_photo_path and 'photo' not in request.FILES:
-                 new_post_data['photo_path'] = current_photo_path
+                new_post_data['photo_path'] = current_photo_path
             
             
             # 2. 画像ファイルをセッションに保存 (新しい写真がアップロードされた場合)
@@ -329,13 +329,7 @@ def photo_post_confirm(request):
             # safe_float() を使用して値を Decimal 型で取得
             latitude_val = safe_float(post_data.get('latitude'))
             longitude_val = safe_float(post_data.get('longitude'))
-            
-            # 💡 デバッグログ: full_clean()実行直前の値を確認
-            print(f"--- DEBUG: full_clean()直前の座標値 (Confirm View) ---")
-            print(f"Lattitude: {latitude_val} (Type: {type(latitude_val)})")
-            print(f"Longitude: {longitude_val} (Type: {type(longitude_val)})")
-            print("------------------------------------------------------")
-            
+  
             # 1. セッションデータからインスタンスを作成
             new_post = models.PhotoPost(
                 user=request.user,
@@ -378,8 +372,6 @@ def photo_post_confirm(request):
                 fs.delete(photo_path)
                 logger.info(f"--- TEMP FILE DELETED: {photo_path} ---")
             
-            # 6. 完了画面へリダイレクト（基本フロー⑧）
-            messages.success(request, "報告を送信しました。")
             return redirect('photo_post_done')
             
         except ValidationError as e:
