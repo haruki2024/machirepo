@@ -56,14 +56,8 @@
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     }
 
-    /* 必須: 地図コンテナの高さ設定とZ-index - !importantで高さを強制適用 */
-    #mapid {
-        height: 400px !important;
-        width: 100%;
-        border-radius: 0.5rem;
-        border: 1px solid #ccc;
-        z-index: 10;
-    }
+
+    
 </style>
 
 
@@ -114,8 +108,7 @@
                             {% if post.latitude and post.longitude %}
                                 <div class="form-group mb-6">
                                     <label class="block text-gray-700 font-medium mb-2">地図表示 (OpenStreetMap):</label>
-                                    <div id="mapid">
-                                        </div>
+                                    <div id="map-display"></div>
                                 </div>
                             {% endif %}
                         {% else %}
@@ -128,9 +121,11 @@
             <div class="form-group mb-6">
                 <label class="block text-gray-700 font-medium mb-1">カテゴリ:</label>
                 <p class="text-gray-800">
-                    {% for tag in post.tags.all %}
-                        <span class="inline-block bg-indigo-100 text-indigo-700 text-sm px-2 py-0.5 rounded-full mr-1">{{ tag.name | default:"タグなし" }}</span>
-                    {% endfor %}
+                    {% if post.tags.first %}
+                        {{ post.tags.first.name }}
+                    {% else %}
+                        (タグなし)
+                    {% endif %}
                 </p>
             </div>
 
@@ -267,7 +262,7 @@
         if (lat === 0 && lng === 0 || typeof L === 'undefined') return; 
 
         // 1. Mapオブジェクトの作成 (省略)
-        const map = L.map('mapid').setView([lat, lng], 16); 
+        const map = L.map('map-display').setView([lat, lng], 16); 
         
         // 2. タイルレイヤーを追加 (省略)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

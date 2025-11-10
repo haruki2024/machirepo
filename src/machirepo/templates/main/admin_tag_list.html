@@ -103,32 +103,29 @@
                 タグを追加
             </a>
         </div>
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>タグ名</th>
-                    <th style="width: 100px;">操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if tags %}
+
+        {% if not tags %}
+            <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
+                <p style="color: #6b7280;">現在、タグはありません。</p>
+            </div>
+        {% else %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>タグ名</th>
+                        <th style="width: 100px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {% for tag in tags %}
                         <tr>
                             <td>{{ tag.name }}</td>
                             <td><a href="#" class="delete-link" data-tag-id="{{ tag.pk }}" data-tag-name="{{ tag.name }}" onclick="openDeleteModal(this); return false;" style="color: #ef4444;">削除</a></td>
                         </tr>
-                            
                     {% endfor %}
-                {% else %}
-                    <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
-                        <p style="color: #6b7280;">現在、タグはありません。</p>
-                    </div>
-                {% endif %}
-
-
-            </tbody>
-        </table>
-
+                </tbody>
+            </table>
+        {% endif %}
 
     </main>
 </div>

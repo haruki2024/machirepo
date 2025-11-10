@@ -16,36 +16,40 @@
             <a href="{% url 'admin_home' %}" class="link-secondary" style="margin: 0 0 1.5rem 0; text-align: left;">&lt; 管理メニューに戻る</a>
             <h2 style="font-size: 1.5rem; font-weight: 700;">ユーザー管理</h2>
             
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>氏名</th>
-                        <th>メールアドレス</th>
-                        <th>登録日</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.date_joined|date:"Y/m/d" }}</td>
-                        
-                        <td>
-                            <!-- 削除リンク: JS関数を呼び出し、URLを渡す -->
-                            <a href="#" 
-                               onclick="confirmDelete('{{ user.username }}', '{% url 'admin_user_delete_confirm' user_id=user.id %}')" 
-                               style="color: #ef4444;">削除</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4">登録されているユーザーはいません。</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% if not users %}
+                <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
+                    <p style="color: #6b7280;">現在、ユーザーはいません。</p>
+                </div>
+
+            {% else %}
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>氏名</th>
+                            <th>メールアドレス</th>
+                            <th>登録日</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.date_joined|date:"Y/m/d" }}</td>
+                            
+                            <td>
+                                <!-- 削除リンク: JS関数を呼び出し、URLを渡す -->
+                                <a href="#" 
+                                onclick="confirmDelete('{{ user.username }}', '{% url 'admin_user_delete_confirm' user_id=user.id %}')" 
+                                style="color: #ef4444;">削除</a>
+                            </td>
+                        </tr>
+                            
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
         </main>
     </div>
 
