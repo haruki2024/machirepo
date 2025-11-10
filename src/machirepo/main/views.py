@@ -451,25 +451,21 @@ def admin_user_delete_confirm(request, user_id):
     
     # POSTリクエスト: 削除処理を実行
     if request.method == 'POST':
-        # 削除対象のユーザーを取得 (存在しない場合は404)
         user_to_delete = get_object_or_404(User, pk=user_id)
         
-        # 自身を削除しようとしていないかチェック
         if user_to_delete.pk == request.user.pk:
             messages.error(request, "自分自身のアカウントをこの画面から削除することはできません。")
             return redirect('admin_user_list')
         
         try:
-            # ユーザーを削除
             username = user_to_delete.username
             user_to_delete.delete()
             
             messages.success(request, f"ユーザー「{username}」を削除しました。")
-            # 成功したら削除完了画面へリダイレクト
+            
             return redirect('admin_user_delete_complete')
             
         except Exception as e:
-            # データの整合性エラーやその他の予期せぬエラー
             logger.error(f"ユーザーID {user_id} の削除中にエラーが発生: {e}", exc_info=True)
             messages.error(request, f"削除中に予期せぬエラーが発生しました。詳細: {e}")
             return redirect('admin_user_list')
@@ -486,38 +482,37 @@ def admin_user_delete_complete(request):
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_list(request):
+
+    #絞り込み
     status_filter = request.GET.get('status', None)
     tag_filter = request.GET.get('tag', None)
     priority_filter = request.GET.get('priority', None)
 
     posts = models.PhotoPost.objects.all().select_related('user').prefetch_related('tags').order_by('-posted_at')
 
-    # 1. ステータスによる絞り込み
     valid_statuses = dict(models.PhotoPost.STATUS_CHOICES).keys()
     if status_filter in valid_statuses:
         posts = posts.filter(status=status_filter)
 
-    # 2. タグによる絞り込み
     if tag_filter:
         try:
-            # タグIDが整数であることを確認
             tag_id = int(tag_filter)
             posts = posts.filter(tags__id=tag_id)
         except ValueError:
-            # フィルター値が無効な場合は無視
+            
             pass
 
-    # 3. 優先度による絞り込み (未設定（__none__）に対応)
     if priority_filter:
         if priority_filter == '__none__':
-            # 優先度が未設定（NULL）の投稿をフィルタリング
             posts = posts.filter(priority__isnull=True)
         else:
-            # 'low', 'medium', 'high'のいずれかでフィルタリング
             posts = posts.filter(priority=priority_filter)
 
-    # 全タグを取得（フォームの選択肢用）
     all_tags = models.Tag.objects.all().order_by('name')
+
+
+
+
 
     context = {
         'posts': posts,
@@ -526,13 +521,11 @@ def admin_post_list(request):
         'priority_filter': priority_filter,
         'all_tags': all_tags,
     }
-    # テンプレート名を 'admin_post_list.html' に変更
     return render(request, 'main/admin_post_list.html', context)
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_detail(request, post_id):
     post = get_object_or_404(models.PhotoPost, pk=post_id)
-    # status編集用のフォームを追加
     form = StatusUpdateForm(instance=post)
     context = {
         'post': post,
@@ -553,14 +546,12 @@ def manage_post_status_edit(request, post_id):
             
             return redirect('admin_status_edit_done', post_id=updated_post.pk) 
     else:
-        # GETリクエストの場合、現在の値でフォームを初期化
         form = StatusUpdateForm(instance=post)
 
     context = {
         'form': form,
         'post': post
     }
-    # テンプレート名は 'admin_post_status_edit.html' のままとし、ファイル名との整合性を維持
     return render(request, 'main/admin_post_status_edit.html', context)
 
 
@@ -569,7 +560,7 @@ def manage_status_edit_done(request, post_id):
     """ステータス編集完了画面"""
     post = get_object_or_404(models.PhotoPost, pk=post_id)
     context = {'post': post}
-    return render(request, 'main/admin_post_status_complete.html', context) # テンプレート名は維持
+    return render(request, 'main/admin_post_status_complete.html', context)
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_delete(request, post_id):
@@ -578,7 +569,6 @@ def admin_post_delete(request, post_id):
 
     if request.method == 'POST':
         post_pk = post.pk
-        # コメントの先頭20文字を報告タイトルとして使用
         post_title = (post.comment[:20] + '...') if post.comment and len(post.comment) > 20 else post.comment or f"ID:{post_pk}の報告"
 
         try:
@@ -593,7 +583,6 @@ def admin_post_delete(request, post_id):
             messages.error(request, "報告の削除中に予期せぬエラーが発生しました。")
             return redirect('admin_post_detail', post_id=post_id)
 
-    # POST以外のリクエストは詳細画面に戻す
     messages.error(request, "報告の削除にはPOSTリクエストが必要です。")
     return redirect('admin_post_detail', post_id=post_id)
 
@@ -613,7 +602,7 @@ def admin_post_delete_complete(request):
 
 
 # --------------------------------------------------
-# 3. 管理者向けタグ管理画面 (新規追加)
+# 6. 管理者向けタグ管理画面 (新規追加)
 # --------------------------------------------------
 
 @login_required
@@ -665,3 +654,4 @@ def admin_tag_delete_complete(request):
     """タグの追加/削除 完了画面"""
     # messagesフレームワークを使って、直前の処理メッセージを表示する
     return render(request, 'main/admin_tag_delete_complete.html', {'page_title': '完了'})
+
