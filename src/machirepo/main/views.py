@@ -115,13 +115,13 @@ def post_history(request):
         'STATUS_CHOICES_DISPLAY': STATUS_CHOICES_DISPLAY,
         'PRIORITY_CHOICES_DISPLAY': PRIORITY_CHOICES_DISPLAY,
     }
-    return render(request, 'main/post_history.html', context)
+    return render(request, 'main/user_post_history.html', context)
 
 
 def post_list(request):
     posts = models.PhotoPost.objects.exclude(status='not_required').order_by('-posted_at')
     context = {'posts': posts}
-    return render(request, 'main/post_list.html', context)
+    return render(request, 'main/user_post_list.html', context)
 
 
 # -----------------------------------------------------
@@ -224,7 +224,7 @@ def photo_post_create(request):
         print("--- DEBUG: Rendering Step 1 Form ---") # GETリクエストの確認
     
     # ② システムは投稿画面を表示する
-    return render(request, 'main/photo_post_create.html', {'form': form, 'step': 1})
+    return render(request, 'main/user_photo_post_create.html', {'form': form, 'step': 1})
 
 
 @login_required
@@ -282,7 +282,7 @@ def photo_post_manual_location(request):
         'post_data': post_data,
         'step': 2
     }
-    return render(request, 'main/photo_post_manual_location.html', context)
+    return render(request, 'main/user_photo_post_manual_location.html', context)
 
 @login_required
 def photo_post_confirm(request):
@@ -401,12 +401,12 @@ def photo_post_confirm(request):
         'selected_tag': selected_tag, # テンプレートで表示するために追加
         'step': 3
     }
-    return render(request, 'main/photo_post_confirm.html', context)
+    return render(request, 'main/user_photo_post_confirm.html', context)
 
 @login_required
 def photo_post_done(request):
     """報告作成完了（基本フロー⑧）"""
-    return render(request, 'main/photo_post_complete.html', {})
+    return render(request, 'main/user_photo_post_complete.html', {})
 
 
 # -----------------------------------------------------
