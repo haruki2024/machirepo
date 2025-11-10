@@ -129,20 +129,20 @@
                 <label class="block text-gray-700 font-medium mb-1">カテゴリ:</label>
                 <p class="text-gray-800">
                     {% for tag in post.tags.all %}
-                        <span class="inline-block bg-indigo-100 text-indigo-700 text-sm px-2 py-0.5 rounded-full mr-1">{{ tag.name }}</span>
+                        <span class="inline-block bg-indigo-100 text-indigo-700 text-sm px-2 py-0.5 rounded-full mr-1">{{ tag.name | default:"タグなし" }}</span>
                     {% endfor %}
                 </p>
             </div>
 
             <div class="form-group mb-6">
                 <label class="block text-gray-700 font-medium mb-1">詳細:</label>
-                <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap">{{ post.comment }}</p>
+                <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap">{{ post.comment | linebreaks }}</p>
             </div>
             
             {% if post.admin_note %}
             <div class="form-group mb-6 p-3 bg-indigo-50 border border-indigo-200 rounded-md">
                 <label class="block text-indigo-700 font-medium mb-1">管理者コメント:</label>
-                <p class="text-indigo-800 whitespace-pre-wrap">{{ post.admin_note }}</p>
+                <p class="text-indigo-800 whitespace-pre-wrap">{{ post.admin_note | linebreaks}}</p>
             </div>
             {% endif %}
 

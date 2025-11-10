@@ -215,27 +215,36 @@ class PhotoPostForm(forms.ModelForm):
                 })
 
 
+
+# -----------------------------------------------------
+# 4. 位置情報手動入力フォーム (ManualLocationForm)
+# -----------------------------------------------------
+    
 class ManualLocationForm(forms.Form):
     """基本フロー② - 位置情報の手動入力フォーム（★コメント入力専用に変更★）"""
-    comment = forms.CharField(
-        label="詳細情報（必須）",
+    # comment = forms.CharField(
+    #     label="詳細情報（必須）",
+    #     required=True,
+    #     widget=forms.Textarea(attrs={'rows': 5, 'placeholder': '例: 交差点の北西角が陥没しています。発生時期は不明です。'}),
+    #     help_text="具体的な状況や発生時期、危険性などを詳しく記述してください。",
+    #     validators=[MinLengthValidator(10, message='詳細情報は10文字以上で入力してください。')]
+    # )
+
+    location_name = forms.CharField(
+        label="地名（任意）", 
+        max_length=255, 
         required=True,
-        widget=forms.Textarea(attrs={'rows': 5, 'placeholder': '例: 交差点の北西角が陥没しています。発生時期は不明です。'}),
-        help_text="具体的な状況や発生時期、危険性などを詳しく記述してください。",
-        validators=[MinLengthValidator(10, message='詳細情報は10文字以上で入力してください。')]
+        widget=forms.Textarea(attrs={'rows': 4, 'placeholder': '例: 交差点の北西角が陥没しています。発生時期は不明です。'}) # 2行分の高さを指定
     )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
             field.widget.attrs.update({
                 'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
             })
-
-# -----------------------------------------------------
-# 4. 位置情報手動入力フォーム (ManualLocationForm)
-# -----------------------------------------------------
-class ManualLocationForm(forms.Form):
-    location_name = forms.CharField(label="地名（任意）", max_length=255, required=False)
+    
+    
 
 
 # -----------------------------------------------------
@@ -260,3 +269,17 @@ class StatusUpdateForm(forms.ModelForm):
             'priority': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg'}),
         }
 
+
+class TagForm(forms.ModelForm):
+    """タグ新規作成用のフォーム"""
+    class Meta:
+        model = Tag
+        # nameフィールドのみを使用
+        fields = ('name',)
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500',
+                'placeholder': '例：ゴミ問題',
+                'required': 'required',
+            })
+        }

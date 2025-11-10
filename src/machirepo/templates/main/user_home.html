@@ -20,12 +20,18 @@
                 <h2 style="font-size: 1.5rem; font-weight: 700;">ようこそ</h2>
                 <p style="color: #6b7280; margin-top: 0.5rem;">まちのインフラ不具合を報告しましょう。</p>
             </div>
+
+            <div>
+                <h2>みんなの投稿</h2>
+                
+            </div>
+
             
             <div style="width: 100%;">
                 <a href="{% url 'photo_post_create' %}" class="btn btn-primary" style="padding-top: 1rem; padding-bottom: 1rem; font-size: 1.125rem;">
                     新規投稿を行う
                 </a>
-                <a href="history.html" class="btn btn-primary" style="margin-top: 1rem; padding-top: 1rem; padding-bottom: 1rem; font-size: 1.125rem;">
+                <a href="{% url 'post_history' %}" class="btn btn-primary" style="margin-top: 1rem; padding-top: 1rem; padding-bottom: 1rem; font-size: 1.125rem;">
                     投稿履歴を見る
                 </a>
             </div>

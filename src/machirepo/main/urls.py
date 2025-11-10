@@ -17,6 +17,7 @@ urlpatterns = [
     # --------------------------------------------------
     path('home/', views.user_home, name='user_home'),
     path('mypage/', views.my_page, name='my_page'),
+    path('mypage/history/', views.post_history, name='post_history'),
     path('posts/', views.post_list, name='post_list'),
     
     # --------------------------------------------------
@@ -41,6 +42,15 @@ urlpatterns = [
     path('manage/posts/<int:post_id>/status/complete/', views.manage_status_edit_done, name='admin_status_edit_done'), 
     path('manage/posts/<int:post_id>/delete/', views.admin_post_delete, name='admin_post_delete'),
     path('manage/posts/delete/complete/', views.admin_post_delete_complete, name='admin_post_delete_complete'),
+
+    # --------------------------------------------------
+    # 3. 管理者向けタグ管理画面 (新規追加)
+    # --------------------------------------------------
+    path('manage/tags/', views.admin_tag_list, name='admin_tag_list'),
+    path('manage/tags/add/', views.admin_tag_create, name='admin_tag_create'),
+    path('manage/tags/<int:pk>/delete/', views.admin_tag_delete, name='ademin_tag_delete'),
+    path('manage/tags/create/complete/', views.admin_tag_create_complete, name='admin_tag_create_complete'),
+    path('manage/tags/delete/complete/', views.admin_tag_delete_complete, name='admin_tag_delete_complete'),
 
 
 ]

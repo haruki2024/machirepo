@@ -1,0 +1,70 @@
+{% extends 'top_base.html' %}
+
+{% block title %}{{ page_title }} - まちレポ{% endblock %}
+
+{% block head %}
+<style>
+/* 基本レイアウト */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: white;
+    position: relative;
+}
+/* フォームコンテナ */
+.form-container {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    max-width: 450px;
+    margin: 2rem auto;
+}
+/* フォームの入力フィールド (forms.pyでも定義済み) */
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    <header class="app-header">
+        <h1 class="title">まちレポ</h1>
+        <div>
+            <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <a href="{% url 'admin_tag_list' %}" class="link-secondary" style="margin: 0 0 1.5rem 0; text-align: left;">&lt; タグ一覧に戻る</a>
+        <h2 style="font-size: 1.5rem; font-weight: 700;">新しいタグを追加</h2>
+            <form method="post" action="{% url 'admin_tag_create' %}">
+                {% csrf_token %}
+                
+                
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">タグ名</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        {% for error in form.name.errors %}
+                            <p class="text-red-500 text-xs italic mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+               
+                    
+                <button type="submit" class="btn btn-primary">
+                    追加する
+                </button>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}

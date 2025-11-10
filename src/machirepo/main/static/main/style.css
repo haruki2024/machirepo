@@ -13,6 +13,7 @@
 ==================================================
 */
 body {
+    padding-bottom: var(--footer-height);
     font-family: 'Inter', 'Noto Sans JP', sans-serif;
     background-color: #f3f4f6;
     color: #1f2937;
@@ -164,6 +165,10 @@ body.form-page-bg {
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     margin-bottom: 1rem;
 }
+
+
+
+
 .history-item-header {
     display: flex;
     justify-content: space-between;
@@ -199,22 +204,31 @@ body.form-page-bg {
     display: inline-block;
     white-space: nowrap;
 }
-.status-new { background-color: #e0f2fe; color: #0ea5e9; } /* 新規 */
-.status-pending { background-color: #fffbe6; color: #f59e0b; } /* 対応中 */
-.status-complete { background-color: #ecfdf5; color: #10b981; } /* 対応完了 */
-.status-not-applicable { background-color: #f3f4f6; color: #6b7280; } /* 対応不可 */
+.status-new { 
+    background-color: #e0f2fe; 
+    color: #0ea5e9; 
+} /* 新規 */
+.status-pending { 
+    background-color: #fffbe6; 
+    color: #f59e0b; 
+} /* 対応中 */
+.status-complete { 
+    background-color: #ecfdf5; 
+    color: #10b981; 
+} /* 対応完了 */
+.status-not-applicable { 
+    background-color: #f3f4f6; 
+    color: #6b7280; 
+} /* 対応不可 */
 
 /* 優先度タグ */
 .priority-badge {
+    padding: 0.3em 0.8em;
+    border-radius: 1em;
+    font-size: 0.8rem;
+    font-weight: bold;
     display: inline-block;
-    padding: 0.2em 0.6em;
-    font-size: 0.75rem; /* 12px */
-    font-weight: 700;
-    line-height: 1;
-    text-align: center;
     white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: 0.75rem; /* 12px */
 }
 .priority-high {
     background-color: #fee2e2;
@@ -371,6 +385,16 @@ body.form-page-bg {
     .form-container {
         padding: 40px; 
     }
+
+
+    .history-item .history-item-title {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--primary-hover-color);
+        margin: 0;
+    }
+
+
 
     /* テーブルの横スクロールを無効化（タブレット以上の幅があるため） */
     .table-responsive {

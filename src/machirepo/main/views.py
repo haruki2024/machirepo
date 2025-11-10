@@ -18,6 +18,9 @@ from django.db.models import Q
 from django.core.files.storage import FileSystemStorage # FileSystemStorageのインポート
 import os # ファイルパス操作用にosをインポート
 import decimal
+from .models import PhotoPost, Tag
+from .forms import TagForm
+
 # ロガーの設定
 logger = logging.getLogger(__name__)
 
@@ -68,7 +71,7 @@ class ResidentRegisterView(CreateView):
     
     # 💡 【デバッグ追加】フォームバリデーション失敗時にエラー内容をログに出力
     def form_invalid(self, form):
-        logger.error("--- 🚨 ResidentCreationForm バリデーション失敗エラー詳細 🚨 ---")
+        logger.error("--- ResidentCreationForm バリデーション失敗エラー詳細 ---")
         for field, errors in form.errors.items():
             logger.error(f"フィールド '{field}': {errors}")
         logger.error("---------------------------------------------------------------")
@@ -96,6 +99,25 @@ def my_page(request):
     context = {'my_posts': my_posts}
     return render(request, 'main/my_page.html', context)
 
+@login_required
+def post_history(request):
+    # ログインユーザーの投稿のみを取得し、投稿日時順に並べる
+    # StatusHistoryモデルがないため、prefetch_relatedは不要
+    posts = PhotoPost.objects.filter(user=request.user).order_by('-posted_at') 
+
+
+    # models.pyのCHOICES定義を使用
+    STATUS_CHOICES_DISPLAY = dict(PhotoPost.STATUS_CHOICES) 
+    PRIORITY_CHOICES_DISPLAY = dict(PhotoPost.PRIORITY_CHOICES) 
+
+    context = {
+        'posts': posts,
+        'STATUS_CHOICES_DISPLAY': STATUS_CHOICES_DISPLAY,
+        'PRIORITY_CHOICES_DISPLAY': PRIORITY_CHOICES_DISPLAY,
+    }
+    return render(request, 'main/post_history.html', context)
+
+
 def post_list(request):
     posts = models.PhotoPost.objects.exclude(status='not_required').order_by('-posted_at')
     context = {'posts': posts}
@@ -107,15 +129,12 @@ def post_list(request):
 # -----------------------------------------------------
 @login_required
 def photo_post_create(request):
-    """基本フロー②/③/④ - 報告作成ステップ1: 写真/コメント入力"""
     post_data = request.session.get('post_data', {})
     
     # 【ステップ1クリーンアップ】
     if request.method == 'GET':
-        # ★修正: セッションクリア対象に'post_photo_data'と一時ファイル削除を追加★
         keys_to_remove = ['latitude', 'longitude', 'title', 'tags', 'comment', 'photo_path'] 
         
-        # 1. post_dataのクリーンアップ
         if any(k in post_data for k in keys_to_remove):
             if 'photo_path' in post_data and post_data['photo_path']:
                 try:
@@ -142,17 +161,10 @@ def photo_post_create(request):
         form = PhotoPostForm(request.POST, request.FILES, initial=post_data)
         
         if form.is_valid():
-            # =================================================================
-            # ★★★ 修正箇所: tagsのセッション保存方法を単一PKに変更 ★★★
-            # =================================================================
             
-            # 1. フォームデータをセッションに保存
-            
-            # tagsを処理: 単一のTagオブジェクトの場合はそのPKを保存
             cleaned_tag = form.cleaned_data['tags']
             tag_pk_to_save = cleaned_tag.pk if cleaned_tag else None
             
-            # post_dataを初期化し、photo_path（もしあれば）を保持
             current_photo_path = post_data.get('photo_path')
             
 		
@@ -162,20 +174,17 @@ def photo_post_create(request):
                 'title': form.cleaned_data['title'],
                 'comment': form.cleaned_data['comment'],
                 'tags': tag_pk_to_save, 
-                # ↓↓↓ 💡 修正点1: POSTデータから緯度・経度を取得し、セッションに保存 ↓↓↓
-                'latitude': request.POST.get('latitude', '0.0'),   # form.cleaned_dataには含まれないため、request.POSTから直接取得
+                
+                'latitude': request.POST.get('latitude', '0.0'),   
                 'longitude': request.POST.get('longitude', '0.0'),
 			}
-            # 既存のphoto_pathがある場合は引き継ぐ（フォームで写真が上書きされない場合）
+            
             if current_photo_path and 'photo' not in request.FILES:
                 new_post_data['photo_path'] = current_photo_path
             
-            
-            # 2. 画像ファイルをセッションに保存 (新しい写真がアップロードされた場合)
             photo_file = request.FILES.get('photo')
             if photo_file:
                 
-                # 既存のファイルがあれば削除
                 if 'photo_path' in post_data and post_data['photo_path']:
                     try:
                         # ファイルパスがセッションに保存されていると仮定し、削除
@@ -193,15 +202,9 @@ def photo_post_create(request):
 
             logger.info("--- SESSION SAVE: Form data and photo path saved to session. ---")
             
-            # 基本フロー⑤の起点へ: 位置情報取得の起点となるステップ2へリダイレクト
             return redirect('photo_post_location')
         
         else:
-            # === DEBUG/代替フロー①：必須項目未入力エラー処理 ===
-            print("--- DEBUG: FORM IS NOT VALID. ERRORS BELOW ---")
-            print(form.errors) 
-            print("---------------------------------------------")
-            
             logger.error("PhotoPostForm validation failed: %s", form.errors)
             messages.error(request, "投稿内容にエラーがあります。不足している必須項目（写真、カテゴリ、タイトル）を確認するか、写真のファイルサイズ（最大5MB）を確認してください。")
     
@@ -209,7 +212,6 @@ def photo_post_create(request):
     else:
         initial_data = post_data.copy()
         
-        # ★修正: セッションに保存された単一のPKをModelChoiceFieldが期待するインスタンスに変換し直す★
         tag_pk = initial_data.get('tags') 
         if tag_pk:
             try:
@@ -249,12 +251,8 @@ def photo_post_manual_location(request):
 
 
     if is_valid_coord(session_lat) and is_valid_coord(session_lng):
-        # 自動取得が成功し、有効な座標がセッションに保存されている！
         logger.info("--- GEOLOCATION SUCCESS: Skipping manual step and redirecting to CONFIRM. ---")
         
-        # messages.info(request, "位置情報が自動取得されました。確認画面に進みます。") # メッセージは確認画面で表示
-        
-        # セッションデータは既に有効な緯度経度で更新済みなので、そのまま確認画面へ
         return redirect('photo_post_confirm')
     
 
@@ -385,12 +383,10 @@ def photo_post_confirm(request):
             
         except Exception as e:
             # 予期せぬ一般エラー
-            logger.error("--- FATAL ERROR: 報告保存時の予期せぬ一般エラーが発生 ---", exc_info=True)
+            logger.error("--- FATAL ERROR: 報告保存時の予期せぬエラーが発生 ---", exc_info=True)
             messages.error(request, f"**投稿通信エラー**：報告の保存中に予期せぬエラーが発生しました。再度投稿してください。エラー: {e}")
             return redirect('photo_post_create')
             
-    # GETリクエスト時 (確認画面の表示)
-    # ★修正: 確認画面表示のため、単一のPKからTagインスタンスに戻す★
     tag_pk = post_data.get('tags')
     selected_tag = None
     if tag_pk:
@@ -433,7 +429,6 @@ def admin_home(request):
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_user_list(request):
-    """管理者向けユーザー一覧表示画面"""
     User = get_user_model()
     # 自分自身（リクエストユーザー）以外の全ユーザーを取得し、登録が新しい順に並べ替え
     users = User.objects.exclude(pk=request.user.pk).order_by('-date_joined')
@@ -448,7 +443,6 @@ def admin_user_list(request):
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_user_delete_confirm(request, user_id):
-    """特定のユーザーを削除する処理 (POSTのみ許可)"""
     User = get_user_model()
 
     # GETリクエストは一覧に戻す (削除確認はモーダルで行うため)
@@ -482,8 +476,6 @@ def admin_user_delete_confirm(request, user_id):
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_user_delete_complete(request):
-    """ユーザー削除完了画面"""
-    # テンプレートは admin_user_delete_complete.html を使用
     context = {
         'app_name': '削除完了'
     }
@@ -494,15 +486,10 @@ def admin_user_delete_complete(request):
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_list(request):
-    """
-    管理者向けの報告一覧ビュー。
-    ステータス、タグ、優先度で絞り込みを可能にする。
-    """
     status_filter = request.GET.get('status', None)
     tag_filter = request.GET.get('tag', None)
     priority_filter = request.GET.get('priority', None)
 
-    # PhotoPostをベースに、ユーザーとタグのデータをプリフェッチして効率化
     posts = models.PhotoPost.objects.all().select_related('user').prefetch_related('tags').order_by('-posted_at')
 
     # 1. ステータスによる絞り込み
@@ -555,21 +542,15 @@ def admin_post_detail(request, post_id):
 
 
 @user_passes_test(is_staff_user, login_url='/')
-def manage_post_status_edit(request, post_id): # 💡 関数名を 'admin_post_status_edit' から 'manage_post_status_edit' に変更
-    """
-    管理者向け：ステータス記録ビュー（優先度・コメント対応版）
-    """
+def manage_post_status_edit(request, post_id):
     post = get_object_or_404(models.PhotoPost, pk=post_id)
 
     if request.method == 'POST':
-        # StatusUpdateFormはPostモデルに紐づくModelFormと仮定
         form = StatusUpdateForm(request.POST, instance=post) 
         if form.is_valid():
-            # 💡 優先度、ステータス、管理者コメントが一括で更新される
             updated_post = form.save() 
             messages.success(request, f"報告 (ID: {post_id}) のステータスと優先順位を更新しました。")
             
-            # 💡 リダイレクト先を 'manage_status_edit_done' に修正
             return redirect('admin_status_edit_done', post_id=updated_post.pk) 
     else:
         # GETリクエストの場合、現在の値でフォームを初期化
@@ -584,7 +565,7 @@ def manage_post_status_edit(request, post_id): # 💡 関数名を 'admin_post_s
 
 
 @user_passes_test(is_staff_user, login_url='/')
-def manage_status_edit_done(request, post_id): # 💡 関数名を 'admin_status_edit_done' から 'manage_status_edit_done' に変更
+def manage_status_edit_done(request, post_id): 
     """ステータス編集完了画面"""
     post = get_object_or_404(models.PhotoPost, pk=post_id)
     context = {'post': post}
@@ -596,7 +577,6 @@ def admin_post_delete(request, post_id):
     post = get_object_or_404(models.PhotoPost, pk=post_id)
 
     if request.method == 'POST':
-        # 削除前の報告情報を取得し、メッセージに利用
         post_pk = post.pk
         # コメントの先頭20文字を報告タイトルとして使用
         post_title = (post.comment[:20] + '...') if post.comment and len(post.comment) > 20 else post.comment or f"ID:{post_pk}の報告"
@@ -606,7 +586,6 @@ def admin_post_delete(request, post_id):
 
             messages.success(request, f"報告「{post_title}」を削除しました。")
 
-            # ★修正: 削除完了後、一覧ではなく新しい完了画面にリダイレクト★
             return redirect('admin_post_delete_complete')
 
         except Exception as e:
@@ -629,3 +608,60 @@ def admin_post_delete_complete(request):
         'app_name': '報告削除完了'
     }
     return render(request, 'main/admin_post_delete_complete.html', context)
+
+
+
+
+# --------------------------------------------------
+# 3. 管理者向けタグ管理画面 (新規追加)
+# --------------------------------------------------
+
+@login_required
+def admin_tag_list(request):
+    """タグ一覧表示画面"""
+    # ★注意: 本番運用では is_staff やカスタム権限チェックが必要です
+    tags = Tag.objects.all().order_by('name')
+    context = {'tags': tags}
+    return render(request, 'main/admin_tag_list.html', context)
+
+@login_required
+def admin_tag_create(request):
+    """新規タグ作成画面/処理"""
+    if request.method == 'POST':
+        form = TagForm(request.POST)
+        if form.is_valid():
+            tag = form.save()
+            # 追加完了画面へリダイレクト
+            return redirect('admin_tag_create_complete')
+    else:
+        form = TagForm()
+
+    context = {'form': form, 'page_title': '新規タグ追加'}
+    return render(request, 'main/admin_tag_create.html', context)
+
+@login_required
+def admin_tag_delete(request, pk):
+    """タグ削除処理"""
+    tag = get_object_or_404(Tag, pk=pk)
+    
+    if request.method == 'POST':
+        tag_name = tag.name
+        tag.delete()
+        # 削除完了画面へリダイレクト
+        return redirect('admin_tag_delete_complete')
+    
+    # POSTメソッド以外の場合は一覧に戻す（削除は一覧画面のモーダルからPOSTされる想定）
+    return redirect('admin_tag_list') 
+
+@login_required
+def admin_tag_create_complete(request):
+    """タグの追加/削除 完了画面"""
+    # messagesフレームワークを使って、直前の処理メッセージを表示する
+    return render(request, 'main/admin_tag_create_complete.html', {'page_title': '完了'})
+
+
+@login_required
+def admin_tag_delete_complete(request):
+    """タグの追加/削除 完了画面"""
+    # messagesフレームワークを使って、直前の処理メッセージを表示する
+    return render(request, 'main/admin_tag_delete_complete.html', {'page_title': '完了'})

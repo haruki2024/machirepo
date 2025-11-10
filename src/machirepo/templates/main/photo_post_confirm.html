@@ -34,7 +34,7 @@
         .header-link { text-decoration: none; color: #10b981; font-weight: 600; }
         .main-content { padding-bottom: 7rem; }
         .form-group { margin-bottom: 1.5rem; }
-        .app-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #ffffff; padding: 1rem; border-top: 1px solid #e5e7eb; box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1); z-index: 100; }
+        .app-footer { padding: 1rem 1rem; background-color: #ffffff; border-top: 1px solid #e5e7eb; box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1), 0 -2px 4px -2px rgb(0 0 0 / 0.1); position: sticky; bottom: 0; z-index: 100; }
         .uploaded-photo { max-width: 100%; height: auto; max-height: 300px; border-radius: 0.375rem; object-fit: cover; border: 1px solid #e5e7eb;}
     </style>
 
@@ -98,7 +98,7 @@
             <div class="form-group" style="margin-bottom: 1.5rem;">
                 <label class="block text-gray-700 font-medium mb-1">詳細:</label>
                 <p style="background-color: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; line-height: 1.6; margin:0;">
-                    {{ post_data.comment|default:"コメントなし" }}
+                    {{ post_data.comment|default:"コメントなし"}}
                 </p>
             </div>
         </main>

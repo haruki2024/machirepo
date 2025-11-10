@@ -7,6 +7,7 @@
 
 
 {% block content %}
+   
     <div class="app-container">
         <header class="app-header">
             <!-- 戻るボタンは、最初の投稿画面に戻る -->
@@ -19,39 +20,26 @@
             {% csrf_token %}
 
             <main class="main-content">
-                <div class="alert-info">
-                    自動での位置情報取得に失敗しました。お手数ですが、以下のフォームに緯度・経度、または地名を直接入力してください。
+                <div class="error-box">
+                    <p style="font-weight: 700;">位置情報を取得できませんでした。</p>
+                    <p>大まかな場所を把握するためコメントを追加してください。</p>
                 </div>
-                
                 <!-- 手動入力フォームの表示 -->
+                
                 <div class="form-group">
-                    <label for="{{ manual_form.manual_latitude.id_for_label }}">{{ manual_form.manual_latitude.label }}</label>
-                    {{ manual_form.manual_latitude }}
-                    {% if manual_form.manual_latitude.errors %}<div class="text-danger">{{ manual_form.manual_latitude.errors }}</div>{% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="{{ manual_form.manual_longitude.id_for_label }}">{{ manual_form.manual_longitude.label }}</label>
-                    {{ manual_form.manual_longitude }}
-                    {% if manual_form.manual_longitude.errors %}<div class="text-danger">{{ manual_form.manual_longitude.errors }}</div>{% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="{{ manual_form.location_name.id_for_label }}">{{ manual_form.location_name.label }}</label>
+                    <label for="{{ manual_form.location_name.id_for_label }}">コメント（目印となる建物など）</label>
                     {{ manual_form.location_name }}
-                    <small class="text-muted">（例: 〇〇公園の南側。任意入力です。）</small>
                 </div>
                 
                 {% if manual_form.non_field_errors %}
                     <div class="text-danger" style="margin-top: 1rem;">{{ manual_form.non_field_errors }}</div>
                 {% endif %}
-
-            </main>
-            <footer class="app-footer">
+                
                 <button type="submit" class="btn btn-primary">
                     内容を確認する
                 </button>
-            </footer>
+            </main>
         </form>
+       
     </div>
 {% endblock %}
