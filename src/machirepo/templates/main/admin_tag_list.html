@@ -113,13 +113,15 @@
                 <thead>
                     <tr>
                         <th>タグ名</th>
-                        <th style="width: 100px;">操作</th>
+                        <th style="width: 50px;"></th>
+                        <th style="width: 50px;"></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for tag in tags %}
                         <tr>
                             <td>{{ tag.name }}</td>
+                            <td><a href="{% url 'admin_tag_edit' pk=tag.pk %}" class="delete-link" style="color: #14b8a6;">編集</a></td>
                             <td><a href="#" class="delete-link" data-tag-id="{{ tag.pk }}" data-tag-name="{{ tag.name }}" onclick="openDeleteModal(this); return false;" style="color: #ef4444;">削除</a></td>
                         </tr>
                     {% endfor %}

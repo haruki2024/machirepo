@@ -20,7 +20,7 @@ urlpatterns = [
     path('mypage/history/', views.post_history, name='post_history'),
     path('posts/', views.post_list, name='post_list'),
     path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
-    
+
     # --------------------------------------------------
     # 3. 投稿フロー
     # --------------------------------------------------
@@ -49,8 +49,10 @@ urlpatterns = [
     # --------------------------------------------------
     path('manage/tags/', views.admin_tag_list, name='admin_tag_list'),
     path('manage/tags/add/', views.admin_tag_create, name='admin_tag_create'),
+    path('manage/tags/<int:pk>/edit/', views.admin_tag_edit, name='admin_tag_edit'), 
     path('manage/tags/<int:pk>/delete/', views.admin_tag_delete, name='ademin_tag_delete'),
     path('manage/tags/create/complete/', views.admin_tag_create_complete, name='admin_tag_create_complete'),
+    path('manage/tags/edit/complete/', views.admin_tag_edit_complete, name='admin_tag_edit_complete'),
     path('manage/tags/delete/complete/', views.admin_tag_delete_complete, name='admin_tag_delete_complete'),
 
 

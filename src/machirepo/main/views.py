@@ -648,6 +648,24 @@ def admin_tag_create(request):
     context = {'form': form, 'page_title': '新規タグ追加'}
     return render(request, 'main/admin_tag_create.html', context)
 
+@user_passes_test(is_staff_user, login_url='/')
+def admin_tag_edit(request, pk):
+    """タグ編集ビュー"""
+    tag = get_object_or_404(Tag, pk=pk)
+    
+    if request.method == 'POST':
+        # フォームにPOSTされたデータと、既存のタグインスタンスを渡す
+        form = TagForm(request.POST, instance=tag)
+        if form.is_valid():
+            updated_tag = form.save()
+            return redirect('admin_tag_edit_complete')
+    else:
+        # GETリクエストの場合、既存のタグ情報でフォームを初期化
+        form = TagForm(instance=tag)
+        
+    context = {'form': form, 'tag': tag, 'page_title': 'タグ編集'}
+    return render(request, 'main/admin_tag_edit.html', context)
+
 @login_required
 def admin_tag_delete(request, pk):
     """タグ削除処理"""
@@ -661,11 +679,16 @@ def admin_tag_delete(request, pk):
     
     return redirect('admin_tag_list') 
 
+
 @login_required
 def admin_tag_create_complete(request):
     """タグの追加 完了画面"""
     return render(request, 'main/admin_tag_create_complete.html', {'page_title': '完了'})
 
+@user_passes_test(is_staff_user, login_url='/')
+def admin_tag_edit_complete(request):
+    """タグの編集 完了画面"""
+    return render(request, 'main/admin_tag_edit_complete.html', {'page_title': '編集完了'})
 
 @login_required
 def admin_tag_delete_complete(request):

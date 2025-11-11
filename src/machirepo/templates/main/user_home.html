@@ -28,25 +28,32 @@
                 {% if latest_posts %}
                     <div class="latest-posts-list" style="display: flex; flex-direction: column; gap: 1rem;">
                         {% for post in latest_posts %}
-                            <a href="{% url 'post_detail' post.id %}" class="post-card-link" style="text-decoration: none; display: block; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                                    <h3 style="font-size: 1rem; font-weight: 600; color: #1f2937; margin: 0;">{{ post.title|default:"タイトルなし" }}</h3>
-                                   
-                                    <span class="status-badge 
-                                            {% if post.status == 'new' %}status-new
-                                            {% elif post.status == 'in_progress' %}status-pending
-                                            {% elif post.status == 'completed' %}status-complete
-                                            {% elif post.status == 'not_required' %}status-not-applicable
-                                            {% endif %}">
-                                        {{ post.get_status_display }}
-                                    </span>
+                            <a href="{% url 'post_detail' post.id %}"  class="post-card-link" style="text-decoration: none;" >
+                                
+                                <div class="history-item">
+                                    <div class="history-item-header">
+                                        <div "w-2/3 min-w-0 pr-4">
+                                            <p class="history-item-title">{{ post.title|default:"タイトルなし" }}</p>
+                                            
+                                            <p class="history-item-date">{{ post.posted_at|date:"Y/m/d H:i" }}</p>
+                                            <p class="history-item-date">投稿者：{{ post.user.username }}</p>
+                                            
+                                        </div>
+                                        
+                                        <div class="status-wrapper">
+                                            
+                                            {# ステータスバッジ: get_status_display()で日本語の表示名を取得 #}
+                                            <span class="status-badge 
+                                                    {% if post.status == 'new' %}status-new
+                                                    {% elif post.status == 'in_progress' %}status-pending
+                                                    {% elif post.status == 'completed' %}status-complete
+                                                    {% elif post.status == 'not_required' %}status-not-applicable
+                                                    {% endif %}">
+                                                {{ post.get_status_display }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">
-                                    {{ post.comment|truncatechars:50|default:"(コメントなし)" }}
-                                </p>
-                                <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.5rem; text-align: right;">
-                                    投稿日時: {{ post.posted_at|date:"Y/m/d H:i" }}
-                                </p>
                             </a>
                         {% endfor %}
                     </div>

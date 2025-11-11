@@ -21,6 +21,9 @@
                         <div "w-2/3 min-w-0 pr-4">
                             <p class="history-item-title">{{ post.title|default:"タイトルなし" }}</p>
                             <p class="history-item-date">{{ post.posted_at|date:"Y/m/d H:i" }}</p>
+                            <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">
+                                {{ post.comment|truncatechars:50|default:"(コメントなし)" }}
+                            </p>
                         </div>
                         
                         <div class="status-wrapper">
@@ -35,13 +38,14 @@
                                 {{ post.get_status_display }}
                             </span>
                         </div>
+                        
+                            
                     </div>
                     
                     {# 管理者コメントの表示 (対応完了または対応不可の場合、かつコメントが存在する場合) #}
                     {% if post.admin_note %}
                         <div class="admin-comment">
-                            <p class="comment-title">管理者からのコメント</p>
-                            <p class="comment-body">{{ post.admin_note | linebreaks}}</p>
+                            <p class="comment-title" style="color: #ff0000ff;">★管理者からのコメントあり</p>
                         </div>
                     {% endif %}
                 </div>
