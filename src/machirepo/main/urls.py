@@ -19,6 +19,7 @@ urlpatterns = [
     path('mypage/', views.my_page, name='my_page'),
     path('mypage/history/', views.post_history, name='post_history'),
     path('posts/', views.post_list, name='post_list'),
+    path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
     
     # --------------------------------------------------
     # 3. 投稿フロー

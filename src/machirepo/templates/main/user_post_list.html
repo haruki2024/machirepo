@@ -1,0 +1,59 @@
+{% extends 'top_base.html' %} 
+
+{% block title %}投稿一覧{% endblock %} 
+
+{% block content %}
+    <div class="app-container">
+        <header class="app-header">
+            <a href="{% url 'user_home' %}" class="header-link" style="font-weight: 600; color: #10b981;">&lt; 戻る</a>
+            <h2 style="font-size: 1.25rem; font-weight: 700; position: absolute; left: 50%; transform: translateX(-50%);">みんなの投稿</h2>
+            <span style="width: 50px;"></span>
+        </header>
+        
+        <main class="main-content p-4">
+
+            <div style="margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 700;">みんなの報告</h2>
+                <p style="color: #6b7280; margin-top: 0.5rem;">現在、対応中の報告、完了した報告などすべてを表示しています。</p>
+            </div>
+
+            {% if posts %}
+                {% for post in posts %}
+                    <a href="{% url 'post_detail' post.id %}"  class="post-card-link" style="text-decoration: none;" >
+                        
+                        <div class="history-item">
+                            <div class="history-item-header">
+                                <div "w-2/3 min-w-0 pr-4">
+                                    <p class="history-item-title">{{ post.title|default:"タイトルなし" }}</p>
+                                    
+                                    <p class="history-item-date">{{ post.posted_at|date:"Y/m/d H:i" }}</p>
+                                    <p class="history-item-date">投稿者：{{ post.user.username }}</p>
+                                </div>
+                                
+                                <div class="status-wrapper">
+                                    
+                                    {# ステータスバッジ: get_status_display()で日本語の表示名を取得 #}
+                                    <span class="status-badge 
+                                            {% if post.status == 'new' %}status-new
+                                            {% elif post.status == 'in_progress' %}status-pending
+                                            {% elif post.status == 'completed' %}status-complete
+                                            {% elif post.status == 'not_required' %}status-not-applicable
+                                            {% endif %}">
+                                        {{ post.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            
+            {% else %}
+                <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
+                    <p style="color: #6b7280;">現在、新しい報告はありません。</p>
+                </div>
+            {% endif %}
+            
+
+        </main>
+    </div>
+{% endblock %}

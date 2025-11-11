@@ -1,34 +1,30 @@
+import logging
+import os 
+import decimal
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.edit import CreateView
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Count
-from django.http import Http404, HttpResponse
-from django.contrib.auth import logout
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.core.exceptions import ValidationError 
-import logging
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile, SimpleUploadedFile 
 from django.db.models import Q 
 from django.core.files.storage import FileSystemStorage # FileSystemStorageのインポート
-import os # ファイルパス操作用にosをインポート
-import decimal
+from . import models 
 from .models import PhotoPost, Tag
-from .forms import TagForm
+from .forms import TagForm, StatusUpdateForm, ResidentCreationForm, PhotoPostForm, ManualLocationForm 
 
 # ロガーの設定
 logger = logging.getLogger(__name__)
 
-# モデルとフォームのインポート
-from . import models 
-from .forms import StatusUpdateForm, ResidentCreationForm, PhotoPostForm, ManualLocationForm 
 
-# FileSystemStorageのインスタンス化（一時ファイルの操作に使用）
+
+
 fs = FileSystemStorage()
 
 # -----------------------------------------------------
@@ -55,7 +51,6 @@ def home_redirect(request):
     """認証後のリダイレクト先。権限によって画面を振り分ける。"""
     if not request.user.is_authenticated:
         return redirect('login')
-
     if request.user.is_staff:
         return redirect('admin_home')
     else:
@@ -88,8 +83,11 @@ def user_logout_view(request):
 # -----------------------------------------------------
 @login_required
 def user_home(request):
-    posts = models.PhotoPost.objects.exclude(status='not_required').order_by('-posted_at')[:5]
-    context = {'posts': posts}
+    latest_posts = models.PhotoPost.objects.exclude(status='not_required').order_by('-posted_at')[:2]
+    
+    # 🌟 変更点: コンテキストのキーを 'latest_posts' に変更
+    context = {'latest_posts': latest_posts} 
+    
     # ① 住民は住民用トップ画面から「新規投稿を行う」を押す (リンクとして配置されることを想定)
     return render(request, 'main/user_home.html', context)
 
@@ -408,6 +406,36 @@ def photo_post_done(request):
     """報告作成完了（基本フロー⑧）"""
     return render(request, 'main/user_photo_post_complete.html', {})
 
+# ユーザー画面ビューのセクションに追記してください
+
+# 🌟 新規追加: 投稿詳細ページ
+def post_detail(request, post_id):
+    """
+    ユーザー向け投稿詳細ページ。
+    対応不要の報告は表示しないようにするなどの権限チェックを追加することが望ましい。
+    """
+    # IDで投稿を取得。存在しない、または「対応不要」の場合は404エラー
+    post = get_object_or_404(
+        models.PhotoPost.objects.exclude(status='not_required'), # 🌟 'not_required' は除外
+        pk=post_id
+    )
+    
+    # 関連タグを取得
+    selected_tag = post.tags.first() # 最初のタグを取得
+    
+    context = {
+        'post': post,
+        'selected_tag': selected_tag,
+    }
+    return render(request, 'main/user_post_detail.html', context) # 🌟 新しいテンプレート名
+
+
+
+
+
+
+
+
 
 # -----------------------------------------------------
 # 4. 管理者画面ビュー（スタッフ権限限定）
@@ -510,10 +538,6 @@ def admin_post_list(request):
 
     all_tags = models.Tag.objects.all().order_by('name')
 
-
-
-
-
     context = {
         'posts': posts,
         'status_filter': status_filter,
@@ -586,13 +610,9 @@ def admin_post_delete(request, post_id):
     messages.error(request, "報告の削除にはPOSTリクエストが必要です。")
     return redirect('admin_post_detail', post_id=post_id)
 
-
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_delete_complete(request):
-    """
-    ★新規追加: 管理者向け：報告削除完了画面
-    ユーザー削除完了画面(admin_user_delete_complete)に倣い、シンプルな完了画面とします。
-    """
+    """新規追加: 管理者向け：報告削除完了画面"""
     context = {
         'app_name': '報告削除完了'
     }
@@ -602,7 +622,7 @@ def admin_post_delete_complete(request):
 
 
 # --------------------------------------------------
-# 6. 管理者向けタグ管理画面 (新規追加)
+# 5. 管理者向けタグ管理画面 (新規追加)
 # --------------------------------------------------
 
 @login_required
@@ -615,7 +635,7 @@ def admin_tag_list(request):
 
 @login_required
 def admin_tag_create(request):
-    """新規タグ作成画面/処理"""
+    """タグ作成画面"""
     if request.method == 'POST':
         form = TagForm(request.POST)
         if form.is_valid():
@@ -639,19 +659,16 @@ def admin_tag_delete(request, pk):
         # 削除完了画面へリダイレクト
         return redirect('admin_tag_delete_complete')
     
-    # POSTメソッド以外の場合は一覧に戻す（削除は一覧画面のモーダルからPOSTされる想定）
     return redirect('admin_tag_list') 
 
 @login_required
 def admin_tag_create_complete(request):
-    """タグの追加/削除 完了画面"""
-    # messagesフレームワークを使って、直前の処理メッセージを表示する
+    """タグの追加 完了画面"""
     return render(request, 'main/admin_tag_create_complete.html', {'page_title': '完了'})
 
 
 @login_required
 def admin_tag_delete_complete(request):
-    """タグの追加/削除 完了画面"""
-    # messagesフレームワークを使って、直前の処理メッセージを表示する
+    """タグの削除 完了画面"""
     return render(request, 'main/admin_tag_delete_complete.html', {'page_title': '完了'})
 
