@@ -152,7 +152,33 @@ class EmailAuthenticationForm(AuthenticationForm):
     def get_user(self):
         return getattr(self, 'user_cache', None)
     
+
+
+User = get_user_model()
+
+# 🌟 新規追加: ユーザー名とメールアドレス編集用フォーム
+class UserUpdateForm(forms.ModelForm):
+    # パスワードは別の画面で変更するため、含めない
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-input'}),
+            'email': forms.EmailInput(attrs={'class': 'form-input'}),
+        }
     
+    # バリデーションの例: ユーザー名が一意であることを確認
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        
+        # 自身を除く他のユーザーで同じユーザー名が存在するかチェック
+        if User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+             raise forms.ValidationError("このユーザー名は既に使用されています。")
+        return username
+
+
+
+
 # -----------------------------------------------------
 # 3. 投稿作成フォーム (PhotoPostForm)
 # -----------------------------------------------------

@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
-
+from django.urls import reverse_lazy
 urlpatterns = [
     # --------------------------------------------------
     # 1. 共通/認証関連
@@ -20,6 +20,22 @@ urlpatterns = [
     path('mypage/history/', views.post_history, name='post_history'),
     path('posts/', views.post_list, name='post_list'),
     path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
+
+
+    # app/urls.py (既存のユーザー画面ビューのセクションに追記)
+    # --------------------------------------------------
+    # 2. ユーザー画面ビュー (user_home, my_pageなど)
+    # --------------------------------------------------
+    path('mypage/', views.my_page, name='my_page'), 
+    path('mypage/edit/', views.user_profile_edit, name='user_profile_edit'), 
+    path('mypage/password/change/', auth_views.PasswordChangeView.as_view(
+        template_name='main/user_password_change.html', 
+        success_url=reverse_lazy('user_edit_complete')
+    ), name='user_password_change'),
+    path('mypage/complete/', views.user_edit_complete, name='user_edit_complete'), 
+
+
+
 
     # --------------------------------------------------
     # 3. 投稿フロー

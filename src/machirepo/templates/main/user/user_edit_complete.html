@@ -1,0 +1,20 @@
+{% extends 'top_base.html' %}
+
+{% block title %}編集完了 - まちレポ{% endblock %}
+
+{% block content %}
+
+<div class="app-container">
+    <main class="main-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+
+        <img src="/media/images/koemy_bow.png" alt="コエミィ" style="width: 150px; height: auto;">
+
+        <h2 style="font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem;">ユーザー情報の更新が完了しました</h2>
+        
+        
+        <div style="width: 100%; max-width: 20rem; margin-top: 2.5rem;">
+            <a href="{% url 'user_home' %}" class="btn btn-primary">ホームに戻る</a>
+        </div>
+    </main>
+</div>
+{% endblock %}

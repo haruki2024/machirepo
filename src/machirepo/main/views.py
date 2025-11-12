@@ -17,7 +17,12 @@ from django.db.models import Q
 from django.core.files.storage import FileSystemStorage # FileSystemStorageのインポート
 from . import models 
 from .models import PhotoPost, Tag
-from .forms import TagForm, StatusUpdateForm, ResidentCreationForm, PhotoPostForm, ManualLocationForm 
+from .forms import TagForm, StatusUpdateForm, ResidentCreationForm, PhotoPostForm, ManualLocationForm, UserUpdateForm
+from django.contrib.auth.views import PasswordChangeView as AuthPasswordChangeView
+from django.contrib.auth.forms import PasswordChangeForm
+from django.views.generic.edit import UpdateView 
+
+
 
 # ロガーの設定
 logger = logging.getLogger(__name__)
@@ -89,13 +94,14 @@ def user_home(request):
     context = {'latest_posts': latest_posts} 
     
     # ① 住民は住民用トップ画面から「新規投稿を行う」を押す (リンクとして配置されることを想定)
-    return render(request, 'main/user_home.html', context)
+    return render(request, 'main/user/user_home.html', context)
+
 
 @login_required
 def my_page(request):
     my_posts = models.PhotoPost.objects.filter(user=request.user).order_by('-posted_at')
     context = {'my_posts': my_posts}
-    return render(request, 'main/my_page.html', context)
+    return render(request, 'main/user/user_mypage.html', context)
 
 @login_required
 def post_history(request):
@@ -113,13 +119,50 @@ def post_history(request):
         'STATUS_CHOICES_DISPLAY': STATUS_CHOICES_DISPLAY,
         'PRIORITY_CHOICES_DISPLAY': PRIORITY_CHOICES_DISPLAY,
     }
-    return render(request, 'main/user_post_history.html', context)
+    return render(request, 'main/user/user_post_history.html', context)
 
 
 def post_list(request):
     posts = models.PhotoPost.objects.exclude(status='not_required').order_by('-posted_at')
     context = {'posts': posts}
-    return render(request, 'main/user_post_list.html', context)
+    return render(request, 'main/user/user_post_list.html', context)
+
+
+
+
+@login_required
+def my_page(request):
+    """マイページ"""
+    context = {
+        'user': request.user,
+    }
+    return render(request, 'main/user/user_mypage.html', context)
+
+
+@method_decorator(login_required, name='dispatch')
+class UserProfileUpdateView(UpdateView):
+    """ユーザー情報編集"""
+    model = get_user_model()
+    form_class = UserUpdateForm 
+    template_name = 'main/user/user_profile_edit.html'
+    
+    # 編集成功時のリダイレクト先
+    def get_success_url(self):
+        messages.success(self.request, "アカウント情報を更新しました。")
+        return reverse('user_edit_complete')
+
+    # 編集対象のユーザーは現在ログイン中のユーザーに固定
+    def get_object(self, queryset=None):
+        return self.request.user
+
+user_profile_edit = UserProfileUpdateView.as_view()
+
+@login_required
+def user_edit_complete(request):
+    """アカウント情報編集完了画面"""
+    return render(request, 'main/user/user_edit_complete.html', {})
+
+
 
 
 # -----------------------------------------------------
@@ -222,7 +265,7 @@ def photo_post_create(request):
         print("--- DEBUG: Rendering Step 1 Form ---") # GETリクエストの確認
     
     # ② システムは投稿画面を表示する
-    return render(request, 'main/user_photo_post_create.html', {'form': form, 'step': 1})
+    return render(request, 'main/user/user_photo_post_create.html', {'form': form, 'step': 1})
 
 
 @login_required
@@ -280,7 +323,7 @@ def photo_post_manual_location(request):
         'post_data': post_data,
         'step': 2
     }
-    return render(request, 'main/user_photo_post_manual_location.html', context)
+    return render(request, 'main/user/user_photo_post_manual_location.html', context)
 
 @login_required
 def photo_post_confirm(request):
@@ -399,12 +442,12 @@ def photo_post_confirm(request):
         'selected_tag': selected_tag, # テンプレートで表示するために追加
         'step': 3
     }
-    return render(request, 'main/user_photo_post_confirm.html', context)
+    return render(request, 'main/user/user_photo_post_confirm.html', context)
 
 @login_required
 def photo_post_done(request):
     """報告作成完了（基本フロー⑧）"""
-    return render(request, 'main/user_photo_post_complete.html', {})
+    return render(request, 'main/user/user_photo_post_complete.html', {})
 
 # ユーザー画面ビューのセクションに追記してください
 
@@ -427,7 +470,7 @@ def post_detail(request, post_id):
         'post': post,
         'selected_tag': selected_tag,
     }
-    return render(request, 'main/user_post_detail.html', context) # 🌟 新しいテンプレート名
+    return render(request, 'main/user/user_post_detail.html', context) # 🌟 新しいテンプレート名
 
 
 
@@ -450,7 +493,7 @@ def admin_home(request):
         'total_posts': total_posts,
         'new_posts_count': new_posts_count
     }
-    return render(request, 'main/admin_home.html', context)
+    return render(request, 'main/admin/admin_home.html', context)
 
 
 
@@ -466,7 +509,7 @@ def admin_user_list(request):
         'app_name': 'ユーザー一覧'
     }
     # テンプレートは admin_user_list.html を使用
-    return render(request, 'main/admin_user_list.html', context)
+    return render(request, 'main/admin/admin_user_list.html', context)
 
 
 @user_passes_test(is_staff_user, login_url='/')
@@ -503,7 +546,7 @@ def admin_user_delete_complete(request):
     context = {
         'app_name': '削除完了'
     }
-    return render(request, 'main/admin_user_delete_complete.html', context)
+    return render(request, 'main/admin/admin_user_delete_complete.html', context)
 
 
 # --- 管理者向け：報告の確認・記録機能 ---
@@ -545,7 +588,7 @@ def admin_post_list(request):
         'priority_filter': priority_filter,
         'all_tags': all_tags,
     }
-    return render(request, 'main/admin_post_list.html', context)
+    return render(request, 'main/admin/admin_post_list.html', context)
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_detail(request, post_id):
@@ -555,7 +598,7 @@ def admin_post_detail(request, post_id):
         'post': post,
         'form': form
     }
-    return render(request, 'main/admin_post_detail.html', context)
+    return render(request, 'main/admin/admin_post_detail.html', context)
 
 
 @user_passes_test(is_staff_user, login_url='/')
@@ -576,7 +619,7 @@ def manage_post_status_edit(request, post_id):
         'form': form,
         'post': post
     }
-    return render(request, 'main/admin_post_status_edit.html', context)
+    return render(request, 'main/admin/admin_post_status_edit.html', context)
 
 
 @user_passes_test(is_staff_user, login_url='/')
@@ -584,7 +627,7 @@ def manage_status_edit_done(request, post_id):
     """ステータス編集完了画面"""
     post = get_object_or_404(models.PhotoPost, pk=post_id)
     context = {'post': post}
-    return render(request, 'main/admin_post_status_complete.html', context)
+    return render(request, 'main/admin/admin_post_status_complete.html', context)
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_delete(request, post_id):
@@ -616,7 +659,7 @@ def admin_post_delete_complete(request):
     context = {
         'app_name': '報告削除完了'
     }
-    return render(request, 'main/admin_post_delete_complete.html', context)
+    return render(request, 'main/admin/admin_post_delete_complete.html', context)
 
 
 
@@ -631,7 +674,7 @@ def admin_tag_list(request):
     # ★注意: 本番運用では is_staff やカスタム権限チェックが必要です
     tags = Tag.objects.all().order_by('name')
     context = {'tags': tags}
-    return render(request, 'main/admin_tag_list.html', context)
+    return render(request, 'main/admin/admin_tag_list.html', context)
 
 @login_required
 def admin_tag_create(request):
@@ -646,7 +689,7 @@ def admin_tag_create(request):
         form = TagForm()
 
     context = {'form': form, 'page_title': '新規タグ追加'}
-    return render(request, 'main/admin_tag_create.html', context)
+    return render(request, 'main/admin/admin_tag_create.html', context)
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_tag_edit(request, pk):
@@ -664,7 +707,7 @@ def admin_tag_edit(request, pk):
         form = TagForm(instance=tag)
         
     context = {'form': form, 'tag': tag, 'page_title': 'タグ編集'}
-    return render(request, 'main/admin_tag_edit.html', context)
+    return render(request, 'main/admin/admin_tag_edit.html', context)
 
 @login_required
 def admin_tag_delete(request, pk):
@@ -683,15 +726,15 @@ def admin_tag_delete(request, pk):
 @login_required
 def admin_tag_create_complete(request):
     """タグの追加 完了画面"""
-    return render(request, 'main/admin_tag_create_complete.html', {'page_title': '完了'})
+    return render(request, 'main/admin/admin_tag_create_complete.html', {'page_title': '完了'})
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_tag_edit_complete(request):
     """タグの編集 完了画面"""
-    return render(request, 'main/admin_tag_edit_complete.html', {'page_title': '編集完了'})
+    return render(request, 'main/admin/admin_tag_edit_complete.html', {'page_title': '編集完了'})
 
 @login_required
 def admin_tag_delete_complete(request):
     """タグの削除 完了画面"""
-    return render(request, 'main/admin_tag_delete_complete.html', {'page_title': '完了'})
+    return render(request, 'main/admin/admin_tag_delete_complete.html', {'page_title': '完了'})
 
