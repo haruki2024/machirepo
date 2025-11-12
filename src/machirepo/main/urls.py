@@ -29,7 +29,7 @@ urlpatterns = [
     path('mypage/', views.my_page, name='my_page'), 
     path('mypage/edit/', views.user_profile_edit, name='user_profile_edit'), 
     path('mypage/password/change/', auth_views.PasswordChangeView.as_view(
-        template_name='main/user_password_change.html', 
+        template_name='main/user/user_password_change.html', 
         success_url=reverse_lazy('user_edit_complete')
     ), name='user_password_change'),
     path('mypage/complete/', views.user_edit_complete, name='user_edit_complete'), 

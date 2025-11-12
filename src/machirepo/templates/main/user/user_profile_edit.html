@@ -29,17 +29,19 @@
                 {% endif %}
 
                 {% for field in form %}
-                    <div style="margin-bottom: 1rem;">
-                        <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
-                        {% for error in field.errors %}
-                            <p style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">{{ error }}</p>
-                        {% endfor %}
-                        {% if field.help_text %}
-                            <p style="color: #6b7280; font-size: 0.75rem; margin-top: 0.25rem;">{{ field.help_text|safe }}</p>
-                        {% endif %}
+                    <div class="form-group">
+                        <div style="margin-bottom: 1rem;">
+                            <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <p style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">{{ error }}</p>
+                            {% endfor %}
+                            {% if field.help_text %}
+                                <p style="color: #6b7280; font-size: 0.75rem; margin-top: 0.25rem;">{{ field.help_text|safe }}</p>
+                            {% endif %}
+                        </div>
                     </div>
                 {% endfor %}
 
