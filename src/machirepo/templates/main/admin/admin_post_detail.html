@@ -1,0 +1,294 @@
+{% extends 'top_base.html' %} 
+
+{% block title %}報告の詳細 - まちレポ管理者{% endblock %}
+
+
+{% block content %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+<style>
+    /* .modal-overlay の必須スタイルを定義し、全画面に表示されるようにする */
+    .modal-overlay {
+        position: fixed; /* 画面に固定 */
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        background-color: rgba(0, 0, 0, 0.6); /* 半透明の黒背景 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+    /* hidden クラスがついていれば非表示にする */
+    .modal-overlay.hidden {
+        display: none !important; 
+    }
+    /* .modal-box の基本的なスタイル */
+    .modal-box {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        position: relative; /* モーダルコンテンツが前面にくるように */
+    }
+    /* モーダル内のボタン配置 */
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+
+    .custom-div-icon {
+        background-color: #e53e3e; /* 赤 */
+        border: 3px solid #ffffff; /* 白い縁 */
+        width: 15px; /* サイズ */
+        height: 15px;
+        border-radius: 50%; /* 円形 */
+        opacity: 0.9;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    }
+
+
+    
+</style>
+
+
+<div class="p-4 md:p-8">
+    <div class="page-container">
+
+        <header class="app-header">
+            <div class="title">まちレポ 管理者ページ</div>
+            <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
+        </header>
+        
+        <main class="main-content">
+            <a href="{% url 'admin_post_list' %}" class="link-secondary" style="margin: 0 0 1.5rem 0; text-align: left;"> &lt; 管理メニューに戻る
+            </a>
+
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">報告詳細</h1>
+            
+
+            <div class="form-group mb-6">
+                <label class="block text-gray-700 font-medium mb-1">タイトル:</label>
+                <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap">{{ post.title|default:"(タイトルなし)" }}</p>
+            </div>
+
+            
+            <div class="form-group mb-6">
+                <label class="block text-gray-700 font-medium mb-2">写真:</label>
+                <div class="bg-gray-200 rounded-md overflow-hidden border border-gray-300 h-64">
+                    {% if post.photo %}
+                        <img src="{{ post.photo.url }}" alt="報告写真: {{ post.title }}" class="post-photo">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-gray-500">
+                            写真がありません
+                        </div>
+                    {% endif %}
+                </div>
+                
+            </div>
+
+            
+            
+            <div class="form-group mb-6">
+                <label class="block text-gray-700 font-medium mb-2">場所:</label>
+                <div class="bg-gray-50 rounded-md border border-gray-300 p-3">
+                    <p class="text-gray-800">
+                        {% if post.location_name %}
+                            {{ post.location_name }}
+                        {% elif post.latitude and post.longitude %}
+                            {% if post.latitude and post.longitude %}
+                                <div class="form-group mb-6">
+                                    <label class="block text-gray-700 font-medium mb-2">地図表示 (OpenStreetMap):</label>
+                                    <div id="map-display"></div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            位置情報は記録されていません
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-group mb-6">
+                <label class="block text-gray-700 font-medium mb-1">カテゴリ:</label>
+                <p class="text-gray-800">
+                    {% if post.tags.first %}
+                        {{ post.tags.first.name }}
+                    {% else %}
+                        (タグなし)
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="form-group mb-6">
+                <label class="block text-gray-700 font-medium mb-1">詳細:</label>
+                <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap">{{ post.comment | linebreaks }}</p>
+            </div>
+            
+            {% if post.admin_note %}
+            <div class="form-group mb-6 p-3 bg-indigo-50 border border-indigo-200 rounded-md">
+                <label class="block text-indigo-700 font-medium mb-1">管理者からのコメント:</label>
+                <p class="text-indigo-800 whitespace-pre-wrap">{{ post.admin_note | linebreaks}}</p>
+            </div>
+            {% endif %}
+
+        
+
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mt-8 pt-6 border-t border-gray-200">
+                <a href="{% url 'admin_post_status_edit' post_id=post.id %}" class="btn btn-primary flex-1 text-center py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-semibold transition duration-150">
+                    ステータスを記録する
+                </a>
+                
+                <button type="button" onclick="openDeleteModal('{% if post.title %}{{ post.title|escapejs }}{% else %}タイトルなし{% endif %}')" class="btn btn-secondary" style="border: 1px solid #ef4444; color: #ef4444;">
+                    この報告を削除する
+                </button>
+            </div>
+
+        
+
+        </main>
+
+        <div id="delete-modal" class="modal-overlay hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="modal-box">
+            
+                
+                <h2 class="text-2xl font-extrabold text-red-700 mb-4" id="modal-title">本当に削除しますか？</h2>
+                
+                <p class="text-sm text-gray-600 mb-6 border-b pb-4">
+                    この操作は取り消せません。                
+                </p>
+                
+
+                
+                <div class="modal-actions">
+                    <button type="button" onclick="closeDeleteModal()" class="btn btn-secondary" style="flex: 1; margin-top: 0;">
+                        キャンセル
+                    </button>
+                    
+                    <form id="deleteForm" method="post" action="{% url 'admin_post_delete' post_id=post.pk %}" style="display: inline; flex: 1;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" style="width: 100%;">
+                            削除
+                        </button>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
+
+    </div>
+ 
+</div>
+
+
+
+<script>
+    const deleteModal = document.getElementById('delete-modal');
+    const postTitlePlaceholder = document.getElementById('postTitlePlaceholder');
+
+    /**
+     * 削除確認モーダルを表示し、報告タイトルをセットする関数。
+     */
+    function openDeleteModal(postTitle) {
+        if (postTitlePlaceholder) {
+            postTitlePlaceholder.textContent = postTitle;
+        }
+        
+        if (deleteModal) {
+            deleteModal.classList.remove('hidden');
+            console.log("Delete Modal opened successfully."); 
+        } else {
+            console.error("Delete Modal element not found! Check HTML ID."); 
+        }
+    }
+
+    /**
+     * 削除確認モーダルを閉じる関数。
+     */
+    function closeDeleteModal() {
+        if (deleteModal) {
+            deleteModal.classList.add('hidden');
+            console.log("Delete Modal closed."); 
+        }
+    }
+    
+    // 互換性のため、closeModalをcloseDeleteModalにマップ
+    function closeModal() {
+        closeDeleteModal();
+    }
+
+
+    // モーダル背景クリックでモーダルを閉じる機能
+    if (deleteModal) {
+        deleteModal.addEventListener('click', function(event) {
+            // イベントターゲットがdeleteModal自身（オーバーレイ）であるかチェック
+            if (event.target === deleteModal) {
+                closeDeleteModal();
+            }
+        });
+    }
+
+
+
+
+
+{% if post.latitude and post.longitude %}
+    
+    // 投稿の位置情報 (Djangoのテンプレートタグで値を挿入)
+    const lat = {{ post.latitude|default:"0" }}; 
+    const lng = {{ post.longitude|default:"0" }};
+    const locationName = "{% if post.location_name %}{{ post.location_name|escapejs }}{% else %}報告された場所{% endif %}";
+    
+    // 💡 追加: L.divIcon を定義 💡
+    const customIcon = L.divIcon({
+        className: 'custom-div-icon', // 上で定義したCSSクラス
+        iconSize: [15, 15],           // アイコンサイズ
+        iconAnchor: [7.5, 7.5],       // アイコンの中心（正確な位置合わせ）
+        popupAnchor: [0, -10]         // ポップアップ位置調整
+    });
+
+
+    function initLeafletMap() {
+        // 緯度・経度が有効な値であるか確認
+        if (lat === 0 && lng === 0 || typeof L === 'undefined') return; 
+
+        // 1. Mapオブジェクトの作成 (省略)
+        const map = L.map('map-display').setView([lat, lng], 16); 
+        
+        // 2. タイルレイヤーを追加 (省略)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19,
+        }).addTo(map);
+
+        // 3. 💡 マーカー（記号）を追加 (L.divIconを使用) 💡
+        const marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);
+        
+        // 4. ポップアップ（吹き出し）を追加 (省略)
+        marker.bindPopup(`<b>${locationName}</b><br>緯度: ${lat}<br>経度: ${lng}`).openPopup();
+        
+        // 💡 Leafletにコンテナサイズを再認識させる
+        map.invalidateSize();
+        
+        console.log(`Leaflet Map initialized at: ${lat}, ${lng} with custom div icon.`);
+    }
+
+    // 遅延実行: レンダリングの安定化のため
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initLeafletMap, 100);
+    });
+    
+{% endif %}
+</script>
+
+
+{% endblock %}

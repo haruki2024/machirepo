@@ -1,0 +1,86 @@
+{% extends 'top_base.html' %} 
+
+{% block title %}住民トップページ{% endblock %} 
+
+{% block content %}
+    <div class="app-container">
+        <header class="app-header">
+            <h1 class="title">まちレポ</h1>
+            <div>
+                <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
+            </div>
+        </header>
+        
+        <main class="main-content" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            
+            <img src="/media/images/koemy_welcome.png" alt="コエミィ" style="width: 150px; height: auto; margin-bottom: 0.5rem;">
+            
+            <p style="font-size: 0.75rem; color: #9ca3af; margin-bottom: 1.5rem;">※イメージキャラクターコエミィ</p>
+
+            <div style="margin-bottom: 2.5rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 700;">ようこそ</h2>
+                <p style="color: #6b7280; margin-top: 0.5rem;">まちのインフラ不具合を報告しましょう。</p>
+            </div>
+
+            <div style="width: 100%; margin-bottom: 2rem; text-align: left;">
+                <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">みんなの投稿</h2>
+
+                {% if latest_posts %}
+                    <div class="latest-posts-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                        {% for post in latest_posts %}
+                            <a href="{% url 'post_detail' post.id %}"  class="post-card-link" style="text-decoration: none;" >
+                                
+                                <div class="history-item">
+                                    <div class="history-item-header">
+                                        <div "w-2/3 min-w-0 pr-4">
+                                            <p class="history-item-title">{{ post.title|default:"タイトルなし" }}</p>
+                                            
+                                            <p class="history-item-date">{{ post.posted_at|date:"Y/m/d H:i" }}</p>
+                                            <p class="history-item-date">投稿者：{{ post.user.username }}</p>
+                                            
+                                        </div>
+                                        
+                                        <div class="status-wrapper">
+                                            
+                                            {# ステータスバッジ: get_status_display()で日本語の表示名を取得 #}
+                                            <span class="status-badge 
+                                                    {% if post.status == 'new' %}status-new
+                                                    {% elif post.status == 'in_progress' %}status-pending
+                                                    {% elif post.status == 'completed' %}status-complete
+                                                    {% elif post.status == 'not_required' %}status-not-applicable
+                                                    {% endif %}">
+                                                {{ post.get_status_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+
+                    <div style="text-align: right; margin-top: 1rem;">
+                        <a href="{% url 'post_list' %}" class="link-secondary" style="font-size: 0.875rem; color: #4b5563; text-decoration: none;">
+                            すべての投稿を見る &gt;
+                        </a>
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
+                        <p style="color: #6b7280;">現在、新しい報告はありません。</p>
+                    </div>
+                {% endif %}
+            </div>
+            <div style="width: 100%; margin-top: 2rem;">
+                <a href="{% url 'photo_post_create' %}" class="btn btn-primary" style="display: block; padding-top: 1rem; padding-bottom: 1rem; font-size: 1.125rem; margin-bottom: 1rem;">
+                    新規投稿を行う
+                </a>
+                <a href="{% url 'post_history' %}" class="btn btn-primary" style="display: block; padding-top: 1rem; padding-bottom: 1rem; font-size: 1.125rem;">
+                    投稿履歴を見る
+                </a>
+                <a href="{% url 'my_page' %}" class="btn btn-primary" style="display: block; padding-top: 1rem; padding-bottom: 1rem; font-size: 1.125rem;">
+                    マイページを見る
+                </a>
+            </div>
+        </main>
+    </div>
+
+{% endblock %}

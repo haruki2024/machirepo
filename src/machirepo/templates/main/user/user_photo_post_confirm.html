@@ -1,0 +1,146 @@
+{% extends "top_base.html" %}
+
+{% block title %}投稿内容の確認{% endblock %}
+
+{% block content %}
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    
+    <style>
+        /* 地図コンテナのサイズを定義 */
+    
+
+        /* 💡 追加: カスタムピンのスタイル (管理者画面と共通) 💡 */
+        .custom-div-icon {
+            background-color: #e53e3e; /* 赤 */
+            border: 3px solid #ffffff; /* 白い縁 */
+            width: 15px; /* サイズ */
+            height: 15px;
+            border-radius: 50%; /* 円形 */
+            opacity: 0.9;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* その他の既存のスタイル */
+        
+        .header-link { text-decoration: none; color: #10b981; font-weight: 600; }
+        .main-content { padding-bottom: 7rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .app-footer { padding: 1rem 1rem; background-color: #ffffff; border-top: 1px solid #e5e7eb; box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1), 0 -2px 4px -2px rgb(0 0 0 / 0.1); position: sticky; bottom: 0; z-index: 100; }
+        .uploaded-photo { max-width: 100%; height: auto; max-height: 300px; border-radius: 0.375rem; object-fit: cover; border: 1px solid #e5e7eb;}
+    </style>
+
+    <div class="app-container">
+        <header class="app-header">
+            <a href="{% url 'photo_post_create' %}" class="header-link">&lt; 修正する</a>
+            <h2 style="font-size: 1.25rem; font-weight: 700; position: absolute; left: 50%; transform: translateX(-50%);">投稿内容の確認</h2>
+            <span style="width: 80px;"></span>
+        </header>
+        
+        <main class="main-content">
+        
+            
+            <div class="form-group">
+                <label class="block text-gray-700 font-medium mb-1">タイトル:</label>
+                <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap">{{ post_data.title|default:"(タイトルなし)" }}</p>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="block text-gray-700 font-medium mb-1">写真:</label>
+                <div class="photo-container">
+                    {% if request.session.post_photo_data %}
+                        <img src="{{ request.session.post_photo_data }}" alt="アップロードされた写真" class="uploaded-photo">
+                    {% else %}
+                        写真が見つかりません
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="block text-gray-700 font-medium mb-1">場所:</label>
+                
+                {% if post_data.latitude and post_data.longitude %}
+                    <div id="map-display"></div>
+                {% else %}
+                    <div style="background-color: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; margin:0; line-height: 1.6;">
+                        {{ post_data.location_name }}
+                    </div>
+                {% endif %}
+                
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="block text-gray-700 font-medium mb-1">カテゴリ:</label>
+                <p style="background-color: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; margin:0;">
+                    
+                    {# ★ここを修正しました: post_data.tags のループを削除し、selected_tag を参照します。★ #}
+                    {% if selected_tag %}
+                        <span>{{ selected_tag.name }}</span>
+                    {% elif post_data.tags is not None %}
+                        {# post_data.tags が None ではなく、Tagが見つからなかった場合（エラー処理） #}
+                        カテゴリ情報にエラー
+                    {% else %}
+                        {# post_data.tags が None の場合（選択なし） #}
+                        カテゴリなし
+                    {% endif %}
+                    
+                </p>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="block text-gray-700 font-medium mb-1">詳細:</label>
+                <p style="background-color: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; line-height: 1.6; margin:0;">
+                    {{ post_data.comment|default:"コメントなし"}}
+                </p>
+            </div>
+        </main>
+        
+        <footer class="app-footer">
+            <form method="post" action="{% url 'photo_post_confirm' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="width: 100%;">この内容で投稿する</button>
+            </form>
+        </footer>
+    </div>
+    
+    {% if post_data.latitude and post_data.longitude %}
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            // 💡 カスタムマーカーアイコンを定義
+            const customIcon = L.divIcon({
+                className: 'custom-div-icon', // 上で定義したCSSクラスを使用
+                iconSize: [15, 15],           // アイコンサイズ
+                iconAnchor: [7.5, 7.5],       // アイコンの中心に合わせる
+                popupAnchor: [0, -10]         // ポップアップ位置調整
+            });
+
+            const lat = parseFloat("{{ post_data.latitude|default:"0" }}"); 
+            const lng = parseFloat("{{ post_data.longitude|default:"0" }}");
+            
+            // DOMContentLoaded後に地図を初期化
+            document.addEventListener('DOMContentLoaded', function() {
+                if (lat !== 0 || lng !== 0) {
+                    // 地図コンテナが存在することを確認
+                    const mapContainer = document.getElementById('map-display');
+                    if (mapContainer) {
+                        // 1. Mapオブジェクトの作成
+                        const map = L.map('map-display').setView([lat, lng], 16); 
+                        
+                        // 2. タイルレイヤーを追加
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                        }).addTo(map);
+
+                        // 3. マーカーを追加 - 💡 customIconを使用
+                        L.marker([lat, lng], {icon: customIcon}).addTo(map)
+                            .bindPopup('投稿場所')
+                            .openPopup();
+                            
+                        // 4. サイズを再評価 (念のため)
+                        setTimeout(() => { map.invalidateSize(); }, 100);
+                    }
+                }
+            });
+        </script>
+    {% endif %}
+{% endblock %}

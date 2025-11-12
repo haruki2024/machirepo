@@ -1,0 +1,20 @@
+{% extends 'top_base.html' %} 
+
+{% block title %}ユーザー削除完了{% endblock %} 
+
+{% block content %}
+    <div class="page-container">
+        <header class="app-header">
+            <div class="title">まちレポ 管理者ページ</div>
+            <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
+        </header>
+        <main class="main-content" style="text-align: center; padding-top: 6rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 700;">ユーザーを削除しました。</h2>
+            <div style="margin-top: 2rem; max-width: 300px; margin-left: auto; margin-right: auto;">
+                <a href="{% url 'admin_user_list' %}" class="btn btn-primary">ユーザー一覧に戻る</a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+{% endblock %}

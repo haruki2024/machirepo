@@ -1,0 +1,36 @@
+{% extends 'base.html' %} 
+{% load static %}
+
+{% block title %}ログイン{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; text-align:center;">まちレポ ログイン</h2>
+      
+    <form method="post" >
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="error-box">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">メールアドレス</label> 
+            {{ form.username }}
+            </div>
+        
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">パスワード</label>
+            {{ form.password }}
+            </div>
+        <div style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">ログイン</button>
+            <a href="{% url 'index' %}" class="link-secondary">トップページに戻る</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

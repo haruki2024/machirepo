@@ -1,0 +1,51 @@
+{% extends 'top_base.html' %}
+
+{% block title %}マイページ - まちレポ{% endblock %}
+
+{% block content %}
+    <div class="app-container">
+        <header class="app-header">
+            <h1 class="title">マイページ</h1>
+            <div>
+                <a href="{% url 'user_home' %}" class="header-link">トップへ</a>
+                <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
+            </div>
+        </header>
+        
+        <main class="main-content" style="max-width: 600px; margin: 0 auto; padding: 1.5rem;">
+
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; border-bottom: 2px solid #f3f4f6; padding-bottom: 0.5rem;">
+                アカウント情報
+            </h2>
+            
+            <div class="user-info-display" style="background-color: #f9fafb; padding: 1.5rem; border-radius: 8px;">
+                
+                <div style="margin-bottom: 1rem;">
+                    <p style="font-weight: 600; color: #4b5563; margin-bottom: 0.25rem;">ユーザー名</p>
+                    <p style="font-size: 1.125rem; color: #1f2937;">{{ user.username }}</p>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <p style="font-weight: 600; color: #4b5563; margin-bottom: 0.25rem;">メールアドレス</p>
+                    <p style="font-size: 1.125rem; color: #1f2937;">{{ user.email|default:"未設定" }}</p>
+                </div>
+                
+                <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <a href="{% url 'user_profile_edit' %}" class="btn btn-primary" style="text-align: center; padding: 0.75rem;">
+                        ユーザー名・メールアドレスを編集
+                    </a>
+                    <a href="{% url 'user_password_change' %}" class="btn btn-secondary" style="text-align: center; padding: 0.75rem;">
+                        パスワードを変更
+                    </a>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: center;">
+                <a href="{% url 'post_history' %}" class="link-secondary">
+                    投稿履歴を見る &gt;
+                </a>
+            </div>
+            
+        </main>
+    </div>
+{% endblock %}

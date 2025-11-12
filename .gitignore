@@ -1,0 +1,12 @@
+# .gitignoreに追記
+# 仮想環境関連のファイルを除外
+Lib/
+Scripts/
+machirepo/  # 外側の仮想環境ルート
+venv/       # 新しい仮想環境用
+pyvenv.cfg  # 仮想環境設定ファイル
+/src/db.sqlite3 # srcフォルダ内のデータベースファイル
+/db.sqlite3     # ルートにある場合
+__pycache__/
+*.pyc
+venv/pyvenv.cfg

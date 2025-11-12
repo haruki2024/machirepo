@@ -1,0 +1,17 @@
+{% extends 'base.html' %} 
+
+{% block title %}トップページ{% endblock %} 
+
+{% block content %}
+    <div class="form-container">
+        <div style="text-align: center;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; color: var(--primary-hover-color); margin-bottom: 1rem;">まちレポ</h1>
+            <p style="color: #6b7280;">あなたの声で、まちを良くする</p>
+        </div>
+        <div style="margin-top: 4rem;">
+            <a href="{% url 'login' %}" class="btn btn-primary">ログイン</a>
+            <a href="{% url 'signup' %}" class="link-secondary" style="margin-top: 1.5rem;">アカウントをお持ちでない方はこちら（新規登録）</a>
+        </div>
+    </div>
+
+{% endblock %}

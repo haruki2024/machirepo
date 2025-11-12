@@ -1,0 +1,206 @@
+{% extends 'top_base.html' %}
+
+{% block title %}タグ一覧 - まちレポ{% endblock %}
+
+
+{% block content %}
+<style>
+/* 基本レイアウト */
+
+
+/* タグ一覧テーブル */
+.tag-list {
+    width: 100%;
+    max-width: 600px;
+    margin: 2rem auto;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tag-header {
+    background-color: #f3f4f6;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem 0.75rem 0 0;
+    font-size: 0.875rem;
+    color: #4b5563;
+    font-weight: 600;
+}
+
+.tag-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+.tag-item:last-child {
+    border-bottom: none;
+}
+
+.tag-name {
+    font-size: 1rem;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+/* 削除ボタンのスタイル */
+.delete-btn {
+    background-color: #ef4444; /* red-500 */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: background-color 0.15s;
+    cursor: pointer;
+}
+.delete-btn:hover {
+    background-color: #dc2626; /* red-600 */
+}
+
+/* モーダル（削除確認ダイアログ） */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none; /* 初期状態では非表示 */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+</style>
+<div class="app-container">
+    <header class="app-header">
+        <h1 class="title">まちレポ</h1>
+        <div>
+            <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <a href="{% url 'admin_home' %}" class="link-secondary" style="margin: 0 0 1.5rem 0; text-align: left;">&lt; 管理メニューに戻る</a>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0;">タグ管理</h2>
+            <a href="{% url 'admin_tag_create' %}" class="btn btn-primary" style="width: auto; padding: 0.5rem 1rem;">
+                タグを追加
+            </a>
+        </div>
+
+        {% if not tags %}
+            <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
+                <p style="color: #6b7280;">現在、タグはありません。</p>
+            </div>
+        {% else %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>タグ名</th>
+                        <th style="width: 50px;"></th>
+                        <th style="width: 50px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tag in tags %}
+                        <tr>
+                            <td>{{ tag.name }}</td>
+                            <td><a href="{% url 'admin_tag_edit' pk=tag.pk %}" class="delete-link" style="color: #14b8a6;">編集</a></td>
+                            <td><a href="#" class="delete-link" data-tag-id="{{ tag.pk }}" data-tag-name="{{ tag.name }}" onclick="openDeleteModal(this); return false;" style="color: #ef4444;">削除</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+    </main>
+</div>
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin-top: 0;">本当にタグ「<strong id="tagNamePlaceholder"></strong>」を削除しますか？</h3>
+        <p style="color: #6b7280; margin-bottom: 1.5rem;">このタグが設定された過去の報告にも影響が出る可能性があります。</p>
+
+        <div class="modal-actions">
+            <button type="button" onclick="closeModal()" class="btn btn-secondary" style="flex: 1; margin-top: 0;">
+                キャンセル
+            </button>
+
+            <form id="deleteForm" method="post" action="" style="display: inline; flex: 1;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" style="width: 100%;">
+                    削除
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# ★★★ JavaScript (モーダル制御) ★★★ #}
+<script>
+    let modal, tagNamePlaceholder, deleteForm; // グローバル変数を宣言
+
+    // モーダルを表示する関数 (タグ削除用に調整)
+    // 既存のHTMLのonclick属性に合わせて openDeleteModal 関数名を維持
+    window.openDeleteModal = function(link) {
+        if (!modal || !tagNamePlaceholder || !deleteForm) {
+            console.error("モーダル要素の初期化に失敗しました。");
+            return;
+        }
+
+        const tagId = link.getAttribute('data-tag-id');
+        const tagName = link.getAttribute('data-tag-name');
+        
+        // プレースホルダーにタグ名を設定
+        tagNamePlaceholder.textContent = tagName;
+        
+        // フォームのアクションURLを動的に設定
+        // 例: /manage/tags/1/delete/
+        deleteForm.action = `/manage/tags/${tagId}/delete/`; 
+        
+        // モーダルを表示 (style.displayを使用)
+        modal.style.display = 'flex';
+    }
+
+    // モーダルを閉じる関数 (ユーザー提供の closeModal 関数名を採用)
+    window.closeModal = function() {
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    // 既存のonclick属性からcloseModalが呼ばれるようにエイリアスを設定
+    window.closeDeleteModal = window.closeModal;
+
+    // DOMContentLoadedで要素を取得し、イベントリスナーを設定
+    document.addEventListener('DOMContentLoaded', () => {
+        modal = document.getElementById('deleteModal');
+        tagNamePlaceholder = document.getElementById('tagNamePlaceholder');
+        deleteForm = document.getElementById('deleteForm');
+
+        // モーダルの外側をクリックで閉じる
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    window.closeModal();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

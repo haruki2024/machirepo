@@ -1,0 +1,61 @@
+{% extends 'top_base.html' %}
+
+{% block title %}投稿履歴 - まちレポ{% endblock %}
+
+
+
+{% block content %}
+<div class="app-container">
+    <header class="app-header">
+        <a href="{% url 'user_home' %}" class="header-link" style="font-weight: 600; color: #10b981;">&lt; 戻る</a>
+        <h2 style="font-size: 1.25rem; font-weight: 700; position: absolute; left: 50%; transform: translateX(-50%);">投稿履歴</h2>
+        <span style="width: 50px;"></span>
+    </header>
+    
+    <main class="main-content p-4">
+        {% if posts %}
+            {% for post in posts %}
+            <a href="{% url 'post_detail' post.id %}"  class="post-card-link" style="text-decoration: none;" >
+                <div class="history-item">
+                    <div class="history-item-header">
+                        <div "w-2/3 min-w-0 pr-4">
+                            <p class="history-item-title">{{ post.title|default:"タイトルなし" }}</p>
+                            <p class="history-item-date">{{ post.posted_at|date:"Y/m/d H:i" }}</p>
+                            <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">
+                                {{ post.comment|truncatechars:50|default:"(コメントなし)" }}
+                            </p>
+                        </div>
+                        
+                        <div class="status-wrapper">
+                            
+                            {# ステータスバッジ: get_status_display()で日本語の表示名を取得 #}
+                            <span class="status-badge 
+                                    {% if post.status == 'new' %}status-new
+                                    {% elif post.status == 'in_progress' %}status-pending
+                                    {% elif post.status == 'completed' %}status-complete
+                                    {% elif post.status == 'not_required' %}status-not-applicable
+                                    {% endif %}">
+                                {{ post.get_status_display }}
+                            </span>
+                        </div>
+                        
+                            
+                    </div>
+                    
+                    {# 管理者コメントの表示 (対応完了または対応不可の場合、かつコメントが存在する場合) #}
+                    {% if post.admin_note %}
+                        <div class="admin-comment">
+                            <p class="comment-title" style="color: #ff0000ff;">★管理者からのコメントあり</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
+                <p style="color: #6b7280;">現在、新しい報告はありません。</p>
+            </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

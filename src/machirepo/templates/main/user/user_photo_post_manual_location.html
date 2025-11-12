@@ -1,0 +1,45 @@
+{% extends 'top_base.html' %} 
+
+{% load static %}
+
+{% block title %}位置情報手動入力{% endblock %} 
+
+
+
+{% block content %}
+   
+    <div class="app-container">
+        <header class="app-header">
+            <!-- 戻るボタンは、最初の投稿画面に戻る -->
+            <a href="{% url 'photo_post_create' %}" class="header-link">&lt; 戻る</a>
+            <h2 style="font-size: 1.25rem; font-weight: 700; position: absolute; left: 50%; transform: translateX(-50%);">位置情報手動入力</h2>
+            <span style="width: 50px;"></span>
+        </header>
+        
+        <form method="post">
+            {% csrf_token %}
+
+            <main class="main-content">
+                <div class="error-box">
+                    <p style="font-weight: 700;">位置情報を取得できませんでした。</p>
+                    <p>大まかな場所を把握するためコメントを追加してください。</p>
+                </div>
+                <!-- 手動入力フォームの表示 -->
+                
+                <div class="form-group">
+                    <label for="{{ manual_form.location_name.id_for_label }}">コメント（目印となる建物など）</label>
+                    {{ manual_form.location_name }}
+                </div>
+                
+                {% if manual_form.non_field_errors %}
+                    <div class="text-danger" style="margin-top: 1rem;">{{ manual_form.non_field_errors }}</div>
+                {% endif %}
+                
+                <button type="submit" class="btn btn-primary">
+                    内容を確認する
+                </button>
+            </main>
+        </form>
+       
+    </div>
+{% endblock %}

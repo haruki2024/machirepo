@@ -1,0 +1,475 @@
+/* ===== Google Fontsの読み込み ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+/* ===== 色の変数を定義 ===== */
+:root {
+    --primary-color: #14b8a6; /* ティール (bg-teal-500) */
+    --primary-hover-color: #0d9488; /* 濃いティール (bg-teal-600) */
+}
+
+/* ==================================================
+===== 共通スタイル および SP表示 (767px 以下)
+==================================================
+*/
+body {
+    padding-bottom: var(--footer-height);
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    background-color: #f3f4f6;
+    color: #1f2937;
+    margin: 0;
+    padding: 0;
+    font-size: 16px; /* SPの基本フォントサイズ */
+}
+
+/* ページ全体のコンテナ（SPでは幅を制限し中央寄せ） */
+.page-container {
+    max-width: 28rem;
+    margin: 0 auto; 
+    background-color: #ffffff;
+    min-height: 100vh;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* ヘッダー */
+.app-header {
+    background-color: #fff;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+.app-header .title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-hover-color);
+    margin: 0;
+}
+.app-header .header-link {
+    color: #4b5563;
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+/* メインコンテンツ */
+.main-content {
+    flex-grow: 1;
+    padding: 2rem; /* SPの左右パディング */
+    overflow-y: auto;
+}
+
+/* フッター（ボタンエリア） */
+.app-footer {
+    padding: 1rem;
+    background-color: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+/* ログイン・新規登録フォーム用のコンテナ */
+.form-container {
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+    padding: 2rem;
+}
+body.form-page-bg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* ボタン */
+.btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-weight: 700;
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    cursor: pointer;
+    box-sizing: border-box;
+    
+	border: none;
+}
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    
+}
+.btn-primary:hover {
+    background-color: var(--primary-hover-color);
+}
+.btn-secondary {
+    background-color: #e5e7eb;
+    color: #374151;
+    margin-top: 1rem;
+}
+
+/* リンク */
+.link-secondary {
+    display: block;
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #4b5563;
+    text-decoration: none;
+}
+
+/* フォーム */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+.form-group input, .form-group textarea, .form-group select {
+    display: block;
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+
+
+
+/* エラー表示 */
+.error-box {
+    background-color: #fee2e2;
+    border-left: 4px solid #ef4444;
+    color: #b91c1c;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* 投稿履歴 & 管理者メニューカード */
+.history-item {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    margin-bottom: 1rem;
+}
+
+
+
+
+.history-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.history-item .history-item-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--primary-hover-color);
+    margin: 0;
+}
+.history-item-date {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+.menu-item-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+
+.post-photo {
+    width: 500px;
+    height: auto;
+}
+
+/* ステータスと優先度のバッジ */
+.status-badge {
+    padding: 0.3em 0.8em;
+    border-radius: 1em;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: inline-block;
+    white-space: nowrap;
+}
+.status-new { 
+    background-color: #e0f2fe; 
+    color: #0ea5e9; 
+} /* 新規 */
+.status-pending { 
+    background-color: #fffbe6; 
+    color: #f59e0b; 
+} /* 対応中 */
+.status-complete { 
+    background-color: #ecfdf5; 
+    color: #10b981; 
+} /* 対応完了 */
+.status-not-applicable { 
+    background-color: #f3f4f6; 
+    color: #6b7280; 
+} /* 対応不可 */
+
+/* 優先度タグ */
+.priority-badge {
+    padding: 0.3em 0.8em;
+    border-radius: 1em;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: inline-block;
+    white-space: nowrap;
+}
+.priority-high {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+.priority-medium {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+.priority-low {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+.priority-none {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+/* ==================================================
+===== テーブルスタイル (SP対応含む)
+==================================================
+*/
+
+/* ★ SP対応のためのラッパー要素：このクラスでテーブルを囲んでください */
+.table-responsive {
+    /* SP表示時（メディアクエリ外）に横スクロールを有効にする */
+    overflow-x: auto;
+    /* スクロールバーを見やすくするために下に少し余白をとる */
+    padding-bottom: 0.5rem; 
+    margin-bottom: 1rem;
+    /* スクロールバーが表示されても、テーブルの影が途切れないようにする */
+}
+
+
+/* テーブル本体 */
+.admin-table {
+    /* SP対応のため、widthを min-content に設定し、強制的に横に伸ばす */
+    width: min-content; 
+    min-width: 100%; /* 少なくともコンテナ幅は確保する */
+    
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    background-color: #fff;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    border-radius: 8px;
+    overflow: hidden; 
+}
+.admin-table th, .admin-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap; /* テーブルセルの内容が折り返されないようにする */
+}
+.admin-table th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+.admin-table a {
+    color: var(--primary-hover-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+.admin-table a:hover {
+    text-decoration: underline;
+}
+
+
+.post-photo {
+    width: 300px;
+    height: auto;
+}
+
+/* ===== 確認モーダル ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+.modal-box {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+/* ボタン配置 */
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 0rem;
+}
+.modal-box .btn-danger {
+    background-color: #ef4444;
+    color: #fff;
+    border-color: #ef4444;
+}
+.modal-box .btn-danger:hover {
+    background-color: #dc2626;
+}
+
+.btn-secondary {
+    background-color: #f3f4f6;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+    border-color: #ef4444;
+} 
+
+
+/*  後から追加した分 */
+#map-display {
+    height: 400px !important;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid #ccc;
+    z-index: 10;
+}
+
+
+
+/*
+==================================================
+===== タブレット表示 (768px 以上 1024px 未満)
+==================================================
+*/
+@media (min-width: 768px) and (max-width: 1023px) {
+    body {
+        font-size: 15px;
+    }
+
+    /* page-container は幅100%にし、box-shadowを解除 */
+    .page-container {
+        max-width: 100%;
+        margin: 0; 
+        box-shadow: none;
+    }
+
+    /* メインコンテンツ: 中央寄せを維持し、パディングを調整 */
+    .main-content {
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 3rem; 
+        padding-right: 3rem;
+        max-width: none; 
+    }
+
+    /* フォームコンテナは中央寄せと幅制限を維持 */
+    .form-container {
+        padding: 40px; 
+    }
+
+
+    .history-item .history-item-title {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--primary-hover-color);
+        margin: 0;
+    }
+
+
+
+    /* テーブルの横スクロールを無効化（タブレット以上の幅があるため） */
+    .table-responsive {
+        overflow-x: visible;
+        padding-bottom: 0;
+    }
+    .admin-table {
+        width: 100%; /* コンテナいっぱいに広げる */
+        min-width: initial;
+    }
+}
+
+/*
+==================================================
+===== PC表示 (1024px 以上)
+==================================================
+*/
+@media (min-width: 1024px) {
+    body {
+        font-size: 15px;
+    }
+    
+    /* page-container: PCで幅いっぱい */
+    .page-container {
+        max-width: 100%;
+        margin: 0; 
+        box-shadow: none;
+    }
+    
+    /* メインコンテンツ: 幅の制限を解除（フル幅） */
+    .main-content {
+        margin-left: 0;
+        margin-right: 0;
+        
+        /* PC用の左右パディングを設定 */
+        padding-left: 4rem;
+        padding-right: 4rem;
+        
+        /* 幅の制限を解除し、画面いっぱいまで広げる */
+        max-width: none; 
+    }
+    
+    /* フォームコンテナ: 中央寄せと幅制限を維持 */
+    .form-container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        padding: 40px;
+    }
+    
+    /* テーブルの横スクロールを無効化（PCの幅があるため） */
+    .table-responsive {
+        overflow-x: visible;
+        padding-bottom: 0;
+    }
+    .admin-table {
+        width: 100%; /* コンテナいっぱいに広げる */
+        min-width: initial;
+    }       
+    .post-photo {
+        width: 400px;
+        height: auto;
+    }
+}
+
