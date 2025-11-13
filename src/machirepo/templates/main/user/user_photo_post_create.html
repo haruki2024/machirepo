@@ -123,13 +123,7 @@
         // 既存の Leaflet デフォルトアイコンの依存関係を削除（カスタムアイコン使用のため）
         delete L.Icon.Default.prototype._getIconUrl;
 
-        // Leaflet デフォルトアイコンを使わないが、念のため設定を残すことも可能だが、ここではカスタムピンを使用する。
-        /* L.Icon.Default.mergeOptions({
-            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
-        }); */
-        
+
         // 💡 カスタムマーカーアイコンを定義
         const customIcon = L.divIcon({
             className: 'custom-div-icon', // CSSで定義された赤色の円形ピン

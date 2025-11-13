@@ -1,8 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User # ユーザー提供のコードに基づく
 from django.utils import timezone
-import uuid # UUIDフィールドは使用しないが、念のためimportは残しておく
-# from taggit.managers import TaggableManager # TaggableManagerは使用しない
+import uuid 
+from django.conf import settings
 
 
 # 投稿のカテゴリー分けに使用するタグモデル
@@ -65,12 +64,12 @@ class PhotoPost(models.Model):
     # IDフィールドは暗黙的に作成されるため、ここでは定義しない
 
     user = models.ForeignKey(
-        User, 
+        settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
         verbose_name="投稿ユーザー"
     )
     
-    # ★修正点: titleを非必須にする (null=True, blank=Trueを設定)★
+    
     title = models.CharField(
         max_length=100, 
         verbose_name="タイトル",
