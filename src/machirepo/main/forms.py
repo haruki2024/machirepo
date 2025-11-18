@@ -226,7 +226,7 @@ class PhotoPostForm(forms.ModelForm):
                 })
             elif name == 'photo':
                 field.widget.attrs.update({
-                    'class': 'w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none'
+                    'class': 'input-file-trick'
                 })
             elif name == 'tags':
                 field.widget.attrs.update({

@@ -1,45 +1,233 @@
-{% extends 'top_base.html' %} 
-
+{% extends 'top_base.html' %}
 {% load static %}
 
-{% block title %}位置情報手動入力{% endblock %} 
+{% block title %}位置情報手動入力画面{% endblock %}
 
-
+{% block extra_head %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endblock %}
 
 {% block content %}
-   
-    <div class="app-container">
-        <header class="app-header">
-            <!-- 戻るボタンは、最初の投稿画面に戻る -->
-            <a href="{% url 'photo_post_create' %}" class="header-link">&lt; 戻る</a>
-            <h2 style="font-size: 1.25rem; font-weight: 700; position: absolute; left: 50%; transform: translateX(-50%);">位置情報手動入力</h2>
-            <span style="width: 50px;"></span>
-        </header>
-        
-        <form method="post">
-            {% csrf_token %}
+<style>
+    /* --- スタイル設定 --- */
+    .map-container {
+        height: 400px; /* ← 高さをしっかり確保 */
+        width: 100%;
+        border-radius: 0.5rem;
+        margin-top: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        background-color: #f8f8f8;
+        overflow: hidden;
+    }
 
-            <main class="main-content">
-                <div class="error-box">
-                    <p style="font-weight: 700;">位置情報を取得できませんでした。</p>
-                    <p>大まかな場所を把握するためコメントを追加してください。</p>
-                </div>
-                <!-- 手動入力フォームの表示 -->
-                
-                <div class="form-group">
-                    <label for="{{ manual_form.location_name.id_for_label }}">コメント（目印となる建物など）</label>
-                    {{ manual_form.location_name }}
-                </div>
-                
-                {% if manual_form.non_field_errors %}
-                    <div class="text-danger" style="margin-top: 1rem;">{{ manual_form.non_field_errors }}</div>
-                {% endif %}
-                
-                <button type="submit" class="btn btn-primary">
-                    内容を確認する
-                </button>
-            </main>
-        </form>
-       
+    .custom-div-icon {
+        background-color: #e53e3e;
+        border: 3px solid #ffffff;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        opacity: 0.9;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .input-style {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 0.375rem;
+    }
+</style>
+
+
+<div class="sub-header">
+    <a href="{% url "photo_post_create" %}" class="back-link">&lt; 戻る</a>
+    <h2 class="page-title">場所の情報を追加</h2>
+</div>
+
+<main class="main-content form-page-main">
+    
+    <div class="error-box">
+        <p style="font-weight: 700;">位置情報を取得できませんでした。</p>
+        <p>地図を操作して場所を指定してください。</p>
     </div>
+    
+    <form id="location-form" method="POST">
+        {% csrf_token %} 
+        <label for="location-search-input" class="block text-sm font-medium text-gray-700 mb-1">地名検索</label>
+        <div  class="form-group">
+            
+            <div class="search-container">
+                <input type="text" id="location-search-input" placeholder="例: 姫路城"/>
+                <button type="button" id="search-button" class="btn-search">検索</button>
+            </div>
+        </div>
+
+
+
+    
+
+        <div class="form-group">
+            <label>地図上で場所を指定（マーカーをドラッグできます）</label>
+            <div id="map-wrapper" class="mb-4">
+                <div id="map" class="map-container"></div>
+            </div>
+
+            <p id="location-status" class="text-sm mb-4 p-2 rounded-lg bg-yellow-100 text-yellow-700">現在地を取得しています...</p>
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                
+                <input
+                    type="hidden"
+                    id="latitude"
+                    name="latitude"  readonly
+                    class="input-style bg-gray-100 text-gray-600 cursor-not-allowed"
+                />
+            </div>
+            <div>
+                <input
+                    type="hidden"
+                    id="longitude"
+                    name="longitude"  readonly
+                    class="input-style bg-gray-100 text-gray-600 cursor-not-allowed"
+                />
+            </div>
+        </div>
+
+
+        <div class="form-submit-container">
+            <button type="submit"id="submit-button" disabled class="btn btn-primary">確定</button>
+        </div>
+    </form>
+</main>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 緯度・経度を格納する変数
+    let currentLat = 34.8394; // 姫路城付近の初期緯度
+    let currentLng = 134.6835; // 姫路城付近の初期経度
+
+    const map = L.map("map", { zoomControl: true }).setView([currentLat, currentLng], 16);
+
+    // OpenStreetMap タイルレイヤー
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+
+    // カスタムマーカー
+    const customIcon = L.divIcon({
+        className: "custom-div-icon",
+        iconSize: [15, 15],
+        iconAnchor: [7.5, 7.5],
+    });
+    const marker = L.marker([currentLat, currentLng], { icon: customIcon, draggable: true }).addTo(map);
+
+    // DOM要素の取得
+    const latInput = document.getElementById("latitude");
+    const lngInput = document.getElementById("longitude");
+    const statusMessage = document.getElementById("location-status");
+    const submitButton = document.getElementById("submit-button");
+    const searchInput = document.getElementById("location-search-input");
+    const searchButton = document.getElementById("search-button");
+
+    // 緯度経度入力欄の更新とボタンの有効化を行う関数
+    function updateLocation(lat, lng, zoom = 16) {
+        currentLat = lat;
+        currentLng = lng;
+        // name属性を付けたので、ここで値を設定すればPOSTされる
+        latInput.value = lat.toFixed(6);
+        lngInput.value = lng.toFixed(6); 
+        
+        marker.setLatLng([lat, lng]);
+        map.setView([lat, lng], zoom);
+        submitButton.disabled = false;
+        statusMessage.classList.remove('bg-yellow-100', 'text-yellow-700', 'bg-red-100', 'text-red-700');
+        statusMessage.classList.add('bg-green-100', 'text-green-700');
+        statusMessage.textContent = `位置情報が設定されました。緯度: ${lat.toFixed(4)}, 経度: ${lng.toFixed(4)}`;
+    }
+
+    // --- 現在地取得機能 ---
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                updateLocation(lat, lng, 16); // 現在地を取得して地図を更新
+            },
+            (error) => {
+                console.error("現在地取得エラー:", error);
+                statusMessage.classList.remove('bg-yellow-100', 'text-yellow-700');
+                statusMessage.classList.add('bg-red-100', 'text-red-700');
+                statusMessage.textContent = "現在地の取得に失敗しました。地図を操作するか地名検索で場所を指定してください。";
+                // 失敗した場合でも初期位置でボタンを有効化
+                updateLocation(currentLat, currentLng, 16); 
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
+    } else {
+        statusMessage.classList.remove('bg-yellow-100', 'text-yellow-700');
+        statusMessage.classList.add('bg-red-100', 'text-red-700');
+        statusMessage.textContent = "お使いのブラウザは現在地取得に対応していません。地図を操作するか地名検索で場所を指定してください。";
+        // 非対応の場合でも初期位置でボタンを有効化
+        updateLocation(currentLat, currentLng, 16);
+    }
+
+    // --- マーカー操作とクリックによる位置設定 ---
+
+    // マーカーをドラッグしたときの処理
+    marker.on("dragend", () => {
+        const latlng = marker.getLatLng();
+        updateLocation(latlng.lat, latlng.lng, map.getZoom());
+    });
+    
+    // 地図をクリックしたときの処理（マーカーの移動）
+    map.on('click', (e) => {
+        updateLocation(e.latlng.lat, e.latlng.lng, map.getZoom());
+    });
+
+    // --- その他機能 ---
+
+    // ページ描画完了後に地図サイズを再計算
+    window.addEventListener("load", () => {
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 500);
+    });
+
+    // 検索ボタン機能（Nominatim API使用）
+    searchButton.addEventListener("click", async () => {
+        const query = searchInput.value.trim();
+        if (!query) return;
+
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+            );
+            const data = await response.json();
+
+            if (data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                updateLocation(lat, lon, 16); // 検索結果で地図を更新
+            } else {
+                alert("場所が見つかりませんでした。");
+                statusMessage.classList.remove('bg-green-100', 'text-green-700');
+                statusMessage.classList.add('bg-red-100', 'text-red-700');
+                statusMessage.textContent = `地名「${query}」は見つかりませんでした。`;
+            }
+        } catch (error) {
+            console.error("検索エラー:", error);
+            alert("地名検索に失敗しました。");
+        }
+    });
+});
+</script>
 {% endblock %}

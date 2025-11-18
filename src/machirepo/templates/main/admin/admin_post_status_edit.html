@@ -1,4 +1,4 @@
-{% extends 'top_base.html' %} 
+{% extends 'top_base_admin.html' %} 
 
 {% load static %}
 
@@ -7,95 +7,65 @@
 {% block extra_head %}
     <style>
         /* 💡 共通のスタイルとTailwindのユーティリティを統合 */
-        .page-container { max-width: 800px; margin: 0 auto; padding: 0 1rem; }
-        .form-label { display: block; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; }
-        .form-input-style {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            transition: border-color 0.15s;
-        }
-        .form-input-style:focus {
-            outline: none;
-            border-color: #4f46e5; /* indigo-600 */
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-        }
-        .error-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; }
-        
-        /* ステータスバッジのスタイル */
-        .status-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; }
-        .status-0 { background-color: #fee2e2; color: #b91c1c; } /* 未対応: 赤系 */
-        .status-1 { background-color: #fffbeb; color: #b45309; } /* 対応中: 黄系 */
-        .status-2 { background-color: #d1fae5; color: #047857; } /* 対応完了: 緑系 */
 
-        /* 優先度バッジのスタイル */
-        .priority-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; margin-left: 0.5rem; }
-        .priority-0 { background-color: #e0f2fe; color: #075985; } /* 低: 青系 */
-        .priority-1 { background-color: #fef9c3; color: #a16207; } /* 中: 黄系 */
-        .priority-2 { background-color: #fecaca; color: #b91c1c; } /* 高: 赤系 */
+        .error-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; }
+ 
 
     </style>
 {% endblock %}
 
 {% block content %}
 
-<div class="page-container">
-        <header class="app-header">
-            <div class="title">まちレポ 管理者ページ</div>
-            <a href="{% url 'admin_post_detail' post.id %}" class="header-link">ログアウト</a>
-        </header>
 
-    <main class="main-content">
-        
-        
+<main class="main-content">
+    
+    
 
-      
-        <form method="post" action="{% url 'admin_post_status_edit' post.id %}" class="space-y-6">
-            {% csrf_token %}
-            
-            {% if form.non_field_errors %}
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <strong class="font-bold mr-2">入力エラー:</strong>
-                    {% for error in form.non_field_errors %}
-                        <span class="block sm:inline">{{ error }}</span>
-                    {% endfor %}
-                </div>
+    
+    <form method="post" action="{% url 'admin_post_status_edit' post.id %}" class="space-y-6">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold mr-2">入力エラー:</strong>
+                {% for error in form.non_field_errors %}
+                    <span class="block sm:inline">{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-group2">
+            <label for="{{ form.status.id_for_label }}" class="form-label">
+                対応状況<span class="text-red-500">*</span>
+            </label>
+            {{ form.status }}
+            {% if form.status.errors %}
+                <div class="error-message">{{ form.status.errors.0 }}</div>
             {% endif %}
+        </div>
 
-            <div class="form-group">
-                <label for="{{ form.status.id_for_label }}" class="form-label">
-                    対応状況<span class="text-red-500">*</span>
-                </label>
-                {{ form.status }}
-                {% if form.status.errors %}
-                    <div class="error-message">{{ form.status.errors.0 }}</div>
-                {% endif %}
-            </div>
+        <div class="form-group2" id="priority-group">
+            <label for="{{ form.priority.id_for_label }}" class="form-label">{{ form.priority.label }}</label>
+            {{ form.priority }}
+            {% if form.priority.errors %}
+                <div class="error-message">{{ form.priority.errors.0 }}</div>
+            {% endif %}
+        </div>
 
-            <div class="form-group" id="priority-group">
-                <label for="{{ form.priority.id_for_label }}" class="form-label">{{ form.priority.label }}</label>
-                {{ form.priority }}
-                {% if form.priority.errors %}
-                    <div class="error-message">{{ form.priority.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.admin_note.id_for_label }}" class="form-label">
-                    管理者コメント（任意）
-                </label>
-                {{ form.admin_note }}
-                
-            </div>
-
-             
+        <div class="form-group2">
+            <label for="{{ form.admin_note.id_for_label }}" class="form-label">
+                管理者コメント（任意）
+            </label>
+            {{ form.admin_note }}
+            
+        </div>
 
             
-            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">記録する</button>
-        </form>
-    </main>
-</div>
+
+        
+        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">記録する</button>
+    </form>
+</main>
+
 
 {% endblock %}

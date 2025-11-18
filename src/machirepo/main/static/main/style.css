@@ -1,475 +1,1292 @@
+/* ===== 抜本的な修正: CSSリセット ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* ================================== */
+
+
 /* ===== Google Fontsの読み込み ===== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
 
 /* ===== 色の変数を定義 ===== */
 :root {
-    --primary-color: #14b8a6; /* ティール (bg-teal-500) */
-    --primary-hover-color: #0d9488; /* 濃いティール (bg-teal-600) */
+  --primary-color: #14b8a6;
+  --primary-hover-color: #0d9488;
 }
 
-/* ==================================================
-===== 共通スタイル および SP表示 (767px 以下)
-==================================================
-*/
+/* ===== 基本スタイル ===== */
 body {
-    padding-bottom: var(--footer-height);
-    font-family: 'Inter', 'Noto Sans JP', sans-serif;
-    background-color: #f3f4f6;
-    color: #1f2937;
-    margin: 0;
-    padding: 0;
-    font-size: 16px; /* SPの基本フォントサイズ */
+  font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  background-color: #f3f4f6;
+  /* index.htmlなどの背景色 */
+  color: #1f2937;
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
 }
 
-/* ページ全体のコンテナ（SPでは幅を制限し中央寄せ） */
+/* ===== ページ全体のコンテナ (index.html, login.html 用) ===== */
 .page-container {
-    max-width: 28rem;
-    margin: 0 auto; 
-    background-color: #ffffff;
-    min-height: 100vh;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    display: flex;
-    flex-direction: column;
+  max-width: 28rem;
+  margin: 0 auto;
+  background-color: #ffffff;
+  min-height: 100vh;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
-/* ヘッダー */
+/* ===== ヘッダー (index.html, login.html 用) ===== */
 .app-header {
-    background-color: #fff;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e5e7eb;
-    flex-shrink: 0;
+  background-color: #fff;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
+
 .app-header .title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--primary-hover-color);
-    margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-hover-color);
+  margin: 0;
 }
+
 .app-header .header-link {
-    color: #4b5563;
-    text-decoration: none;
-    font-size: 0.875rem;
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 0.875rem;
 }
 
-/* メインコンテンツ */
+/* ===== メインコンテンツ (全ページ共通) ===== */
 .main-content {
-    flex-grow: 1;
-    padding: 2rem; /* SPの左右パディング */
-    overflow-y: auto;
+  flex-grow: 1;
+  padding: 2rem; /* SPの左右パディング */
+  overflow-y: auto;
 }
 
-/* フッター（ボタンエリア） */
+/* ===== フッター (index.html, login.html 用) ===== */
 .app-footer {
-    padding: 1rem;
-    background-color: #ffffff;
-    border-top: 1px solid #e5e7eb;
-    flex-shrink: 0;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 
-/* ログイン・新規登録フォーム用のコンテナ */
+/* ===== ログイン・新規登録フォーム用のコンテナ ===== */
 .form-container {
-    width: 100%;
-    max-width: 400px;
-    margin: auto;
-    padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+  padding: 2rem;
 }
+
+/* index.html の <style> タグから背景画像スタイルを統合 */
 body.form-page-bg {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-image: url("/media/images/haikei.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
-/* ボタン */
+
+/* ===== ボタン ===== */
 .btn {
-    display: block;
-    width: 100%;
-    text-align: center;
-    font-weight: 700;
-    padding: 0.875rem 1rem;
-    border-radius: 0.5rem;
-    text-decoration: none;
-    transition: background-color 0.3s;
-    cursor: pointer;
-    box-sizing: border-box;
-    
-	border: none;
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-weight: 700;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.3s;
+  cursor: pointer;
+  box-sizing: border-box;
+  border: none;
 }
+
 .btn-primary {
-    background-color: var(--primary-color);
-    color: #ffffff;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    
+  background-color: var(--primary-color);
+  color: #ffffff !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
+
 .btn-primary:hover {
-    background-color: var(--primary-hover-color);
+  background-color: var(--primary-hover-color);
 }
+
 .btn-secondary {
-    background-color: #e5e7eb;
-    color: #374151;
-    margin-top: 1rem;
+  background-color: #e5e7eb;
+  color: #374151;
+  margin-top: 1rem;
 }
 
-/* リンク */
+
+
+
+/* ===== リンク ===== */
 .link-secondary {
-    display: block;
-    margin-top: 1rem;
-    text-align: center;
-    font-size: 0.875rem;
-    color: #4b5563;
-    text-decoration: none;
+  display: block;
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #4b5563;
+  text-decoration: none;
 }
 
-/* フォーム */
+/* ===== フォーム ===== */
 .form-group {
-    margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
 }
+
 .form-group label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-    margin-bottom: 0.5rem;
-}
-.form-group input, .form-group textarea, .form-group select {
-    display: block;
-    width: 100%;
-    padding: 0.625rem 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    box-sizing: border-box;
-    font-size: 1rem;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
 }
 
+.form-group input,
+.form-group textarea,
+.form-group select {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  box-sizing: border-box;
+  font-size: 1rem;
+}
 
-
-
-/* エラー表示 */
+/* ===== エラー表示 ===== */
 .error-box {
-    background-color: #fee2e2;
-    border-left: 4px solid #ef4444;
-    color: #b91c1c;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
+  background-color: #fee2e2;
+  border-left: 4px solid #ef4444;
+  color: #b91c1c;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-/* 投稿履歴 & 管理者メニューカード */
+/* ===== 投稿履歴 & 管理者メニューカード ===== */
 .history-item {
-    background-color: #ffffff;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    margin-bottom: 1rem;
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  margin-bottom: 1rem;
 }
-
-
-
 
 .history-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
 .history-item .history-item-title {
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--primary-hover-color);
-    margin: 0;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--primary-hover-color);
+  margin: 0 0 0.25rem 0;
 }
+
 .history-item-date {
-    font-size: 0.875rem;
-    color: #6b7280;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
 }
+
 .menu-item-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-
-.post-photo {
-    width: 500px;
-    height: auto;
-}
-
-/* ステータスと優先度のバッジ */
+/* ===== ステータスと優先度のバッジ ===== */
 .status-badge {
-    padding: 0.3em 0.8em;
-    border-radius: 1em;
-    font-size: 0.8rem;
-    font-weight: bold;
-    display: inline-block;
-    white-space: nowrap;
-}
-.status-new { 
-    background-color: #e0f2fe; 
-    color: #0ea5e9; 
-} /* 新規 */
-.status-pending { 
-    background-color: #fffbe6; 
-    color: #f59e0b; 
-} /* 対応中 */
-.status-complete { 
-    background-color: #ecfdf5; 
-    color: #10b981; 
-} /* 対応完了 */
-.status-not-applicable { 
-    background-color: #f3f4f6; 
-    color: #6b7280; 
-} /* 対応不可 */
-
-/* 優先度タグ */
-.priority-badge {
-    padding: 0.3em 0.8em;
-    border-radius: 1em;
-    font-size: 0.8rem;
-    font-weight: bold;
-    display: inline-block;
-    white-space: nowrap;
-}
-.priority-high {
-    background-color: #fee2e2;
-    color: #b91c1c;
-}
-.priority-medium {
-    background-color: #fef3c7;
-    color: #92400e;
-}
-.priority-low {
-    background-color: #dbeafe;
-    color: #1e40af;
-}
-.priority-none {
-    background-color: #f3f4f6;
-    color: #6b7280;
+  border-radius: 1em;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: inline-block;
+  white-space: nowrap;
+  width: 5em;
+  text-align: center;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
+  padding-left: 0;
+  padding-right: 0;
+  box-sizing: border-box;
 }
 
-/* ==================================================
-===== テーブルスタイル (SP対応含む)
-==================================================
-*/
+.status-new {
+  background-color: #e0f2fe;
+  color: #0ea5e9;
+}
 
-/* ★ SP対応のためのラッパー要素：このクラスでテーブルを囲んでください */
-.table-responsive {
-    /* SP表示時（メディアクエリ外）に横スクロールを有効にする */
-    overflow-x: auto;
-    /* スクロールバーを見やすくするために下に少し余白をとる */
-    padding-bottom: 0.5rem; 
-    margin-bottom: 1rem;
-    /* スクロールバーが表示されても、テーブルの影が途切れないようにする */
+.status-pending {
+  background-color: #fffbe6;
+  color: #f59e0b;
+}
+
+.status-complete {
+  background-color: #ecfdf5;
+  color: #10b981;
+}
+
+.status-not-applicable {
+  background-color: #f3f4f6;
+  color: #6b7280;
 }
 
 
-/* テーブル本体 */
+/* ===== テーブル ===== */
 .admin-table {
-    /* SP対応のため、widthを min-content に設定し、強制的に横に伸ばす */
-    width: min-content; 
-    min-width: 100%; /* 少なくともコンテナ幅は確保する */
-    
-    border-collapse: collapse;
-    margin-top: 1.5rem;
-    background-color: #fff;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-    border-radius: 8px;
-    overflow: hidden; 
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  background-color: #fff;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  border-radius: 8px;
+  overflow: hidden;
 }
-.admin-table th, .admin-table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-    white-space: nowrap; /* テーブルセルの内容が折り返されないようにする */
+
+.admin-table th,
+.admin-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
 }
+
 .admin-table th {
-    background-color: #f9fafb;
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: #6b7280;
+  background-color: #f9fafb;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #6b7280;
 }
+
 .admin-table tr:last-child td {
-    border-bottom: none;
+  border-bottom: none;
 }
+
 .admin-table a {
-    color: var(--primary-hover-color);
-    text-decoration: none;
-    font-weight: 500;
+  color: var(--primary-hover-color);
+  text-decoration: none;
+  font-weight: 500;
 }
+
 .admin-table a:hover {
-    text-decoration: underline;
-}
-
-
-.post-photo {
-    width: 300px;
-    height: auto;
+  text-decoration: underline;
 }
 
 /* ===== 確認モーダル ===== */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
 .modal-box {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
 }
-/* ボタン配置 */
-.modal-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 0rem;
-}
+
 .modal-box .btn-danger {
-    background-color: #ef4444;
-    color: #fff;
-    border-color: #ef4444;
+  background-color: #ef4444;
+  color: #fff;
+  border: none;
 }
+
 .modal-box .btn-danger:hover {
-    background-color: #dc2626;
+  background-color: #dc2626;
 }
 
-.btn-secondary {
-    background-color: #f3f4f6;
-    color: #333;
-    border: 1px solid #ccc;
+/* ===== ログイン後専用スタイル (app-page) ===== */
+body.app-page {
+  /* background-color: #1f2937; */
+  position: relative;
 }
 
-.btn-danger {
-    background-color: #ef4444;
-    color: white;
-    border-color: #ef4444;
-} 
+body.app-page::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("/media/images/haikei.png");
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
+body.app-page .page-container {
+  max-width: 100%;
+  margin: 0;
+  min-height: 100vh;
+  background-color: transparent;
+  box-shadow: none;
+  position: relative;
+  z-index: 1;
+}
+
+body.app-page .app-header {
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+body.app-page .app-header .title {
+  color: #1f2937;
+  text-shadow: none;
+}
+
+body.app-page .app-header .header-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: transparent;
+  padding: 0;
+  color: #1f2937;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-shadow: none;
+}
+
+body.app-page .app-header .header-link:hover {
+  background-color: transparent;
+  opacity: 0.8;
+}
+
+body.app-page .app-header .header-link img {
+  height: 1.5rem;
+  width: auto;
+  filter: none;
+}
+
+body.app-page .app-header .header-link span {
+  color: #1f2937;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 2px;
+  text-shadow: none;
+}
+
+body.app-page main.main-content h2,
+body.app-page main.main-content p {
+  color: #1f2937 !important;
+  text-shadow: none !important;
+}
+
+body.app-page .app-footer {
+  background-color: transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+  text-align: center;
+  padding: 1rem;
+  color: #1f2937;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.7), 0 0 2px rgba(255, 255, 255, 0.7);
+}
 
 
-/*  後から追加した分 */
+/* ===== ハンバーガーメニュー関連 ===== */
+.header-icon-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 100;
+}
+
+.drawer-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.drawer-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 80%;
+  max-width: 300px;
+  max-height: 100vh;
+  background-color: #ffffff;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-menu.is-open {
+  transform: translateX(0);
+}
+
+.drawer-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.drawer-menu-header h4 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--primary-hover-color);
+}
+
+#drawer-close-button {
+  font-size: 2rem;
+  line-height: 1;
+  color: #9ca3af;
+  text-decoration: none;
+  padding: 0 0.5rem;
+  cursor: pointer;
+}
+
+.drawer-menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 1rem 0;
+  overflow-y: auto;
+}
+
+.drawer-menu-list li a {
+  display: block;
+  padding: 0.875rem 1.5rem;
+  text-decoration: none;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.drawer-menu-list li a:hover {
+  background-color: #f3f4f6;
+  color: var(--primary-color);
+}
+
+body.app-page .drawer-menu {
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-bottom-left-radius: 8px;
+}
+
+body.app-page .drawer-menu-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+body.app-page .drawer-menu-header h4 {
+  color: #1f2937;
+  text-shadow: none;
+}
+
+body.app-page #drawer-close-button {
+  color: #1f2937;
+  opacity: 0.8;
+}
+
+body.app-page .drawer-menu-list li a {
+  color: #1f2937;
+  text-shadow: none;
+}
+
+body.app-page .drawer-menu-list li a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #1f2937;
+}
+
+
+/* ===== カードレイアウト / home.html 専用スタイル ===== */
+body.app-page .card-layout-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 1.5rem 1rem;
+  /* home.html用 (サブヘッダーなし) */
+  box-sizing: border-box;
+}
+
+body.app-page .card-layout-main.is-v-centered {
+  justify-content: center;
+}
+
+body.app-page .content-card {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 600px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  max-height: calc(100vh - 3rem);
+}
+
+body.app-page main.main-content .content-card h2 {
+  color: #1f2937 !important;
+  text-shadow: none !important;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+body.app-page main.main-content .content-card h3 {
+  color: #1f2937 !important;
+  text-shadow: none !important;
+}
+
+body.app-page main.main-content .content-card p {
+  color: #374151 !important;
+  text-shadow: none !important;
+  line-height: 1.6;
+}
+
+.terms-content {
+  text-align: left;
+  width: 100%;
+}
+
+.terms-section-title {
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+}
+
+.terms-content p+p {
+  margin-top: 1em;
+}
+
+/* ===== home.html のレイアウト調整 ===== */
+body.app-page .card-layout-main {
+  justify-content: flex-start;
+  position: relative;
+  flex-grow: 1;
+}
+
+.home-button-container {
+  position: fixed;
+  bottom: 2.5rem;
+  right: 1rem;
+  width: auto;
+  max-width: none;
+  z-index: 20;
+}
+
+.home-button-container .btn {
+  width: auto;
+}
+
+.btn-with-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  filter: invert(1) brightness(2);
+}
+
+.home-welcome-message {
+  margin: 0;
+  text-align: left;
+  flex-grow: 1;
+}
+
+.home-welcome-message h2,
+.home-welcome-message p {
+  color: #1f2937;
+  text-shadow: none;
+}
+
+
+/* ===== new-post.html 用の追加CSS ===== */
+body.app-page .app-header h2 {
+  color: #1f2937;
+  text-shadow: none;
+  margin: 0;
+}
+
+.form-page-main {
+  padding: 0 1rem;
+}
+
+.form-submit-container {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.btn-upload-mock {
+  width: auto;
+  display: inline-block;
+  margin-top: 0;
+}
+
+
+/* ===== history.html 用の追加CSS ===== */
+.list-page-main {
+  padding: 0 1rem;
+}
+
+.status-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.admin-comment {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}
+
+.admin-comment .comment-title {
+  font-weight: 700;
+  color: #374151;
+  margin: 0 0 0.25rem 0;
+}
+
+.admin-comment .comment-body {
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ===== home.html (new posts) 用の追加CSS ===== */
+.post-feed-container {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+.post-feed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0 0.5rem;
+}
+
+.post-feed-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.post-feed-all-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
+  text-decoration: none;
+}
+
+.post-feed-all-link:hover {
+  text-decoration: underline;
+}
+
+.post-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.post-feed-item {
+  display: block;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 0.75rem;
+}
+
+.post-feed-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+
+/* ===== home.html (welcome) 用の追加CSS ===== */
+.home-welcome-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+  margin-bottom: 2.5rem;
+}
+
+.home-welcome-message {
+  margin: 0;
+  text-align: left;
+  flex-grow: 1;
+}
+
+.home-welcome-image {
+  width: 100px;
+  height: auto;
+  margin: 0;
+  align-self: auto;
+  flex-shrink: 0;
+}
+
+
+/* ===== post-detail.html 用の追加CSS ===== */
+.detail-group {
+  margin-bottom: 1.5rem;
+}
+
+.detail-group label,
+.detail-meta-item label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.detail-data-box {
+  background-color: #ffffff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+  margin: 0;
+  font-size: 1rem;
+  color: #1f2937;
+  line-height: 1.6;
+}
+
+.detail-placeholder-box {
+  background-color: #e5e7eb;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.detail-meta-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-meta-item {
+  flex-grow: 1;
+}
+
+.detail-meta-item:last-child {
+  flex-grow: 0;
+}
+
+
+.detail-data-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin: 0;
+}
+
+.detail-title-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.4;
+}
+
+
+/* ===== about.html 用の追加CSS ===== */
+.about-flow-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 2rem 0;
+  width: 100%;
+  max-width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.about-flow-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30%;
+  text-align: center;
+}
+
+.about-flow-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.5rem;
+  max-width: 120px;
+}
+
+.about-flow-caption {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.4;
+  margin: 0;
+}
+
+
+/* ===== mypage.html (スタンプ) 用の追加CSS ===== */
+.stamp-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.stamp-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.stamp-slot {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  border: 2px dashed #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.stamp-slot.earned {
+  background-color: #ecfdf5;
+  border: 2px solid var(--primary-color);
+}
+
+.stamp-slot.earned img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+}
+
+/* ===== points.html (バッジ表示) 用の追加CSS ===== */
+.badge-display-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  padding-bottom: 0.5rem;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100px;
+}
+
+.badge-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  border-radius: 50%;
+}
+
+.badge-text {
+  font-size: 0.875rem;
+  color: #374151;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.stamp-note {
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 1rem;
+  padding: 0;
+  width: 100%;
+}
+
+
+/* ===== edit-profile.html (バッジ選択) 用の追加CSS ===== */
+.badge-select-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 0;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.badge-radio-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100px;
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.badge-radio-label.disabled {
+  display: none;
+}
+
+.badge-radio-label input[type="radio"] {
+  display: none;
+}
+
+.badge-radio-label .badge-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 0;
+  border-radius: 50%;
+}
+
+.badge-radio-label input[type="radio"]:checked+.badge-image {
+  box-shadow: 0 0 0 3px var(--primary-color);
+}
+
+.badge-radio-label input[type="radio"]:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ===== 新しいヘッダースタイル (user_86.md) ===== */
+
+/* .page-header-area は削除されました */
+
+/* 新しいサブヘッダー (戻るボタンとページタイトル用) */
+.sub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: transparent;
+  /* ガラス効果を削除 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+}
+
+.sub-header .page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  text-shadow: none;
+  margin: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.sub-header .back-link {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1f2937;
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+
+/* サブヘッダーがあるページのメインコンテンツの余白を調整 */
+.list-page-main,
+.form-page-main {
+  padding: 0 1rem;
+}
+
+/* サブヘッダーの直後の最初の要素（カードやフォームグループ）が
+  サブヘッダーにめり込まないよう、マージンを追加 
+*/
+.sub-header+.history-item,
+.sub-header+.form-group,
+.sub-header+.content-card,
+.sub-header+.error-box,
+.sub-header+.content-wrapper,
+.sub-header+h2 {
+  margin-top: 1.5rem;
+}
+
+
+/* home.html (サブヘッダーなし) のメインコンテンツの余白 */
+body.app-page .card-layout-main {
+  padding-top: 1.5rem;
+}
+
+/* ----------------------------------------------
+ * 地図ページ（new-post-error-location.html）
+ * ---------------------------------------------- */
+
+/* 地図を表示するコンテナ */
+#map {
+  height: 300px;
+  /* 地図の高さ */
+  width: 100%;
+  background-color: #e5e7eb;
+  /* 地図読み込み中の背景色 */
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+/* 地名検索フォームのコンテナ（入力欄とボタンを横並びにする） */
+.search-container {
+  display: flex;
+  gap: 0.5rem;
+  /* 入力欄とボタンの間隔 */
+  margin-top: 0.5rem;
+}
+
+/* 検索コンテナ内のテキスト入力欄 */
+.search-container input[type="text"] {
+  flex-grow: 1;
+  /* 入力欄を可能な限り広げる */
+}
+
+/* 検索ボタン（既存の .btn スタイルを流用・調整してもOK） */
+.btn-search {
+  padding: 0.625rem 1rem;
+  border: none;
+  background-color: #2563eb;
+  /* 仮：プライマリカラー（アプリのテーマに合わせてください） */
+  color: white;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  /* 「検索」が改行しないように */
+}
+
+
+
 #map-display {
     height: 400px !important;
     width: 100%;
     border-radius: 0.5rem;
     border: 1px solid #ccc;
-    z-index: 10;
+    z-index: -1;
+}
+
+
+.modal-overlay {
+        position: fixed; /* 画面に固定 */
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        background-color: rgba(0, 0, 0, 0.6); /* 半透明の黒背景 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+}
+/* hidden クラスがついていれば非表示にする */
+.modal-overlay.hidden {
+    display: none !important; 
+}
+/* .modal-box の基本的なスタイル */
+.modal-box {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    position: relative; /* モーダルコンテンツが前面にくるように */
+}
+/* モーダル内のボタン配置 */
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+
+.custom-div-icon {
+    background-color: #e53e3e; /* 赤 */
+    border: 3px solid #ffffff; /* 白い縁 */
+    width: 15px; /* サイズ */
+    height: 15px;
+    border-radius: 50%; /* 円形 */
+    opacity: 0.9;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 
 
-/*
-==================================================
-===== タブレット表示 (768px 以上 1024px 未満)
-==================================================
-*/
-@media (min-width: 768px) and (max-width: 1023px) {
-    body {
-        font-size: 15px;
-    }
+/* style.css の末尾付近にある .input-file-trick を以下の定義に置き換えます */
 
-    /* page-container は幅100%にし、box-shadowを解除 */
-    .page-container {
-        max-width: 100%;
-        margin: 0; 
-        box-shadow: none;
-    }
-
-    /* メインコンテンツ: 中央寄せを維持し、パディングを調整 */
-    .main-content {
-        margin-left: auto;
-        margin-right: auto;
-        padding-left: 3rem; 
-        padding-right: 3rem;
-        max-width: none; 
-    }
-
-    /* フォームコンテナは中央寄せと幅制限を維持 */
-    .form-container {
-        padding: 40px; 
-    }
-
-
-    .history-item .history-item-title {
-        font-weight: 700;
-        font-size: 1.2rem;
-        color: var(--primary-hover-color);
-        margin: 0;
-    }
-
-
-
-    /* テーブルの横スクロールを無効化（タブレット以上の幅があるため） */
-    .table-responsive {
-        overflow-x: visible;
-        padding-bottom: 0;
-    }
-    .admin-table {
-        width: 100%; /* コンテナいっぱいに広げる */
-        min-width: initial;
-    }
+.input-file-trick {
+    /* 🚨 修正: 絶対配置でレイアウトから除外し、見た目を完全に消す */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+    /* 以下の2行は、一部ブラウザでレイアウトに影響を及ぼす可能性があるため削除 */
+    z-index: -1; 
+    opacity: 0;
 }
 
-/*
-==================================================
-===== PC表示 (1024px 以上)
-==================================================
-*/
-@media (min-width: 1024px) {
-    body {
-        font-size: 15px;
-    }
-    
-    /* page-container: PCで幅いっぱい */
-    .page-container {
-        max-width: 100%;
-        margin: 0; 
-        box-shadow: none;
-    }
-    
-    /* メインコンテンツ: 幅の制限を解除（フル幅） */
-    .main-content {
-        margin-left: 0;
-        margin-right: 0;
-        
-        /* PC用の左右パディングを設定 */
-        padding-left: 4rem;
-        padding-right: 4rem;
-        
-        /* 幅の制限を解除し、画面いっぱいまで広げる */
-        max-width: none; 
-    }
-    
-    /* フォームコンテナ: 中央寄せと幅制限を維持 */
-    .form-container {
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        padding: 40px;
-    }
-    
-    /* テーブルの横スクロールを無効化（PCの幅があるため） */
-    .table-responsive {
-        overflow-x: visible;
-        padding-bottom: 0;
-    }
-    .admin-table {
-        width: 100%; /* コンテナいっぱいに広げる */
-        min-width: initial;
-    }       
-    .post-photo {
-        width: 400px;
-        height: auto;
-    }
+/* 補足: 念のため、カスタムボタンにも安全な定義を適用 */
+.btn-upload-mock {
+    width: auto;
+    display: inline-block;
+    margin-top: 0;
+    /* 💡 box-sizingを明示: 要素の幅計算が予期せぬズレを起こさないように */
+    box-sizing: border-box; 
 }
 
+
+
+
+
+
+/* ===== PC表示 (幅768px以上) ===== */
+@media (min-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+
+  /* page-container: PCで幅いっぱい */
+  .page-container {
+      max-width: 100%;
+      margin: 0; 
+      box-shadow: none;
+  }
+
+  /* ログイン前 (index.html) 用のPC背景 */
+  body.form-page-bg {
+    background-image: url("/media/images/haikei_desktop.png");
+  }
+
+  /* ログイン後 (app-page) 用のPC背景 */
+  body.app-page::before {
+    background-image: url("/media/images/haikei_desktop.png");
+  }
+
+  .main-content {
+    width: 60%;
+    padding-left: 4rem;
+    padding-right: 4rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* PC表示で、ログイン前ページ(.form-page-bg)の
+     コンテナ幅を 400px -> 550px に拡大 
+  */
+  body.form-page-bg .form-container {
+    max-width: 550px;
+  }
+
+  /* PC表示で、ログイン前ページのタイトルを大きくする */
+  body.form-page-bg .form-container h1 {
+    font-size: 3rem;
+    /* 2.5remから変更 */
+  }
+
+  /* PC表示で、ログイン前ページのサブタイトルを大きくする */
+  body.form-page-bg .form-container h1+p {
+    font-size: 1.125rem;
+    /* 1remから変更 */
+  }
+
+
+
+  body.form-page-bg .form-container .link-secondary {
+    font-size: 1rem;
+    /* 0.875rem から変更 */
+  }
+
+  /* ★★★ 修正ここまで ★★★ */
+
+}

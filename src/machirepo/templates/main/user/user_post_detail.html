@@ -1,6 +1,6 @@
 {% extends 'top_base.html' %} 
 
-{% block title %}報告の詳細 - まちレポ管理者{% endblock %}
+{% block title %}報告の詳細{% endblock %}
 
 
 {% block content %}
@@ -9,152 +9,89 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
-<style>
-    /* .modal-overlay の必須スタイルを定義し、全画面に表示されるようにする */
-    .modal-overlay {
-        position: fixed; /* 画面に固定 */
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 50;
-        background-color: rgba(0, 0, 0, 0.6); /* 半透明の黒背景 */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1rem;
-    }
-    /* hidden クラスがついていれば非表示にする */
-    .modal-overlay.hidden {
-        display: none !important; 
-    }
-    /* .modal-box の基本的なスタイル */
-    .modal-box {
-        background-color: white;
-        padding: 2rem;
-        border-radius: 0.5rem;
-        width: 100%;
-        max-width: 440px;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        position: relative; /* モーダルコンテンツが前面にくるように */
-    }
-    /* モーダル内のボタン配置 */
-    .modal-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
 
-
-    .custom-div-icon {
-        background-color: #e53e3e; /* 赤 */
-        border: 3px solid #ffffff; /* 白い縁 */
-        width: 15px; /* サイズ */
-        height: 15px;
-        border-radius: 50%; /* 円形 */
-        opacity: 0.9;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    }
-
-
+<div class="sub-header">
+    <a href="{% url "user_home" %}" class="back-link">&lt; 戻る</a>
+    <h2 class="page-title">投稿詳細</h2>
+</div>
+<main class="main-content list-page-main">
     
-</style>
+    
+    
+    <div class="detail-meta-wrapper">
+        <div class="detail-meta-item">
+            <label>タイトル</label>
+            <p class="detail-title-text">{{ post.title|default:"(タイトルなし)" }}</p>
+        </div>
+        <div class="detail-meta-item" style="text-align: right; flex-shrink: 0;">
+            <span class="status-badge 
+                    {% if post.status == 'new' %}status-new
+                    {% elif post.status == 'in_progress' %}status-pending
+                    {% elif post.status == 'completed' %}status-complete
+                    {% elif post.status == 'not_required' %}status-not-applicable
+                    {% endif %}">
+                {{ post.get_status_display }}
+            </span>
+        </div>
+    </div>
 
+    <div class="detail-group">
+        <label>投稿日</label>
+        <span class="detail-data-text">{{ post.posted_at|date:"Y/m/d H:i" }}</span>
+    </div>
 
-<div class="p-4 md:p-8">
-    <div class="page-container">
-
-        <header class="app-header">
-            <a href="{% url 'post_list' %}" class="header-link" style="font-weight: 600; color: #10b981;">&lt; 戻る</a>
-            <h2 style="font-size: 1.25rem; font-weight: 700; position: absolute; left: 50%; transform: translateX(-50%);">みんなの投稿</h2>
-            <span style="width: 50px;"></span>
-        </header>
+    <div class="detail-group">
+        <label>写真</label>
         
-        <main class="main-content">
-            
+        <div class="detail-placeholder-box">
+            {% if post.photo %}
+                <img src="{{ post.photo.url }}" alt="報告写真: {{ post.title }}" class="post-photo" style=" width: 100%;">
+            {% else %}
+                <div class="w-full h-full flex items-center justify-center text-gray-500">
+                    写真がありません
+                </div>
+            {% endif %}
+        </div>
+    </div>
 
-            <h1 class="text-3xl font-bold text-gray-900 mb-6">報告詳細</h1>
-            
-
-            <div class="form-group mb-6">
-                <label class="block text-gray-700 font-medium mb-1">タイトル:</label>
-                <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap">{{ post.title|default:"(タイトルなし)" }}</p>
-            </div>
-
-
-            <div class="form-group mb-6">
-                <label class="block text-gray-700 font-medium mb-1">投稿者:</label>
-                <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap"> {{ post.user.username }}</p>
-            </div>
-
-                        
-            
-
-            
-            <div class="form-group mb-6">
-                <label class="block text-gray-700 font-medium mb-2">写真:</label>
-                <div class="bg-gray-200 rounded-md overflow-hidden border border-gray-300 h-64">
-                    {% if post.photo %}
-                        <img src="{{ post.photo.url }}" alt="報告写真: {{ post.title }}" class="post-photo">
-                    {% else %}
-                        <div class="w-full h-full flex items-center justify-center text-gray-500">
-                            写真がありません
+    <div class="detail-group">
+        <label>場所</label>
+        <div class="bg-gray-50 rounded-md border border-gray-300 p-3">
+            <p class="text-gray-800">
+                {% if post.location_name %}
+                    {{ post.location_name }}
+                {% elif post.latitude and post.longitude %}
+                    {% if post.latitude and post.longitude %}
+                        <div class="form-group mb-6">
+                            <label class="block text-gray-700 font-medium mb-2">地図表示 (OpenStreetMap):</label>
+                            <div id="map-display"></div>
                         </div>
                     {% endif %}
-                </div>
-                
-            </div>
-
-            
-            
-            <div class="form-group mb-6">
-                <label class="block text-gray-700 font-medium mb-2">場所:</label>
-                <div class="bg-gray-50 rounded-md border border-gray-300 p-3">
-                    <p class="text-gray-800">
-                        {% if post.location_name %}
-                            {{ post.location_name }}
-                        {% elif post.latitude and post.longitude %}
-                            {% if post.latitude and post.longitude %}
-                                <div class="form-group mb-6">
-                                    <label class="block text-gray-700 font-medium mb-2">地図表示 (OpenStreetMap):</label>
-                                    <div id="map-display"></div>
-                                </div>
-                            {% endif %}
-                        {% else %}
-                            位置情報は記録されていません
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
-
-            <div class="form-group mb-6">
-                <label class="block text-gray-700 font-medium mb-1">カテゴリ:</label>
-                <p class="text-gray-800">
-                    {% if post.tags.first %}
-                        {{ post.tags.first.name }}
-                    {% else %}
-                        (タグなし)
-                    {% endif %}
-                </p>
-            </div>
-
-            <div class="form-group mb-6">
-                <label class="block text-gray-700 font-medium mb-1">詳細:</label>
-                <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap">{{ post.comment | linebreaks }}</p>
-            </div>
-
-            {% if post.admin_note %}
-            <div class="form-group mb-6 p-3 bg-indigo-50 border border-indigo-200 rounded-md">
-                <label class="block text-indigo-700 font-medium mb-1">管理者からのコメント:</label>
-                <p class="text-indigo-800 whitespace-pre-wrap">{{ post.admin_note | linebreaks}}</p>
-            </div>
-            {% endif %}
-
-        </main>
-
+                {% else %}
+                    位置情報は記録されていません
+                {% endif %}
+            </p>
+        </div>
     </div>
- 
-</div>
+
+    <div class="detail-group">
+        <label>詳細</label>
+        <p class="detail-data-box">{{ post.comment}}</p>
+    </div>
+    
+    {% if post.admin_note %}
+        <div class="detail-group">
+            <label>管理者からのコメント</label>
+            <div class="admin-comment" style="margin-top:0; background-color: #f9fafb; padding: 1rem; border-radius: 0.5rem;">
+                <p class="comment-body">{{ post.admin_note}}</p>
+            </div>
+        </div>
+    {% endif %}
+    <div style="height: 2rem;"></div>
+
+</main>
+
+
 
 
 

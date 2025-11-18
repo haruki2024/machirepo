@@ -1,20 +1,17 @@
-{% extends 'top_base.html' %} 
+{% extends 'top_base_admin.html' %} 
 
-{% block title %}削除完了 - まちレポ管理者{% endblock %}
+{% block title %}報告削除完了{% endblock %}
 
 
 {% block content %}
-    <div class="page-container">
-        <header class="app-header">
-            <div class="title">まちレポ 管理者ページ</div>
-            <!-- ログアウトリンクはDjango URLで動的に -->
-            <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
-        </header>
-        <main class="main-content" style="text-align: center; padding-top: 6rem;">
-            <h2 style="font-size: 1.5rem; font-weight: 700;">報告を削除しました。</h2>
-            <div style="margin-top: 2rem; max-width: 300px; margin-left: auto; margin-right: auto;">
-                <a href="{% url 'admin_post_list' %}" class="btn btn-primary">報告一覧に戻る</a>
-            </div>
-        </main>
+
+<main class="main-content" style="text-align: center; padding-top: 6rem;">
+    <h2 style="font-size: 1.5rem; font-weight: 700;">報告を削除しました。</h2>
+    <div style="margin-top: 2rem; max-width: 300px; margin-left: auto; margin-right: auto;">
+        <a href="{% url 'admin_post_list' %}" class="btn btn-primary" >
+            報告一覧に戻る
+        </a>
     </div>
+        
+</main>
 {% endblock %}

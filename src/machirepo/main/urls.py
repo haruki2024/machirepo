@@ -20,7 +20,9 @@ urlpatterns = [
     path('mypage/history/', views.post_history, name='post_history'),
     path('posts/', views.post_list, name='post_list'),
     path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
-
+    
+    path('terms/', views.user_terms, name='user_terms'),
+    path('about/', views.user_about, name='user_about'),
 
     # app/urls.py (既存のユーザー画面ビューのセクションに追記)
     # --------------------------------------------------

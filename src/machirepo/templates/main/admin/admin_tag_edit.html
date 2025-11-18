@@ -1,46 +1,38 @@
-{% extends 'top_base.html' %} 
+{% extends 'top_base_admin.html' %} 
 
-{% block title %}タグ編集 - まちレポ{% endblock %} 
+{% block title %}タグ編集{% endblock %} 
 
 {% block content %}
-<div class="app-container">
-    <header class="app-header">
-        <h1 class="title">まちレポ</h1>
-        <div>
-            <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
-        </div>
-    </header>
+
+
+<main class="main-content">
+    <a href="{% url "admin_tag_list" %}" class="link-secondary">&lt; タグ一覧に戻る</a>
+    <h2 style="font-size: 2rem; padding-top: -10rem; margin-left: 0rem;">タグの編集</h2>
     
-    <main class="main-content">
-        <a href="{% url 'admin_tag_list' %}" class="link-secondary" style="margin: 0 0 1.5rem 0; text-align: left;">&lt; タグ一覧に戻る</a>
+    <form class="form-group3" method="post">
+        {% csrf_token %}
         
-        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">タグ「{{ tag.name|default:"新規" }}」の編集</h2>
-        
-        <form class="form-group" method="post">
-            {% csrf_token %}
-            
-            {% for field in form %}
-                <div style="margin-bottom: 1rem;">
-                    <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">
-                        {{ field.label }}
-                    </label>
-                    {{ field }}
-                    
-                    {% for error in field.errors %}
-                        <p style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">{{ error }}</p>
-                    {% endfor %}
-                    
-                    {% if field.help_text %}
-                        <p style="color: #6b7280; font-size: 0.75rem; margin-top: 0.25rem;">{{ field.help_text }}</p>
-                    {% endif %}
-                </div>
-            {% endfor %}
+        {% for field in form %}
+            <div style="margin-bottom: 1rem;">
+                <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                
+                {% for error in field.errors %}
+                    <p style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">{{ error }}</p>
+                {% endfor %}
+                
+                {% if field.help_text %}
+                    <p style="color: #6b7280; font-size: 0.75rem; margin-top: 0.25rem;">{{ field.help_text }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem; margin-top: 1.5rem;">
-                保存する
-            </button>
-        </form>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem; margin-top: 1.5rem;">
+            保存する
+        </button>
+    </form>
 
-    </main>
-</div>
+</main>
 {% endblock %}

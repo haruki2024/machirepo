@@ -88,13 +88,36 @@ def user_logout_view(request):
 # -----------------------------------------------------
 @login_required
 def user_home(request):
-    latest_posts = models.PhotoPost.objects.exclude(status='not_required').order_by('-posted_at')[:2]
+    latest_posts = models.PhotoPost.objects.order_by('-posted_at')[:2]
     
     # 🌟 変更点: コンテキストのキーを 'latest_posts' に変更
     context = {'latest_posts': latest_posts} 
     
     # ① 住民は住民用トップ画面から「新規投稿を行う」を押す (リンクとして配置されることを想定)
     return render(request, 'main/user/user_home.html', context)
+
+@login_required
+def user_terms(request):
+    latest_posts = models.PhotoPost.objects.order_by('-posted_at')[:2]
+    
+    # 🌟 変更点: コンテキストのキーを 'latest_posts' に変更
+    context = {'latest_posts': latest_posts} 
+    
+    # ① 住民は住民用トップ画面から「新規投稿を行う」を押す (リンクとして配置されることを想定)
+    return render(request, 'main/user/user_terms.html', context)
+
+@login_required
+def user_about(request):
+    latest_posts = models.PhotoPost.objects.order_by('-posted_at')[:2]
+    
+    # 🌟 変更点: コンテキストのキーを 'latest_posts' に変更
+    context = {'latest_posts': latest_posts} 
+    
+    # ① 住民は住民用トップ画面から「新規投稿を行う」を押す (リンクとして配置されることを想定)
+    return render(request, 'main/user/user_about.html', context)
+
+
+
 
 
 @login_required
@@ -123,7 +146,7 @@ def post_history(request):
 
 
 def post_list(request):
-    posts = models.PhotoPost.objects.exclude(status='not_required').order_by('-posted_at')
+    posts = models.PhotoPost.objects.order_by('-posted_at')
     context = {'posts': posts}
     return render(request, 'main/user/user_post_list.html', context)
 
@@ -148,7 +171,6 @@ class UserProfileUpdateView(UpdateView):
     
     # 編集成功時のリダイレクト先
     def get_success_url(self):
-        messages.success(self.request, "アカウント情報を更新しました。")
         return reverse('user_edit_complete')
 
     # 編集対象のユーザーは現在ログイン中のユーザーに固定
@@ -277,11 +299,12 @@ def photo_post_manual_location(request):
     if not post_data:
         messages.error(request, "報告のデータが見つかりませんでした。最初からやり直してください。")
         return redirect('photo_post_create')
+        
     def is_valid_coord(val):
         try:
             # Noneまたは空文字列はFalse。数値に変換できるかチェック
             f_val = float(val)
-            # 初期値の '0.0' や 0.0 ではない有効な数値かを判定（微小な誤差も考慮）
+            # 初期値の '0.0' や 0.0 ではない有効な数値かを判定
             return abs(f_val) > 0.000001
         except (ValueError, TypeError):
             return False
@@ -289,41 +312,58 @@ def photo_post_manual_location(request):
     session_lat = post_data.get('latitude')
     session_lng = post_data.get('longitude')
     
-
-
+    # 自動取得に成功している場合のリダイレクト判定 (最初のステップで自動取得した場合)
     if is_valid_coord(session_lat) and is_valid_coord(session_lng):
-        logger.info("--- GEOLOCATION SUCCESS: Skipping manual step and redirecting to CONFIRM. ---")
-        
+        # ロギングは環境に合わせて調整してください
+        # logger.info("--- GEOLOCATION SUCCESS: Skipping manual step and redirecting to CONFIRM. ---") 
         return redirect('photo_post_confirm')
     
 
-
     if request.method == 'POST':
-        # 代替フロー④-2: 手動入力フォームからのPOST
-        # ManualLocationFormはlocation_nameを扱うフォームとして想定します。
-		
-        form = ManualLocationForm(request.POST)
-        if form.is_valid():
-            # location_nameをセッションデータに追加・更新
-            post_data.update(form.cleaned_data)
+        # ⭐ 代替フロー④-2: 手動設定画面からのPOSTリクエストを処理 (メインの修正箇所)
+
+        # 1. HTMLから送信された緯度と経度を直接取得
+        posted_lat = request.POST.get('latitude')
+        posted_lng = request.POST.get('longitude')
+
+        # 2. 取得した緯度/経度のバリデーションと変換
+        try:
+            lat = float(posted_lat)
+            lng = float(posted_lng)
+
+            # 3. 緯度・経度をセッションデータに追加・更新
+            post_data['latitude'] = lat
+            post_data['longitude'] = lng
+            
+            # (任意) location_nameを空またはデフォルト値でクリア/設定
+            # post_data['location_name'] = "" 
+
             request.session['post_data'] = post_data
             
-            # 代替フロー④-3: 投稿内容確認画面へリダイレクト
+            # 4. 投稿内容確認画面へリダイレクト
             return redirect('photo_post_confirm')
-        else:
-            # バリデーションに失敗した場合
-            messages.error(request, "入力された地名が正しくありません。") 
-
-    else:
-        # GETリクエストの場合 (自動取得に失敗、またはスキップしたためフォーム表示)
-        form = ManualLocationForm(initial=post_data)
         
+        except (TypeError, ValueError):
+            # 緯度・経度が数値として不正だった場合（この可能性は低い）
+            messages.error(request, "位置情報の値が不正です。再度地図で場所を選択してください。") 
+            # POST後にエラーが出た場合も、GETと同じテンプレートを表示し直す
+
+    # GETリクエストの場合、またはPOSTでエラーが出た場合
+    
+    # ManualLocationForm はここではもはや使用しない前提でコードを簡略化していますが、
+    # テンプレート側で 'manual_form' が必要な場合は、既存の form = ManualLocationForm(...) の行を残してください。
+    
+    # 例として既存の ManualLocationForm の行を残します。
+    from .forms import ManualLocationForm # forms.pyからのインポートが必要です
+    form = ManualLocationForm(initial=post_data) 
+    
     context = {
         'manual_form': form, 
         'post_data': post_data,
         'step': 2
     }
     return render(request, 'main/user/user_photo_post_manual_location.html', context)
+
 
 @login_required
 def photo_post_confirm(request):
@@ -459,7 +499,7 @@ def post_detail(request, post_id):
     """
     # IDで投稿を取得。存在しない、または「対応不要」の場合は404エラー
     post = get_object_or_404(
-        models.PhotoPost.objects.exclude(status='not_required'), # 🌟 'not_required' は除外
+        models.PhotoPost.objects, # 🌟 'not_required' は除外
         pk=post_id
     )
     
