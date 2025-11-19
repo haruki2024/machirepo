@@ -3,149 +3,7 @@
 {% block title %}管理者トップページ{% endblock %} 
 
 {% block content %}
-{% comment %} <body class="p-4 md:p-8">
-    <!-- ページコンテナとヘッダーのクラス名は、参照元HTMLに合わせ、Tailwindクラスから移行します -->
-    <div class="page-container">
-        <!-- app-headerとtitleクラスは外部CSS依存に変更 -->
-        <header class="app-header">
-            <div class="title">まちレポ 管理者ページ</div>
-            <!-- ログアウトリンク (urls.pyの'logout'を使用) -->
-            <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
-        </header>
 
-        <main class="main-content">
-            <!-- 管理メニューに戻るリンクのスタイルをインラインからCSSクラスに変更 -->
-            <a href="{% url 'admin_home' %}" class="link-secondary" style="margin: 0 0 1.5rem 0; text-align: left;">
-                 &lt; 管理メニューに戻る
-            </a>
-
-            <h2 style="font-size: 1.5rem; font-weight: 700;">報告の確認・記録</h2>
-            
-            <!-- フィルタリングフォームのレイアウトも参照元HTMLのスタイルに近づけるためTailwindクラスから移行 -->
-          
-            <!-- 報告テーブル -->
-
-
-            <form method="get" action="{% url 'admin_post_list' %}" id="filter-form" class="filter-container" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background-color: #f9fafb; padding: 1rem; border-radius: 8px;">
-                
-                <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="filter-status">ステータスで絞り込み</label>
-                    <select id="filter-status" name="status" class="form-select js-filter-select"> <option value="">すべて</option>
-                        {% for value, label in posts.model.STATUS_CHOICES %}
-                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="filter-tag">タグで絞り込み</label>
-                    <select id="filter-tag" name="tag" class="form-select js-filter-select"> <option value="">すべて</option>
-                        {% for tag in all_tags %}
-                        <option value="{{ tag.id }}" {% if tag_filter|safe == tag.id|safe %}selected{% endif %}>{{ tag.name }}</option>
-                        {% endfor %}    
-                    </select>
-                </div>
-                
-                <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="filter-priority">優先度で絞り込み</label>
-                    <select id="filter-priority" name="priority" class="form-select js-filter-select"> <option value="">すべて</option>
-                        {% for value, label in posts.model.PRIORITY_CHOICES %}
-                            <option value="{{ value }}" {% if priority_filter == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-            </form>
-                        
-
-            {% if not posts %}
-                <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
-                    <p style="color: #6b7280;">現在、新しい報告はありません。</p>
-                </div>
-            {% else %}
-
-                <div class="table-responsive">
-                    <table class="admin-table">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th>タイトル</th>
-                                <th>投稿日時</th>
-                                <th>カテゴリ</th>
-                                <th>報告者</th>
-                                <th>ステータス</th>
-                                <th>優先度</th>
-                                <th>詳細</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for post in posts %}
-                                <tr>
-                                    <td><div class="text-sm font-semibold text-gray-900 truncate" title="{{ post.title }}">{{ post.title|default:"(タイトルなし)" }}</div></td>
-                                
-                                    <!-- 投稿日時 -->
-                                    <td>{{ post.posted_at|date:"Y/m/d H:i" }}</td>
-                                    
-                                    <!-- タイトル / カテゴリ -->
-                                    <td>
-                                        
-                                        <span style="font-size: 0.75rem; color: #6b7280;">
-                                            {% if post.tags.first %}
-                                                タグ: {{ post.tags.first.name }}
-                                            {% else %}
-                                                (タグなし)
-                                            {% endif %}
-                                        </span>
-                                    </td>
-                                    
-                                    <!-- 報告者 -->
-                                    <td>
-                                        {% if post.user.username %}
-                                            {{ post.user.username }}
-                                        {% else %}
-                                            ユーザーが存在しません
-                                        {% endif %}
-                                    </td>
-                                    
-                                    <!-- ステータス (クラス名変更) -->
-                                    <td>
-                                        <span class="status-badge 
-                                            {% if post.status == 'new' %}status-new
-                                            {% elif post.status == 'in_progress' %}status-pending
-                                            {% elif post.status == 'completed' %}status-complete
-                                            {% elif post.status == 'not_required' %}status-not-applicable
-                                            {% endif %}">
-                                            {{ post.get_status_display }}
-                                        </span>
-                                    </td>
-                                    
-                                    <!-- 優先度 (クラス名変更) -->
-                                    <td>
-                                        {% if post.priority %}
-                                            <span class="priority-badge priority-{{ post.priority }}">
-                                                {{ post.get_priority_display }}
-                                            </span>
-                                        {% else %}
-                                            <span class="priority-badge priority-none">--</span>
-                                        {% endif %}
-                                    </td>
-
-                                    <!-- アクション -->
-                                    <td>
-                                        <!-- URL修正済み: 'admin_post_detail' を直接使用 -->
-                                        <a href="{% url 'admin_post_detail' post.id %}" class="link-primary">詳細を見る</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                
-            {% endif %}
-
-           
-            
-        </main>
-    </div> {% endcomment %}
 
 <main class="main-content">
     <a href="{% url "admin_home" %}" class="link-secondary">&lt; 管理メニューに戻る</a>
@@ -212,8 +70,8 @@
                             
                             <!-- タイトル / カテゴリ -->
                             <td>
-                                {% if post.tags.first %}
-                                    {{ post.tags.first.name }}
+                                {% if post.tag %}
+                                    {{ post.tag.name }}
                                 {% else %}
                                     (タグなし)
                                 {% endif %}

@@ -87,11 +87,13 @@ class PhotoPost(models.Model):
         verbose_name="写真"
     )
     
-    # 投稿が関連付けられているタグ（多対多の関係）
-    tags = models.ManyToManyField(
+    tag = models.ForeignKey(
         Tag, 
+        on_delete=models.SET_NULL, # 関連するTagが削除された場合にNULLを設定する
+        null=True,                 # データベースレベルでNULLを許可
+        blank=True,                # フォームレベルで空を許可
         related_name='photo_posts', 
-        verbose_name="カテゴリ"
+        verbose_name="メインカテゴリ"
     )
     
     latitude = models.DecimalField(
@@ -112,13 +114,6 @@ class PhotoPost(models.Model):
         verbose_name="経度"
     )
     
-    
-    # 地名（手動入力または取得した地名）
-    location_name = models.CharField(
-        max_length=255, 
-        blank=True, 
-        verbose_name="地名"
-    )
     
     posted_at = models.DateTimeField(
         default=timezone.now, 

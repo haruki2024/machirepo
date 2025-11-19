@@ -44,9 +44,9 @@
             <a id="drawer-close-button" role="button">&times;</a> 
         </div>
         <ul class="drawer-menu-list">
-            <li><a href="{%url "user_home" %}">トップページ</a></li>
+            <li><a href="{%url "user_home" %}">ホーム</a></li>
             <li><a href="{% url 'post_history' %}">投稿履歴の確認</a></li>
-            <li><a href="points.html">実績</a></li>
+            <li><a href="{% url "user_stamp" %}">実績</a></li>
             <li><a href="{% url "my_page" %}">マイページ</a></li>
             <li><a href="{% url "user_terms" %}">利用規約</a></li>
             <li><a href="{% url "user_about" %}">まちレポについて</a></li>

@@ -143,8 +143,8 @@ html, body {
         
         <div class="form-group">
             <label for="category">カテゴリ</label>
-            {{ form.tags }}
-            {% if form.tags.errors %}<div class="errorlist text-red-500 text-sm mt-1 list-none p-0">{% for error in form.tags.errors %}{{ error }}{% endfor %}</div>{% endif %}
+            {{ form.tag }}
+            {% if form.tag.errors %}<div class="errorlist text-red-500 text-sm mt-1 list-none p-0">{% for error in form.tag.errors %}{{ error }}{% endfor %}</div>{% endif %}
         </div>
         
         <div class="form-group">

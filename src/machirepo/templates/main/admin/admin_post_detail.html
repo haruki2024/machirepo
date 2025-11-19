@@ -60,90 +60,7 @@
     
 </style>
 
-{% comment %} <main class="main-content report-detail">
-    <a href="{% url "admin_post_list" %}" class="link-secondary">&lt; 一覧に戻る</a>
-    <h2 style="padding-top: -10rem; margin-left: 0rem;">報告の詳細</h2>
 
-    <div class="form-group mb-6">
-        <label class="block text-gray-700 font-medium mb-1">タイトル:</label>
-        <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap">{{ post.title|default:"(タイトルなし)" }}</p>
-    </div>
-
-    
-    <div class="form-group mb-6">
-        <label class="block text-gray-700 font-medium mb-2">写真:</label>
-        <div class="bg-gray-200 rounded-md overflow-hidden border border-gray-300 h-64">
-            {% if post.photo %}
-                <img src="{{ post.photo.url }}" alt="報告写真: {{ post.title }}" class="post-photo">
-            {% else %}
-                <div class="w-full h-full flex items-center justify-center text-gray-500">
-                    写真がありません
-                </div>
-            {% endif %}
-        </div>
-        
-    </div>
-    <div class="form-group mb-6">
-        <label class="block text-gray-700 font-medium mb-2">場所:</label>
-        <div class="bg-gray-50 rounded-md border border-gray-300 p-3">
-            <p class="text-gray-800">
-                {% if post.location_name %}
-                    {{ post.location_name }}
-                {% elif post.latitude and post.longitude %}
-                    {% if post.latitude and post.longitude %}
-                        <div class="form-group mb-6">
-                            <label class="block text-gray-700 font-medium mb-2">地図表示 (OpenStreetMap):</label>
-                            <div id="map-display"></div>
-                        </div>
-                    {% endif %}
-                {% else %}
-                    位置情報は記録されていません
-                {% endif %}
-            </p>
-        </div>
-    </div>
-
-    <div class="form-group mb-6">
-        <label class="block text-gray-700 font-medium mb-1">カテゴリ:</label>
-        <p class="text-gray-800">
-            {% if post.tags.first %}
-                {{ post.tags.first.name }}
-            {% else %}
-                (タグなし)
-            {% endif %}
-        </p>
-    </div>
-
-    <div class="form-group mb-6">
-        <label class="block text-gray-700 font-medium mb-1">詳細:</label>
-        <p class="bg-gray-50 p-3 border border-gray-300 rounded-md whitespace-pre-wrap">{{ post.comment | linebreaks }}</p>
-    </div>
-    
-    {% if post.admin_note %}
-    <div class="form-group mb-6 p-3 bg-indigo-50 border border-indigo-200 rounded-md">
-        <label class="block text-indigo-700 font-medium mb-1">管理者からのコメント:</label>
-        <p class="text-indigo-800 whitespace-pre-wrap">{{ post.admin_note | linebreaks}}</p>
-    </div>
-    {% endif %}
-
-
-
-    
-    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mt-8 pt-6 border-t border-gray-200">
-        <a href="{% url 'admin_post_status_edit' post_id=post.id %}" class="btn btn-primary flex-1 text-center py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-semibold transition duration-150">
-            ステータスを記録する
-        </a>
-        
-        <button type="button" onclick="openDeleteModal('{% if post.title %}{{ post.title|escapejs }}{% else %}タイトルなし{% endif %}')" class="btn btn-secondary" style="border: 1px solid #ef4444; color: #ef4444;">
-            この報告を削除する
-        </button>
-    </div>
-
-    
-    
-
-
-</main> {% endcomment %}
 
 
 <main class="main-content report-detail">
@@ -189,8 +106,8 @@
     <div class="form-group">
         <label>カテゴリ:</label>
         <p>
-            {% if post.tags.first %}
-                {{ post.tags.first.name }}
+            {% if post.tag %}
+                {{ post.tag.name }}
             {% else %}
                 (タグなし)
             {% endif %}

@@ -188,7 +188,7 @@ class PhotoPostForm(forms.ModelForm):
         }
     )
 
-    tags = forms.ModelChoiceField(
+    tag = forms.ModelChoiceField(
         queryset=models.Tag.objects.all().order_by('name'),
         empty_label="カテゴリーを選択してください",
         label="カテゴリ",
@@ -205,7 +205,7 @@ class PhotoPostForm(forms.ModelForm):
     class Meta:
         model = models.PhotoPost 
         # photoは必須。latitude, longitudeは次のステップで入力されるため、ここでは非必須扱い。
-        fields = ('title', 'photo', 'tags', 'comment', 'latitude', 'longitude')
+        fields = ('title', 'photo', 'tag', 'comment', 'latitude', 'longitude')
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -220,7 +220,7 @@ class PhotoPostForm(forms.ModelForm):
 
         # CSSクラスの適用
         for name, field in self.fields.items():
-            if name not in ['tags', 'photo', 'latitude', 'longitude']:
+            if name not in ['tag', 'photo', 'latitude', 'longitude']:
                 field.widget.attrs.update({
                     'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
                 })
@@ -228,7 +228,7 @@ class PhotoPostForm(forms.ModelForm):
                 field.widget.attrs.update({
                     'class': 'input-file-trick'
                 })
-            elif name == 'tags':
+            elif name == 'tag':
                 field.widget.attrs.update({
                     'class': 'form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
                 })

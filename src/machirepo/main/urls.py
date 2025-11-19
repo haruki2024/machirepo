@@ -23,6 +23,8 @@ urlpatterns = [
     
     path('terms/', views.user_terms, name='user_terms'),
     path('about/', views.user_about, name='user_about'),
+    
+    path('stamp/', views.user_stamp, name='user_stamp'),
 
     # app/urls.py (既存のユーザー画面ビューのセクションに追記)
     # --------------------------------------------------

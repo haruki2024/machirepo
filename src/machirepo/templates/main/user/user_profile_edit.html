@@ -13,7 +13,7 @@
 <main class="main-content form-page-main">
     
     
-    <form method="post" style="max-width: 400px; margin: 0 auto; padding: 2rem; ">
+    <form method="post" style="padding-top: 2rem; ">
         {% csrf_token %}
         <div class="form-group">
             <label for="edit-username">ユーザー名</label>
@@ -54,10 +54,7 @@
         
      
         <div class="form-submit-container" style="margin-top: 2rem;">
-                
-            <button type="submit" class="btn btn-primary btn-upload-mock">更新する</button>
-            
-            <a href="{% url 'my_page' %}" class="link-secondary" style="color: #374151; opacity: 1;">キャンセル</a>
+            <button type="submit" class="btn btn-primary">更新</button>
         </div>
 
         <div style="height: 2rem;"></div>

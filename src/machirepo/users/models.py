@@ -4,17 +4,9 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 class CustomUserManager(UserManager):
-    """カスタムUserモデルのためのマネージャ"""
     pass
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    """
-    first_nameとlast_nameフィールドを含まないカスタムユーザーモデル。
-    このモデルを使用するには、settings.pyでAUTH_USER_MODELに設定する必要があります。
-    
-    AbstractUserが持つグループやパーミッション機能はPermissionsMixinで維持されます。
-    """
-    
     # AbstractUserの主要なフィールドを再定義 (first_name, last_nameは省略)
     username = models.CharField(
         _("username"),

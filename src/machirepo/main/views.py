@@ -117,14 +117,63 @@ def user_about(request):
     return render(request, 'main/user/user_about.html', context)
 
 
+@login_required
+def user_stamp(request):
+
+    post_count = 0
+    card = 0
+    # 🌟 変更点: コンテキストのキーを 'latest_posts' に変更
+    
+    posts = PhotoPost.objects.filter(user=request.user).order_by('-posted_at') 
+    for i in posts:
+        post_count += 1
+    card = post_count / 10
+    if post_count > 10:
+        post_count -= (int(card)*10)
+
+    context = {
+                'stamp': range(post_count),
+                'notstamp':range(10-post_count),
+                'card':int(card),
+                }
+
+
+    print(post_count)
+    # ① 住民は住民用トップ画面から「新規投稿を行う」を押す (リンクとして配置されることを想定)
+    return render(request, 'main/user/user_stamp.html', context)
+
+
+
 
 
 
 @login_required
 def my_page(request):
-    my_posts = models.PhotoPost.objects.filter(user=request.user).order_by('-posted_at')
-    context = {'my_posts': my_posts}
+    posts = models.PhotoPost.objects.filter(user=request.user).order_by('-posted_at')
+    
+    post_count = 0
+    card = 0
+    
+    for i in posts:
+        post_count += 1
+    
+    card = int(post_count / 10)
+    
+    print(card)
+    if post_count > 10:
+        post_count -= (card*10)
+    
+    context = {
+                'user': request.user,
+                'posts': posts,
+                'card':int(card),
+                }
+    
     return render(request, 'main/user/user_mypage.html', context)
+
+
+
+
 
 @login_required
 def post_history(request):
@@ -153,22 +202,14 @@ def post_list(request):
 
 
 
-@login_required
-def my_page(request):
-    """マイページ"""
-    context = {
-        'user': request.user,
-    }
-    return render(request, 'main/user/user_mypage.html', context)
-
-
 @method_decorator(login_required, name='dispatch')
 class UserProfileUpdateView(UpdateView):
     """ユーザー情報編集"""
     model = get_user_model()
     form_class = UserUpdateForm 
     template_name = 'main/user/user_profile_edit.html'
-    
+     
+
     # 編集成功時のリダイレクト先
     def get_success_url(self):
         return reverse('user_edit_complete')
@@ -196,7 +237,7 @@ def photo_post_create(request):
     
     # 【ステップ1クリーンアップ】
     if request.method == 'GET':
-        keys_to_remove = ['latitude', 'longitude', 'title', 'tags', 'comment', 'photo_path'] 
+        keys_to_remove = ['latitude', 'longitude', 'title', 'tag_pk', 'comment', 'photo_path'] 
         
         if any(k in post_data for k in keys_to_remove):
             if 'photo_path' in post_data and post_data['photo_path']:
@@ -225,19 +266,17 @@ def photo_post_create(request):
         
         if form.is_valid():
             
-            cleaned_tag = form.cleaned_data['tags']
+            cleaned_tag = form.cleaned_data['tag'] 
             tag_pk_to_save = cleaned_tag.pk if cleaned_tag else None
             
             current_photo_path = post_data.get('photo_path')
-            
-		
+        
 
 
             new_post_data = {
                 'title': form.cleaned_data['title'],
                 'comment': form.cleaned_data['comment'],
-                'tags': tag_pk_to_save, 
-                
+                'tag_pk': tag_pk_to_save,
                 'latitude': request.POST.get('latitude', '0.0'),   
                 'longitude': request.POST.get('longitude', '0.0'),
 			}
@@ -275,16 +314,14 @@ def photo_post_create(request):
     else:
         initial_data = post_data.copy()
         
-        tag_pk = initial_data.get('tags') 
+        tag_pk = initial_data.get('tag_pk')
         if tag_pk:
             try:
-                # ModelChoiceFieldがPKを受け付けるので、Tagインスタンスを渡す
-                initial_data['tags'] = models.Tag.objects.get(pk=tag_pk) 
+                initial_data['tag'] = models.Tag.objects.get(pk=tag_pk) 
             except (models.Tag.DoesNotExist, ValueError):
-                initial_data['tags'] = None
+                initial_data['tag'] = None
                 
         form = PhotoPostForm(initial=initial_data)
-        print("--- DEBUG: Rendering Step 1 Form ---") # GETリクエストの確認
     
     # ② システムは投稿画面を表示する
     return render(request, 'main/user/user_photo_post_create.html', {'form': form, 'step': 1})
@@ -348,12 +385,6 @@ def photo_post_manual_location(request):
             messages.error(request, "位置情報の値が不正です。再度地図で場所を選択してください。") 
             # POST後にエラーが出た場合も、GETと同じテンプレートを表示し直す
 
-    # GETリクエストの場合、またはPOSTでエラーが出た場合
-    
-    # ManualLocationForm はここではもはや使用しない前提でコードを簡略化していますが、
-    # テンプレート側で 'manual_form' が必要な場合は、既存の form = ManualLocationForm(...) の行を残してください。
-    
-    # 例として既存の ManualLocationForm の行を残します。
     from .forms import ManualLocationForm # forms.pyからのインポートが必要です
     form = ManualLocationForm(initial=post_data) 
     
@@ -405,21 +436,27 @@ def photo_post_confirm(request):
         photo_path = post_data.get('photo_path') # ステップ1で保存した一時ファイルパスを取得
         
         try:
-            # safe_float() を使用して値を Decimal 型で取得
             latitude_val = safe_float(post_data.get('latitude'))
             longitude_val = safe_float(post_data.get('longitude'))
-  
-            # 1. セッションデータからインスタンスを作成
             new_post = models.PhotoPost(
                 user=request.user,
                 title=post_data.get('title'), 
                 comment=post_data.get('comment'),
-                latitude=latitude_val, # Decimalオブジェクトが渡される
-                longitude=longitude_val, # Decimalオブジェクトが渡される
-                location_name=post_data.get('location_name', '')
+                latitude=latitude_val, 
+                longitude=longitude_val,
             )
+
+            tag_pk = post_data.get('tag_pk') 
+            if tag_pk:
+                try:
+                    tag_instance = models.Tag.objects.get(pk=tag_pk)
+                    new_post.tag = tag_instance
+                except models.Tag.DoesNotExist:
+                    logger.warning(f"投稿保存時にタグID {tag_pk} が見つかりませんでした。タグなしで保存されます。")
+                    new_post.tag = None
+            else:
+                new_post.tag = None
             
-            # 2. 画像ファイルをファイルパスから読み込み、インスタンスにセット
             if photo_path and fs.exists(fs.path(photo_path)):
                 with fs.open(photo_path, 'rb') as f:
                     file_name = os.path.basename(photo_path)
@@ -428,22 +465,20 @@ def photo_post_confirm(request):
             else:
                 logger.error(f"FATAL: Temporary photo file not found at path: {photo_path}")
                 raise ValidationError({'photo': '一時的な写真ファイルが見つからないか、有効期限切れです。'})
+            
 
-            # 3. モデルの検証と保存 (ここで full_clean() が実行され、エラーが解消されるはず)
+
+            if tag_pk:
+                print(f"--- DEBUG SAVE: Tag PK={tag_pk} found. Tag instance ID to save: {new_post.tag.pk}")
+            else:
+                print("--- DEBUG SAVE: Tag is None. ---")
+           
             new_post.full_clean()
             new_post.save()
             
-            # 4. ManyToManyField (タグ) を保存
-            tag_pk = post_data.get('tags') 
-            if tag_pk:
-                try:
-                    tag_instance = models.Tag.objects.get(pk=tag_pk)
-                    new_post.tags.set([tag_instance]) 
-                except models.Tag.DoesNotExist:
-                    logger.warning(f"投稿保存時にタグID {tag_pk} が見つかりませんでした。タグなしで保存されます。")
-                    new_post.tags.clear()
-            else:
-                new_post.tags.clear()
+            
+            
+            
             
             # 5. 成功したらセッションデータをクリアし、一時ファイルを削除
             del request.session['post_data']
@@ -468,7 +503,7 @@ def photo_post_confirm(request):
             messages.error(request, f"**投稿通信エラー**：報告の保存中に予期せぬエラーが発生しました。再度投稿してください。エラー: {e}")
             return redirect('photo_post_create')
             
-    tag_pk = post_data.get('tags')
+    tag_pk = post_data.get('tag_pk')
     selected_tag = None
     if tag_pk:
         try:
@@ -504,8 +539,7 @@ def post_detail(request, post_id):
     )
     
     # 関連タグを取得
-    selected_tag = post.tags.first() # 最初のタグを取得
-    
+    selected_tag = post.tag
     context = {
         'post': post,
         'selected_tag': selected_tag,
@@ -599,8 +633,8 @@ def admin_post_list(request):
     tag_filter = request.GET.get('tag', None)
     priority_filter = request.GET.get('priority', None)
 
-    posts = models.PhotoPost.objects.all().select_related('user').prefetch_related('tags').order_by('-posted_at')
-
+    posts = models.PhotoPost.objects.all().select_related('user').select_related('tag').order_by('-posted_at')
+  
     valid_statuses = dict(models.PhotoPost.STATUS_CHOICES).keys()
     if status_filter in valid_statuses:
         posts = posts.filter(status=status_filter)
@@ -608,7 +642,7 @@ def admin_post_list(request):
     if tag_filter:
         try:
             tag_id = int(tag_filter)
-            posts = posts.filter(tags__id=tag_id)
+            posts = posts.filter(tag__id=tag_id)
         except ValueError:
             
             pass

@@ -46,11 +46,9 @@
         <p style="background-color: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; margin:0;">
             {% if selected_tag %}
                 <span>{{ selected_tag.name }}</span>
-            {% elif post_data.tags is not None %}
-                {# post_data.tags が None ではなく、Tagが見つからなかった場合（エラー処理） #}
+            {% elif post_data.tag is not None %}
                 カテゴリ情報にエラー
             {% else %}
-                {# post_data.tags が None の場合（選択なし） #}
                 カテゴリなし
             {% endif %}
             

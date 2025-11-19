@@ -33,21 +33,39 @@
         <label>保有バッジ</label>
         
         <div class="badge-display-container" style="margin-top: 0; background-color: transparent; border: none; box-shadow: none; padding: 0; justify-content: flex-start; gap: 0.25rem;">
-            
+            {% if card == 0 %}
+            <div class="badge-item" style="width: auto;">
+                <span class="detail-data-text">現在保有しているバッジはありません</span>
+            </div>
+            {% endif %}
+            {% if card >= 1 %}
             <div class="badge-item" style="width: auto;">
                 <img src="/media/images/badge_bronze.png" alt="銅バッジ" class="badge-image">
             </div>
+            {% endif %}
+            {% if card >= 2 %}
             <div class="badge-item" style="width: auto;">
                 <img src="/media/images/badge_silver.png" alt="銀バッジ" class="badge-image">
-            </div>
+            </div> 
+            {% endif %}
+            {% if card >= 3 %}
+            <div class="badge-item" style="width: auto;">
+                <img src="/media/images/badge_gold.png" alt="金バッジ" class="badge-image">
+            </div> 
+            {% endif %}
+            {% if card >= 4 %}
+            <div class="badge-item" style="width: auto;">
+                <img src="/media/images/badge_rainbow.png" alt="虹バッジ" class="badge-image">
+            </div> 
+            {% endif %}
             
         </div>
         
     </div>
 
     <div class="form-submit-container" style="margin-top: 2rem; text-align: left;">
-        <a href="{% url 'user_profile_edit' %}" class="btn btn-primary ">編集</a>
-        <a href="{% url 'user_password_change' %}" class="btn btn-secondary" style="text-align: center; padding: 0.75rem;">
+        <a href="{% url 'user_profile_edit' %}" class="btn btn-primary " style="margin-bottom: 1rem;">編集</a>
+        <a href="{% url 'user_password_change' %}" class="btn btn-primary" >
             パスワードを変更
         </a>
     </div>
