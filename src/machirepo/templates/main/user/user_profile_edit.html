@@ -1,57 +1,61 @@
 {% extends 'top_base.html' %}
 
-{% block title %}アカウント編集 - まちレポ{% endblock %}
+{% block title %}ユーザー情報編集{% endblock %}
 
 {% block content %}
-    <div class="app-container">
-        <header class="app-header">
-            <h1 class="title">アカウント編集</h1>
-            <div>
-                <a href="{% url 'my_page' %}" class="header-link">マイページへ</a>
-                <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
-            </div>
-        </header>
-        
-        <main class="main-content">
-            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center;">
-                ユーザー情報編集
-            </h2>
-            
-            <form method="post" style="max-width: 400px; margin: 0 auto; padding: 2rem; background-color: #ffffff; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                {% csrf_token %}
-                
-                {% if form.non_field_errors %}
-                    <div class="error-box" style="margin-bottom: 1rem; padding: 0.75rem; background-color: #fee2e2; color: #b91c1c; border-radius: 4px;">
-                        {% for error in form.non_field_errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
+  
+
+<div class="sub-header">
+    <a href="{% url 'my_page' %}" class="back-link">&lt; 戻る</a>
+    <h2 class="page-title">ユーザー情報編集</h2>
+</div>
+
+<main class="main-content form-page-main">
+    
+    
+    <form method="post" style="padding-top: 2rem; ">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="edit-username">ユーザー名</label>
+            {{ form.username }}
+        </div>
+
+
+
+        <div class="badge-select-container">
+            {% for value, label in form.fields.badge_rank.choices %}
+            <label class="badge-radio-label">
+                <input type="radio" name="badge_rank" value="{{ value }}" {% if form.initial.badge_rank == value %}checked{% endif %}>
+                {% if value != 'none' %}
+                    <img src="/media/images/badge_{{ value }}.png" alt="{{ label }}" class="badge-image">
+                {% else %}
+                    <span class="badge-label-text">取得できているバッジは存在しません</span>
                 {% endif %}
+            </label>
+            {% endfor %}
 
-                {% for field in form %}
-                    <div style="margin-bottom: 1rem;">
-                        <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
-                        {% for error in field.errors %}
-                            <p style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem;">{{ error }}</p>
-                        {% endfor %}
-                        {% if field.help_text %}
-                            <p style="color: #6b7280; font-size: 0.75rem; margin-top: 0.25rem;">{{ field.help_text|safe }}</p>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem; margin-top: 1.5rem;">
-                    完了 (変更を保存)
-                </button>
-            </form>
-
-            <div style="text-align: center; margin-top: 1.5rem;">
-                <a href="{% url 'my_page' %}" class="link-secondary">&lt; 編集せずにマイページに戻る</a>
-            </div>
             
-        </main>
-    </div>
+        </div>
+
+
+
+
+
+
+        <div class="form-group">
+            <label for="edit-email">メールアドレス</label>
+            {{ form.email }}
+        </div>
+        
+     
+        <div class="form-submit-container" style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">更新</button>
+        </div>
+
+        <div style="height: 2rem;"></div>
+    </form>
+</main>
+
+
+
 {% endblock %}

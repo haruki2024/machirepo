@@ -1,20 +1,19 @@
 {% extends 'top_base.html' %}
 
-{% block title %}編集完了 - まちレポ{% endblock %}
+{% block title %}ユーザー情報更新完了{% endblock %}
 
 {% block content %}
-
-<div class="app-container">
-    <main class="main-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-
-        <img src="/media/images/koemy_bow.png" alt="コエミィ" style="width: 150px; height: auto;">
-
-        <h2 style="font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem;">ユーザー情報の更新が完了しました</h2>
-        
-        
-        <div style="width: 100%; max-width: 20rem; margin-top: 2.5rem;">
-            <a href="{% url 'user_home' %}" class="btn btn-primary">ホームに戻る</a>
-        </div>
-    </main>
+<div class="sub-header">
+    <a href="{% url "my_page" %}" class="back-link">&lt; マイページへ</a>
+    <h2 class="page-title">更新完了</h2>
 </div>
+<main class="main-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <img src="/media/images/koemy_bow.png" alt="コエミィ" style="width: 150px; height: auto;">
+
+    <h2 style="font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem;">ユーザー情報の更新が完了しました</h2>
+    
+    <div style="width: 100%; max-width: 20rem; margin-top: 2.5rem;">
+        <a href="{% url 'my_page' %}" class="btn btn-primary">マイページに戻る</a>
+    </div>
+</main>
 {% endblock %}

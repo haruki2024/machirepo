@@ -1,8 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User # ユーザー提供のコードに基づく
 from django.utils import timezone
-import uuid # UUIDフィールドは使用しないが、念のためimportは残しておく
-# from taggit.managers import TaggableManager # TaggableManagerは使用しない
+import uuid 
+from django.conf import settings
 
 
 # 投稿のカテゴリー分けに使用するタグモデル
@@ -62,21 +61,18 @@ class PhotoPost(models.Model):
     # -----------------------------------------------------
     # 報告投稿時に必要なフィールド (ユーザー提供のコードに基づく)
     # -----------------------------------------------------
-    # IDフィールドは暗黙的に作成されるため、ここでは定義しない
 
     user = models.ForeignKey(
-        User, 
+        settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
         verbose_name="投稿ユーザー"
     )
     
-    # ★修正点: titleを非必須にする (null=True, blank=Trueを設定)★
     title = models.CharField(
         max_length=100, 
         verbose_name="タイトル",
-        blank=True # フォームで空入力を許可（Step 1通過のため）
+        blank=True
     )
-    
     
     comment = models.TextField(
         blank=True, 
@@ -88,38 +84,32 @@ class PhotoPost(models.Model):
         verbose_name="写真"
     )
     
-    # 投稿が関連付けられているタグ（多対多の関係）
-    tags = models.ManyToManyField(
+    tag = models.ForeignKey(
         Tag, 
+        on_delete=models.SET_NULL, 
+        null=True,                 
+        blank=True,                
         related_name='photo_posts', 
-        verbose_name="カテゴリ"
+        verbose_name="メインカテゴリ"
     )
     
     latitude = models.DecimalField(
         max_digits=30,
         decimal_places=25,
-        null=True,        # データベースレベルでNULLを許可
-        blank=True,       # フォームレベルで空を許可
+        null=True,        
+        blank=True,       
         verbose_name="緯度"
     )
 
-    # 経度 (Longitude):
-    # 同様に、null=True, blank=True を追加します。
+    
     longitude = models.DecimalField(
         max_digits=30,
         decimal_places=25,
-        null=True,        # データベースレベルでNULLを許可
-        blank=True,       # フォームレベルで空を許可
+        null=True,
+        blank=True,
         verbose_name="経度"
     )
     
-    
-    # 地名（手動入力または取得した地名）
-    location_name = models.CharField(
-        max_length=255, 
-        blank=True, 
-        verbose_name="地名"
-    )
     
     posted_at = models.DateTimeField(
         default=timezone.now, 
@@ -127,7 +117,6 @@ class PhotoPost(models.Model):
     )
     
     def __str__(self):
-        # ユーザー提供の__str__メソッドを尊重
         return f"{self.title or 'タイトルなし'} by {self.user.username} ({self.posted_at.strftime('%Y-%m-%d')})"
     
     class Meta:

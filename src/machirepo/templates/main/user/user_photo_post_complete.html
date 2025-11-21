@@ -1,15 +1,16 @@
 {% extends 'top_base.html' %} 
 
-{% load static %}
 
 {% block title %}投稿完了{% endblock %} 
 
 
 {% block content %}
-
-
-<div class="app-container">
-    <main class="main-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+<div class="sub-header">
+    <a href="{% url "user_home" %}" class="back-link">&lt; ホームへ</a>
+    <h2 class="page-title">投稿完了</h2>
+</div>
+<main class="main-content list-page-main">
+    <div class="content-wrapper" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; flex-grow: 1; padding: 1.5rem 0;">
 
         <img src="/media/images/koemy_bow.png" alt="コエミィ" style="width: 150px; height: auto;">
 
@@ -17,9 +18,11 @@
         <p style="color: #6b7280; margin-top: 0.5rem;">ご報告ありがとうございました。</p>
         
         <div style="width: 100%; max-width: 20rem; margin-top: 2.5rem;">
-            <a href="{% url 'user_home' %}" class="btn btn-primary">ホームに戻る</a>
+            <a href="{% url "user_home" %}" class="btn btn-primary">ホームに戻る</a>
         </div>
-    </main>
-</div>
+
+    </div>
+    
+</main>
     
 {% endblock %}

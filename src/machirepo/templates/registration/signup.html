@@ -1,52 +1,50 @@
 {% extends 'base.html' %} 
 {% load static %}
 
-{% block title %}新規登録 - まちレポ{% endblock %}
+{% block title %}新規登録{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">新規登録</h2>
-    
+
+
+<main class="form-container">
     <form method="post" action="{% url 'signup' %}" style="display: contents;" >
         {% csrf_token %}
-
-        {% if form.non_field_errors %}
-            <div class="error-box">
-                {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; text-align: center; color: #1f2937;">新規登録</h2>
+            
+            <div class="form-group">
+                <label for="signup-name">ユーザー名</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.username.errors }}</p>
+                {% endif %}
             </div>
-        {% endif %}
+            <div class="form-group">
+                <label for="signup-email">メールアドレス</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <p style="color: red; font-size: 0.85rem;">{{ form.email.errors.as_text }}</p>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="signup-password">パスワード</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <p style="color: red; font-size: 0.85rem;">{{ form.password.errors.as_text }}</p>
+                {% endif %}
+            </div>
+            
+            <p>{{ form.agree_terms }}<a href="{% url 'user_terms' %}" style="color:red; ">利用規約</a>に同意します</p>
+            
+                
 
-        <div class="form-group">
-            <label for="{{ form.username.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">ユーザー名</label>
-            {{ form.username }}
-            {% if form.username.errors %}
-                <p class="text-red-500 text-xs italic">{{ form.username.errors }}</p>
-            {% endif %}
-        </div>
-        
-        <div class="form-group">
-            <label for="{{ form.email.id_for_label }}">メールアドレス</label>
-            {{ form.email }}
-            {% if form.email.errors %}
-                <p style="color: red; font-size: 0.85rem;">{{ form.email.errors.as_text }}</p>
-            {% endif %}
-        </div>
 
-        <div class="form-group">
-            <label for="{{ form.password.id_for_label }}">パスワード</label>
-            {{ form.password }}
-            {% if form.password.errors %}
-                <p style="color: red; font-size: 0.85rem;">{{ form.password.errors.as_text }}</p>
-            {% endif %}
-        </div>
-
-        <div style="margin-top: auto;">
-            <button type="submit" class="btn btn-primary">登録する</button> 
-            <a href="{% url 'index' %}" class="link-secondary">戻る</a> 
-        </div>
+            <div style="margin-top: 2.5rem; text-align: center;">
+                <button type="submit"class="btn btn-primary ">登録</button>
+                <a href="{% url 'index' %}" class="link-secondary">&lt;戻る</a>
+            </div>
     </form>
-</div>
+</main>
+
+
 
 {% endblock content %}

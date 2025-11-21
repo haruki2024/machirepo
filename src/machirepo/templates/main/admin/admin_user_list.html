@@ -1,83 +1,74 @@
-{% extends 'top_base.html' %} 
+{% extends 'top_base_admin.html' %} 
 
 {% block title %}ユーザー管理{% endblock %} 
 
 {% block content %}
 
-    <!-- 背景となるユーザー一覧ページ -->
-    <div class="page-container">
-        <header class="app-header">
-            <div class="title">まちレポ 管理者ページ</div>
-            <!-- ログアウトリンクはDjango URLで動的に -->
-            <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
-        </header>
-        <main class="main-content">
-            <!-- 管理メニューへのリンクもDjango URLで動的に -->
-            <a href="{% url 'admin_home' %}" class="link-secondary" style="margin: 0 0 1.5rem 0; text-align: left;">&lt; 管理メニューに戻る</a>
-            <h2 style="font-size: 1.5rem; font-weight: 700;">ユーザー管理</h2>
-            
-            {% if not users %}
-                <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
-                    <p style="color: #6b7280;">現在、ユーザーはいません。</p>
-                </div>
+<main class="main-content">
+    <a href="{% url 'admin_home' %}" class="link-secondary">&lt; 管理メニューに戻る</a>
+    <h2>ユーザー管理</h2>
+    
 
-            {% else %}
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>氏名</th>
-                            <th>メールアドレス</th>
-                            <th>登録日</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr>
-                            <td>{{ user.username }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>{{ user.date_joined|date:"Y/m/d" }}</td>
-                            
-                            <td>
-                                <!-- 削除リンク: JS関数を呼び出し、URLを渡す -->
-                                <a href="#" 
-                                onclick="confirmDelete('{{ user.username }}', '{% url 'admin_user_delete_confirm' user_id=user.id %}')" 
-                                style="color: #ef4444;">削除</a>
-                            </td>
-                        </tr>
-                            
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
-        </main>
+
+
+    {% if not users %}
+        <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
+            <p style="color: #6b7280;">現在、ユーザーはいません。</p>
+        </div>
+
+    {% else %}
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>氏名</th>
+                    <th>メールアドレス</th>
+                    <th>登録日</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.date_joined|date:"Y/m/d" }}</td>
+                    
+                    <td>
+                        <!-- 削除リンク: JS関数を呼び出し、URLを渡す -->
+                        <a href="#" 
+                        onclick="confirmDelete('{{ user.username }}', '{% url 'admin_user_delete_confirm' user_id=user.id %}')" 
+                        style="color: #ef4444;">削除</a>
+                    </td>
+                </tr>
+                    
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+    {% endif %}
+</main>
 
-    <!-- ★★★ 確認モーダル (動的な機能に合わせてIDとフォームを追加) ★★★ -->
-    <div id="deleteModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="margin-top: 0;">本当にこのユーザーを削除しますか？</h3>
-            <!-- 削除対象のユーザー名を表示するプレースホルダー -->
+
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin-top: 0;">本当にこのユーザーを削除しますか？</h3>
+        <p style="color: #6b7280; margin-bottom: 1.5rem;">この操作は取り消せません。</p>
+        
+        <div class="modal-actions">
+            <button type="button" onclick="closeModal()" class="btn btn-secondary" style="flex: 1; margin-top: 0;">
+                キャンセル
+            </button>
             
-            <p style="color: #6b7280; margin-bottom: 1.5rem;">この操作は取り消せません。</p>
-            
-            <div class="modal-actions">
-                <!-- キャンセルボタン: JSでモーダルを閉じる -->
-                <button type="button" onclick="closeModal()" class="btn btn-secondary" style="flex: 1; margin-top: 0;">
-                    キャンセル
+            <form id="deleteForm" method="post" action="" style="display: inline; flex: 1;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" style="width: 100%;">
+                    削除
                 </button>
-                
-                <!-- 削除実行フォーム: JSでactionが設定され、POST送信される -->
-                <form id="deleteForm" method="post" action="" style="display: inline; flex: 1;">
-                    {% csrf_token %}
-                    <!-- 削除ボタン -->
-                    <button type="submit" class="btn btn-danger" style="width: 100%;">
-                        削除
-                    </button>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
+</div>
 
     <!-- ★★★ JavaScript (モーダル制御) ★★★ -->
     <script>

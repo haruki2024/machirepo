@@ -5,32 +5,23 @@
 
 {% block content %}
 <div class="form-container">
-    <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; text-align:center;">まちレポ ログイン</h2>
-      
+    <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; text-align:center; color: #1f2937;">まちレポ ログイン</h2>
+    
     <form method="post" >
         {% csrf_token %}
-
-        {% if form.non_field_errors %}
-            <div class="error-box">
-                {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
-
         <div class="form-group">
-            <label for="{{ form.username.id_for_label }}">メールアドレス</label> 
+            <label for="login-email">メールアドレス</label>
             {{ form.username }}
-            </div>
-        
-        <div class="form-group">
-            <label for="{{ form.password.id_for_label }}">パスワード</label>
-            {{ form.password }}
-            </div>
-        <div style="margin-top: 2rem;">
-            <button type="submit" class="btn btn-primary">ログイン</button>
-            <a href="{% url 'index' %}" class="link-secondary">トップページに戻る</a>
         </div>
+        <div class="form-group">
+            <label for="login-password">パスワード</label>
+            {{ form.password }}
+        </div>
+  
+            <button type="submit" class="btn btn-primary">ログイン</button>
+            
+            <a href="{% url 'index' %}" class="link-secondary" style="color: #374151; opacity: 1;">&lt; 戻る</a>
     </form>
 </div>
+
 {% endblock %}

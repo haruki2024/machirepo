@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model 
 from django.core.validators import MinLengthValidator
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.core.exceptions import ValidationError
 from .models import PhotoPost, Tag 
 from . import models 
 
@@ -11,6 +12,7 @@ Resident = get_user_model()
 # -----------------------------------------------------
 # 1. 新規登録フォーム (ResidentCreationForm)
 # -----------------------------------------------------
+
 class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
     # Userモデルのusernameフィールドを氏名として再定義（ニックネームとして使用）
     username = forms.CharField(
@@ -29,54 +31,55 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
         required=True
     )
     
-    # パスワードフィールドをカスタムで追加
     password = forms.CharField(label='パスワード', widget=forms.PasswordInput)
+  
+
+
+    agree_terms = forms.BooleanField(
+        label='利用規約に同意する',
+        required=True,
+        error_messages={'required': '利用規約への同意が必要です。'}
+    )
+
+
 
     class Meta:
         model = User
-        # last_name, first_name を完全にfieldsから削除。
         fields = ('username', 'email') 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # 💡 新規作成時のみ、last_name/first_nameのフィールドをバリデーションリストから除外する。
-        # (これにより、フォームがモデルの必須チェックをスキップしようとする)
         if not self.instance.pk:
             if 'last_name' in self.fields:
                 self.fields['last_name'].required = False
             if 'first_name' in self.fields:
                 self.fields['first_name'].required = False
         
-        # スタイル設定
-        password_attrs = {
+        common_attrs = {
             'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
         }
-        self.fields['password'].widget.attrs.update(password_attrs)
         
-        # その他のフィールドにスタイルを適用
         for name, field in self.fields.items():
-            if name not in ['password', 'password2']:
-                field.widget.attrs.update({
-                    'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
-                })
+            field.widget.attrs.update(common_attrs)
+    
+    def clean_agree_terms(self):
+        if not self.cleaned_data.get('agree_terms'):
+            raise ValidationError('利用規約に同意してください。')
+        return True
+
 
     # ------------------------------------------------------------------
     # clean(): バリデーションとパスワードの一致チェック
     # ------------------------------------------------------------------
     def clean(self):
         cleaned_data = super().clean()
+        # 💡 修正点: password2 の取得と一致チェックを削除しました
         password = cleaned_data.get('password')
-        password2 = cleaned_data.get('password2')
         email = cleaned_data.get('email')
-
-        # 💡 パスワード一致チェック
-        if password and password2 and password != password2:
-            self.add_error('password2', 'パスワードが一致しません。')
 
         # 💡 emailの重複チェック
         if email and User.objects.filter(email__iexact=email).exists():
-            # ModelFormは既にこのチェックを行う場合があるが、明示的に再度チェック
             self.add_error('email', "このメールアドレスは既に使用されています。")
 
         return cleaned_data
@@ -86,14 +89,9 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
     # ------------------------------------------------------------------
     def save(self, commit=True):
         # ModelFormのsave()に頼らず、Userインスタンスを直接作成
-        # これにより、ModelFormの自動バリデーションとクリーンアップを完全に回避し、
-        # 必要なフィールドだけを渡すことができる。
         user = User(
             username=self.cleaned_data["username"], 
             email=self.cleaned_data["email"],
-            # last_name, first_name が必須な場合を考慮し、空文字をセットしてインスタンスを作成
-            last_name="", 
-            first_name="", 
             is_staff=False,
             is_superuser=False,
         )
@@ -106,6 +104,8 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
         if commit:
             user.save() 
         return user
+
+
 
 # -----------------------------------------------------
 # 2. ログインフォーム (EmailAuthenticationForm)
@@ -156,26 +156,37 @@ class EmailAuthenticationForm(AuthenticationForm):
 
 User = get_user_model()
 
-# 🌟 新規追加: ユーザー名とメールアドレス編集用フォーム
 class UserUpdateForm(forms.ModelForm):
-    # パスワードは別の画面で変更するため、含めない
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = ('username', 'email', 'badge_rank')  # ← 追加
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-input'}),
             'email': forms.EmailInput(attrs={'class': 'form-input'}),
+            'badge_rank': forms.RadioSelect(attrs={'class': 'hidden-radio'}),
         }
+
+
     
-    # バリデーションの例: ユーザー名が一意であることを確認
+    def __init__(self, *args, **kwargs):
+        badge_choices = kwargs.pop('badge_choices', [('none', '表示しない')])
+        super().__init__(*args, **kwargs)
+        self.fields['badge_rank'].choices = badge_choices
+
+        # 現在のバッジが選択肢にない場合は 'none' に初期化
+        if self.instance.badge_rank not in [b[0] for b in badge_choices]:
+            self.initial['badge_rank'] = 'none'
+
+
+    
+
+
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        
-        # 自身を除く他のユーザーで同じユーザー名が存在するかチェック
         if User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
-             raise forms.ValidationError("このユーザー名は既に使用されています。")
+            raise forms.ValidationError("このユーザー名は既に使用されています。")
         return username
-
+    
 
 
 
@@ -195,7 +206,7 @@ class PhotoPostForm(forms.ModelForm):
         }
     )
 
-    tags = forms.ModelChoiceField(
+    tag = forms.ModelChoiceField(
         queryset=models.Tag.objects.all().order_by('name'),
         empty_label="カテゴリーを選択してください",
         label="カテゴリ",
@@ -212,7 +223,7 @@ class PhotoPostForm(forms.ModelForm):
     class Meta:
         model = models.PhotoPost 
         # photoは必須。latitude, longitudeは次のステップで入力されるため、ここでは非必須扱い。
-        fields = ('title', 'photo', 'tags', 'comment', 'latitude', 'longitude')
+        fields = ('title', 'photo', 'tag', 'comment', 'latitude', 'longitude')
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -227,15 +238,15 @@ class PhotoPostForm(forms.ModelForm):
 
         # CSSクラスの適用
         for name, field in self.fields.items():
-            if name not in ['tags', 'photo', 'latitude', 'longitude']:
+            if name not in ['tag', 'photo', 'latitude', 'longitude']:
                 field.widget.attrs.update({
                     'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
                 })
             elif name == 'photo':
                 field.widget.attrs.update({
-                    'class': 'w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none'
+                    'class': 'input-file-trick'
                 })
-            elif name == 'tags':
+            elif name == 'tag':
                 field.widget.attrs.update({
                     'class': 'form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
                 })

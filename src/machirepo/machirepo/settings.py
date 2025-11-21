@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
     'main',  
 ]
 
@@ -97,7 +98,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-
+AUTH_USER_MODEL = 'users.CustomUser'
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -109,7 +110,8 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+ALLOWED_HOSTS = ['10.251.112.251', '127.0.0.1', 'localhost']
+# ALLOWED_HOSTS = ['192.168.68.51', '127.0.0.1', 'localhost']
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 

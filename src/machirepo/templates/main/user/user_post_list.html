@@ -3,60 +3,95 @@
 {% block title %}投稿一覧{% endblock %} 
 
 {% block content %}
-    <div class="app-container">
-        <header class="app-header">
-            <a href="{% url 'user_home' %}" class="header-link" style="font-weight: 600; color: #10b981;">&lt; 戻る</a>
-            <h2 style="font-size: 1.25rem; font-weight: 700; position: absolute; left: 50%; transform: translateX(-50%);">みんなの投稿</h2>
-            <span style="width: 50px;"></span>
-        </header>
-        
-        <main class="main-content p-4">
 
-            <div style="margin-bottom: 1.5rem;">
-                <h2 style="font-size: 1.5rem; font-weight: 700;">みんなの報告</h2>
-                <p style="color: #6b7280; margin-top: 0.5rem;">現在、対応中の報告、完了した報告などすべてを表示しています。</p>
-            </div>
+<div class="sub-header">
+    <a href="{% url "user_home" %}" class="back-link">&lt; 戻る</a>
+    <h2 class="page-title">みんなの投稿</h2>
+</div>
 
-            {% if posts %}
-                {% for post in posts %}
-                    <a href="{% url 'post_detail' post.id %}"  class="post-card-link" style="text-decoration: none;" >
-                        
-                        <div class="history-item">
-                            <div class="history-item-header">
-                                <div "w-2/3 min-w-0 pr-4">
-                                    <p class="history-item-title">{{ post.title|default:"タイトルなし" }}</p>
-                                    
-                                    <p class="history-item-date">{{ post.posted_at|date:"Y/m/d H:i" }}</p>
-                                    <p class="history-item-date">投稿者：{{ post.user.username }}</p>
-                                    <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">
-                                        {{ post.comment|truncatechars:50|default:"(コメントなし)" }}
-                                    </p>
-                                </div>
-                                
-                                <div class="status-wrapper">
-                                    
-                                    {# ステータスバッジ: get_status_display()で日本語の表示名を取得 #}
-                                    <span class="status-badge 
-                                            {% if post.status == 'new' %}status-new
-                                            {% elif post.status == 'in_progress' %}status-pending
-                                            {% elif post.status == 'completed' %}status-complete
-                                            {% elif post.status == 'not_required' %}status-not-applicable
-                                            {% endif %}">
-                                        {{ post.get_status_display }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
+<main class="main-content list-page-main">
+    
+    <form method="get" action="{% url 'post_list' %}" id="filter-form" class="filter-container" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background-color: #f9fafb; padding: 1rem; border-radius: 8px;">
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="filter-status">ステータスで絞り込み</label>
+            <select id="filter-status" name="status" class="form-select js-filter-select"> <option value="">すべて</option>
+                {% for value, label in posts.model.STATUS_CHOICES %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
-            
-            {% else %}
-                <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
-                    <p style="color: #6b7280;">現在、新しい報告はありません。</p>
-                </div>
-            {% endif %}
-            
+            </select>
+        </div>
 
-        </main>
-    </div>
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="filter-tag">タグで絞り込み</label>
+            <select id="filter-tag" name="tag" class="form-select js-filter-select"> <option value="">すべて</option>
+                {% for tag in all_tags %}
+                <option value="{{ tag.id }}" {% if tag_filter|safe == tag.id|safe %}selected{% endif %}>{{ tag.name }}</option>
+                {% endfor %}    
+            </select>
+        </div>
+        
+    </form>
+        
+    {% if posts %}
+        {% for post in posts %}
+            <a href="{% url 'post_detail' post.id %}"  class="post-card-link" style="text-decoration: none;" >
+                
+                <div class="history-item">
+                    <div class="history-item-header">
+                        <div>
+                            <p class="history-item-title">{{ post.title|default:"タイトルなし" }}</p>
+                            <p class="history-item-date">{{ post.posted_at|date:"Y/m/d H:i" }}</p>
+                        </div>
+                        
+                        <div class="status-wrapper">
+                            
+                            {# ステータスバッジ: get_status_display()で日本語の表示名を取得 #}
+                            <span class="status-badge 
+                                    {% if post.status == 'new' %}status-new
+                                    {% elif post.status == 'in_progress' %}status-pending
+                                    {% elif post.status == 'completed' %}status-complete
+                                    {% elif post.status == 'not_required' %}status-not-applicable
+                                    {% endif %}">
+                                {{ post.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% if post.admin_note %}
+                        <div class="admin-comment">
+                            <p class="comment-title">管理者からのコメント</p>
+                            <p class="comment-body">{{ post.admin_note | linebreaks}}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </a>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
+            <p style="color: #6b7280;">現在、新しい報告はありません。</p>
+        </div>
+    {% endif %}
+
+</main>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterSelects = document.querySelectorAll('.js-filter-select');
+        
+        const filterForm = document.getElementById('filter-form');
+
+        if (filterForm) {
+            filterSelects.forEach(function(selectElement) {
+                selectElement.addEventListener('change', function() {
+                    filterForm.submit();
+                    console.log("セレクトボックスが変更されました。フォームを自動送信します。");
+                });
+            });
+            
+        } else {
+            console.error("ID 'filter-form' の要素が見つかりませんでした。HTMLを確認してください。");
+        }
+    });
+</script>
+
 {% endblock %}

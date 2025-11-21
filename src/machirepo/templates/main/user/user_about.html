@@ -1,0 +1,51 @@
+{% extends 'top_base.html' %} 
+
+{% block title %}まちレポについて{% endblock %} 
+
+{% block content %}
+<div class="sub-header">
+    <a href="{% url "user_home" %}" class="back-link">&lt; 戻る</a>
+    <h2 class="page-title">まちレポについて</h2>
+</div>
+    
+<main class="main-content list-page-main"> 
+    
+    
+    <div class="content-card" style="margin-bottom: 2rem;"> 
+        
+        <h3 class="terms-section-title">「まちレポ」とは？</h3>
+        <p class="terms-content">「まちレポ」は、市民のみなさんがまちの中で見つけたインフラの不具合（道路の陥没、公園の遊具の破損、街灯の故障など）を、スマートフォンから簡単に報告できるアプリケーションです。</p>
+
+        <div class="about-flow-container">
+            <div class="about-flow-item">
+                <img src="/media/images/machirepo1.png" alt="不具合を発見" class="about-flow-image">
+                <p class="about-flow-caption">撮影・投稿</p>
+            </div>
+            <div class="about-flow-item">
+                <img src="/media/images/machirepo2.png" alt="レポートを受付" class="about-flow-image">
+                <p class="about-flow-caption">確認・受付</p>
+            </div>
+            <div class="about-flow-item">
+                <img src="/media/images/machirepo3.png" alt="対応・解決" class="about-flow-image">
+                <p class="about-flow-caption">対応・改善</p>
+            </div>
+        </div>
+
+        <h3 class="terms-section-title">わたしたちのミッション</h3>
+        <p class="terms-content">このアプリは、市民と行政をつなぐ架け橋となることを目指しています。</p>
+        <p class="terms-content">みなさんからの「声（レポート）」を集約し、共有することで、まちの問題を早期に発見し、より安全で快適な生活環境を維持することに貢献します。</p>
+
+        <h3 class="terms-section-title">使い方</h3>
+        <ol style="padding-left: 1.5rem; line-height: 1.6; margin: 0; font-size: 0.95rem;">
+            <li>ホーム画面の「新規投稿」ボタンを押します。</li>
+            <li>「写真」「場所」「カテゴリ」「詳細」を入力します。</li>
+            <li>「投稿する」ボタンで内容を確認し、送信します。</li>
+            <li>投稿の状況は「投稿履歴の確認」からいつでもチェックできます。</li>
+            <li>ほかのユーザーの投稿もトップページから閲覧可能です。</li>
+        </ol>
+        
+        <p class="terms-content" style="margin-top: 1.5rem;">ご協力よろしくお願いいたします。</p>
+
+    </div>
+</main>
+{% endblock %}

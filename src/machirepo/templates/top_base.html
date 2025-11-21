@@ -5,13 +5,96 @@
     <meta charset="UTF-8">
     <title>{% block title %}まちレポ{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'main/style.css' %}"> 
-</head>
-<body>
+    <link rel="stylesheet" href="{% static 'main/style.css' %}">
+    <link rel="icon" href="/media/images/favicon.ico" type="image/x-icon">
 
-    {% block content %}
-        
-    {% endblock %}
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="app-page">
+
+    <div class="page-container">
+        {% if user.is_authenticated %}
+            <header class="app-header">
+            
+
+                <h1 class="title">まちレポ</h1>
+                <div class="header-icon-group">
+                    
+                    <a href="{% url 'logout' %}" class="header-link">
+                        <img src="/media/images/logout-icon.png" alt="ログアウト">
+                        <span>ログアウト</span>
+                    </a>
+
+                    <a id="hamburger-button" class="header-link" role="button">
+                        <img src="/media/images/menu-icon.png" alt="メニュー"> <span>メニュー</span>
+                    </a>
+                </div>
+            </header>
+        {% endif %}    
+        {% block content %}{% endblock %}
+
+        <footer class="app-footer">
+            © 2025 まちレポ
+        </footer>
+
+    </div>
+
+    <nav id="drawer-menu" class="drawer-menu">
+                
+        <div class="drawer-menu-header">
+            <h4>メニュー</h4>
+            <a id="drawer-close-button" role="button">&times;</a> 
+        </div>
+        <ul class="drawer-menu-list">
+            <li><a href="{%url "user_home" %}">ホーム</a></li>
+            <li><a href="{% url 'post_history' %}">投稿履歴の確認</a></li>
+            <li><a href="{% url "user_stamp" %}">実績</a></li>
+            <li><a href="{% url "my_page" %}">マイページ</a></li>
+            <li><a href="{% url "user_terms" %}">利用規約</a></li>
+            <li><a href="{% url "user_about" %}">まちレポについて</a></li>
+        </ul>
+    </nav>
+    <div id="drawer-overlay" class="drawer-overlay"></div>
+
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const menu = document.getElementById('drawer-menu');
+            const overlay = document.getElementById('drawer-overlay');
+
+            // ページ全体でのクリックイベントを監視
+            document.addEventListener('click', (event) => {
+                
+                // 1. 開くボタン (id="hamburger-button") が押されたか？
+                // (event.target がボタンそのもの、またはボタンの子要素(img, span)でも反応するように closest を使用)
+                if (event.target.closest('#hamburger-button')) {
+                    event.preventDefault(); // 念のためデフォルトのリンク動作を停止
+                    menu.classList.add('is-open');
+                    overlay.classList.add('is-open');
+                }
+
+                // 2. 閉じるボタン (id="drawer-close-button") が押されたか？
+                // (id="drawer-close-button" は _drawer_menu_content.html の中にあります)
+                if (event.target.closest('#drawer-close-button')) {
+                    event.preventDefault();
+                    menu.classList.remove('is-open');
+                    overlay.classList.remove('is-open');
+                }
+
+                // 3. オーバーレイ (id="drawer-overlay") が直接押されたか？
+                if (event.target === overlay) {
+                    menu.classList.remove('is-open');
+                    overlay.classList.remove('is-open');
+                }
+            });
+
+        });
+
+
+    </script>
 
 </body>
 </html>
