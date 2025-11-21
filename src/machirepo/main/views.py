@@ -94,6 +94,7 @@ def user_terms(request):
     
     context = {'latest_posts': latest_posts} 
     
+    
     return render(request, 'main/user/user_terms.html', context)
 
 @login_required
