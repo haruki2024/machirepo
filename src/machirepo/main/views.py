@@ -101,8 +101,14 @@ def user_terms(request):
 def user_about(request):
     latest_posts = models.PhotoPost.objects.order_by('-posted_at')[:2]
     
+
+
+
     context = {'latest_posts': latest_posts} 
     
+
+
+
     return render(request, 'main/user/user_about.html', context)
 
 
@@ -175,10 +181,34 @@ def post_history(request):
 
 
 def post_list(request):
-    posts = models.PhotoPost.objects.order_by('-posted_at')
-    context = {'posts': posts}
-    return render(request, 'main/user/user_post_list.html', context)
+    status_filter = request.GET.get('status')
+    tag_filter = request.GET.get('tag')
 
+    posts = models.PhotoPost.objects.select_related('user', 'tag').order_by('-posted_at')
+
+    valid_statuses = [key for key, _ in models.PhotoPost.STATUS_CHOICES]
+    if status_filter in valid_statuses:
+        posts = posts.filter(status=status_filter)
+
+    if tag_filter:
+        try:
+            tag_id = int(tag_filter)
+            posts = posts.filter(tag__id=tag_id)
+        except ValueError:
+            logger.warning(f"無効なタグID: {tag_filter}")
+
+
+
+    context = {
+        'posts': posts,
+        'status_filter': status_filter,
+        'tag_filter': tag_filter,
+        'all_tags': models.Tag.objects.order_by('name'),
+        'status_choices': models.PhotoPost.STATUS_CHOICES,
+        'priority_choices': models.PhotoPost.PRIORITY_CHOICES,
+    }
+
+    return render(request, 'main/user/user_post_list.html', context)
 
 @method_decorator(login_required, name='dispatch')
 class UserProfileUpdateView(UpdateView):

@@ -10,7 +10,27 @@
 </div>
 
 <main class="main-content list-page-main">
-            
+    
+    <form method="get" action="{% url 'post_list' %}" id="filter-form" class="filter-container" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background-color: #f9fafb; padding: 1rem; border-radius: 8px;">
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="filter-status">ステータスで絞り込み</label>
+            <select id="filter-status" name="status" class="form-select js-filter-select"> <option value="">すべて</option>
+                {% for value, label in posts.model.STATUS_CHOICES %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="filter-tag">タグで絞り込み</label>
+            <select id="filter-tag" name="tag" class="form-select js-filter-select"> <option value="">すべて</option>
+                {% for tag in all_tags %}
+                <option value="{{ tag.id }}" {% if tag_filter|safe == tag.id|safe %}selected{% endif %}>{{ tag.name }}</option>
+                {% endfor %}    
+            </select>
+        </div>
+        
+    </form>
         
     {% if posts %}
         {% for post in posts %}
@@ -52,5 +72,26 @@
     {% endif %}
 
 </main>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterSelects = document.querySelectorAll('.js-filter-select');
+        
+        const filterForm = document.getElementById('filter-form');
+
+        if (filterForm) {
+            filterSelects.forEach(function(selectElement) {
+                selectElement.addEventListener('change', function() {
+                    filterForm.submit();
+                    console.log("セレクトボックスが変更されました。フォームを自動送信します。");
+                });
+            });
+            
+        } else {
+            console.error("ID 'filter-form' の要素が見つかりませんでした。HTMLを確認してください。");
+        }
+    });
+</script>
 
 {% endblock %}
