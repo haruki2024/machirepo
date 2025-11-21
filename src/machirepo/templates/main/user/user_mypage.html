@@ -16,9 +16,17 @@
     
     <div class="form-group">
         <label>ユーザー名</label>
-        <span class="detail-data-text">{{ user.username }}</span>
+        <div class="badge-icon">
+            <span class="detail-data-text" style="margin-top:0.2rem;">{{ user.username }}</span>
+            {% if "none" == user.badge_rank%}
+                <p></p>
+            {% else %}
+                <img src="/media/images/badge_{{ user.badge_rank }}.png" alt="銅バッジ" style="margin-left:0.5rem; width:30px; height:30px;">
+            {% endif %}
+        </div>
     </div>
-
+    
+    
     <div class="form-group">
         <label>メールアドレス</label>
         <span class="detail-data-text">{{ user.email|default:"未設定" }}</span>

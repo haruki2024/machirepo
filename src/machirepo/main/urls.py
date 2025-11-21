@@ -22,11 +22,9 @@ urlpatterns = [
     path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
     
     path('terms/', views.user_terms, name='user_terms'),
-    path('about/', views.user_about, name='user_about'),
-    
+    path('about/', views.user_about, name='user_about'),    
     path('stamp/', views.user_stamp, name='user_stamp'),
 
-    # app/urls.py (既存のユーザー画面ビューのセクションに追記)
     # --------------------------------------------------
     # 2. ユーザー画面ビュー (user_home, my_pageなど)
     # --------------------------------------------------
@@ -38,9 +36,6 @@ urlpatterns = [
     ), name='user_password_change'),
     path('mypage/complete/', views.user_edit_complete, name='user_edit_complete'), 
 
-
-
-
     # --------------------------------------------------
     # 3. 投稿フロー
     # --------------------------------------------------
@@ -48,7 +43,6 @@ urlpatterns = [
     path('post/location/', views.photo_post_manual_location, name='photo_post_location'),
     path('post/confirm/', views.photo_post_confirm, name='photo_post_confirm'),
     path('post/done/', views.photo_post_done, name='photo_post_done'),
-
 
     # --------------------------------------------------
     # 4. 管理者画面 (manage/ に統一)

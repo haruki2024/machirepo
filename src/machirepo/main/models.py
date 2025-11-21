@@ -61,7 +61,6 @@ class PhotoPost(models.Model):
     # -----------------------------------------------------
     # 報告投稿時に必要なフィールド (ユーザー提供のコードに基づく)
     # -----------------------------------------------------
-    # IDフィールドは暗黙的に作成されるため、ここでは定義しない
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
@@ -69,13 +68,11 @@ class PhotoPost(models.Model):
         verbose_name="投稿ユーザー"
     )
     
-    
     title = models.CharField(
         max_length=100, 
         verbose_name="タイトル",
-        blank=True # フォームで空入力を許可（Step 1通過のため）
+        blank=True
     )
-    
     
     comment = models.TextField(
         blank=True, 
@@ -89,9 +86,9 @@ class PhotoPost(models.Model):
     
     tag = models.ForeignKey(
         Tag, 
-        on_delete=models.SET_NULL, # 関連するTagが削除された場合にNULLを設定する
-        null=True,                 # データベースレベルでNULLを許可
-        blank=True,                # フォームレベルで空を許可
+        on_delete=models.SET_NULL, 
+        null=True,                 
+        blank=True,                
         related_name='photo_posts', 
         verbose_name="メインカテゴリ"
     )
@@ -99,18 +96,17 @@ class PhotoPost(models.Model):
     latitude = models.DecimalField(
         max_digits=30,
         decimal_places=25,
-        null=True,        # データベースレベルでNULLを許可
-        blank=True,       # フォームレベルで空を許可
+        null=True,        
+        blank=True,       
         verbose_name="緯度"
     )
 
-    # 経度 (Longitude):
-    # 同様に、null=True, blank=True を追加します。
+    
     longitude = models.DecimalField(
         max_digits=30,
         decimal_places=25,
-        null=True,        # データベースレベルでNULLを許可
-        blank=True,       # フォームレベルで空を許可
+        null=True,
+        blank=True,
         verbose_name="経度"
     )
     
@@ -121,7 +117,6 @@ class PhotoPost(models.Model):
     )
     
     def __str__(self):
-        # ユーザー提供の__str__メソッドを尊重
         return f"{self.title or 'タイトルなし'} by {self.user.username} ({self.posted_at.strftime('%Y-%m-%d')})"
     
     class Meta:

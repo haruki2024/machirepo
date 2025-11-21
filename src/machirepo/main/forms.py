@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model 
 from django.core.validators import MinLengthValidator
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.core.exceptions import ValidationError
 from .models import PhotoPost, Tag 
 from . import models 
 
@@ -30,37 +31,43 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
         required=True
     )
     
-    # パスワードフィールドをカスタムで追加
     password = forms.CharField(label='パスワード', widget=forms.PasswordInput)
-    # 💡 修正点: password2 フィールドを削除しました
-    # password2 = forms.CharField(label='パスワード（確認）', widget=forms.PasswordInput)
+  
+
+
+    agree_terms = forms.BooleanField(
+        label='利用規約に同意する',
+        required=True,
+        error_messages={'required': '利用規約への同意が必要です。'}
+    )
+
 
 
     class Meta:
         model = User
-        # passwordはカスタムフィールドとしてクラス内で定義されているため、
-        # ここには含めず、ModelFormの自動生成対象から外します。
         fields = ('username', 'email') 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # 💡 AbstractUserのフィールドがModelFormによって生成された場合でも、
-        # CustomUserには不要なので非必須として無視します。
         if not self.instance.pk:
             if 'last_name' in self.fields:
                 self.fields['last_name'].required = False
             if 'first_name' in self.fields:
                 self.fields['first_name'].required = False
         
-        # スタイル設定
         common_attrs = {
             'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150'
         }
         
-        # 💡 修正点: password2 が削除されたため、このループは問題なく動作します
         for name, field in self.fields.items():
             field.widget.attrs.update(common_attrs)
+    
+    def clean_agree_terms(self):
+        if not self.cleaned_data.get('agree_terms'):
+            raise ValidationError('利用規約に同意してください。')
+        return True
+
 
     # ------------------------------------------------------------------
     # clean(): バリデーションとパスワードの一致チェック
@@ -149,26 +156,37 @@ class EmailAuthenticationForm(AuthenticationForm):
 
 User = get_user_model()
 
-# 🌟 新規追加: ユーザー名とメールアドレス編集用フォーム
 class UserUpdateForm(forms.ModelForm):
-    # パスワードは別の画面で変更するため、含めない
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = ('username', 'email', 'badge_rank')  # ← 追加
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-input'}),
             'email': forms.EmailInput(attrs={'class': 'form-input'}),
+            'badge_rank': forms.RadioSelect(attrs={'class': 'hidden-radio'}),
         }
+
+
     
-    # バリデーションの例: ユーザー名が一意であることを確認
+    def __init__(self, *args, **kwargs):
+        badge_choices = kwargs.pop('badge_choices', [('none', '表示しない')])
+        super().__init__(*args, **kwargs)
+        self.fields['badge_rank'].choices = badge_choices
+
+        # 現在のバッジが選択肢にない場合は 'none' に初期化
+        if self.instance.badge_rank not in [b[0] for b in badge_choices]:
+            self.initial['badge_rank'] = 'none'
+
+
+    
+
+
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        
-        # 自身を除く他のユーザーで同じユーザー名が存在するかチェック
         if User.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
-             raise forms.ValidationError("このユーザー名は既に使用されています。")
+            raise forms.ValidationError("このユーザー名は既に使用されています。")
         return username
-
+    
 
 
 

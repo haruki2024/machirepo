@@ -1,4 +1,8 @@
-{% extends 'top_base.html' %}
+{% if user.is_authenticated %}
+    {% extends 'top_base.html' %}
+{% else %}
+    {% extends 'base.html' %}
+{% endif %}
 
 {% block title %}利用規約{% endblock %}
 

@@ -1,30 +1,10 @@
 {% extends 'top_base.html' %} 
-{% load static %}
 
 {% block title %}新規投稿{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-/* 全体の横スクロールを防止（応急処置かつ安全） */
-html, body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
-
-/* ページコンテナ（適宜調整） */
-.main-content {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 1rem;
-  box-sizing: border-box;
-}
-
-/* フォーム要素見た目調整（任意） */
-.form-group { margin-bottom: 1.25rem; }
-
-/* 非表示ファイル入力（ラベルで操作）*/
 .input-file-trick {
   position: absolute;
   left: -9999px;
@@ -33,61 +13,29 @@ html, body {
   overflow: hidden;
 }
 
-/* アップロードボタンラベルの見た目 */
-.btn-upload-mock {
-  display: inline-block;
-  padding: 0.75rem 1.25rem;
-  border-radius: 8px;
-  background: #06b6a4;
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 6px 10px rgba(0,0,0,0.08);
-}
-
-/* カスタム marker 用 CSS (divIcon を丸く見せる) */
-.custom-div-icon {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: #ef4444; /* 赤色の丸 */
-  display: block;
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-
-/* map wrapper と container のサイズ管理 */
 #map-wrapper {
   text-align: center;
   margin-top: 0.5rem;
 }
 
-/* map は幅100%、高さは固定 or 可変に。必要に応じて調整 */
 #map {
   width: 100%;
-  max-width: 800px; /* 好みで調整 */
+  max-width: 800px; 
   height: 360px;
   margin: 0 auto;
   border-radius: 8px;
   box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-  display: none; /* 初期は非表示。JSでshowにする */
+  display: none;
   box-sizing: border-box;
+  z-index: 0;
 }
 
-/* Leaflet の不意な幅拡張を防ぐために overflow を制限 */
-.leaflet-container {
-  overflow: hidden !important;
-}
-
-/* ステータスメッセージの色指定は JS で変えるのでここは基本だけ */
 #location-status { font-size: 0.95rem; color: #6b7280; margin-top: 0.5rem; }
 </style>
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-
 
 <div class="sub-header">
     <a href="{% url "user_home" %}" class="back-link">&lt; 戻る</a>
@@ -160,9 +108,6 @@ html, body {
 </main>
 
 <script>
-/* ============================
-   カスタムアイコン定義（Leaflet）
-   ============================ */
 delete L.Icon.Default.prototype._getIconUrl;
 
 const customIcon = L.divIcon({
@@ -172,21 +117,14 @@ const customIcon = L.divIcon({
     popupAnchor: [0, -10]
 });
 
-/* ===========================================
-   グローバル：Leaflet map / marker の保持
-   =========================================== */
 let mapInstance = null;
 let markerInstance = null;
 
-/* ===========================================
-   写真アップロード / プレビュー
-   =========================================== */
 (function setupPhotoPreview() {
     const photoElement = document.getElementById('photo-preview');
     const fileNameDisplay = document.getElementById('file-name-display');
     const fileInput = document.getElementById('photo');
 
-    // 過去投稿の写真パスが context にあれば表示（Django context から取得）
     const photoFileName = "{{ post_data.photo_path|default:'' }}";
     if (photoFileName) {
         const MEDIA_URL_PREFIX = '/media/';
@@ -233,7 +171,6 @@ function initializeMap(lat, lng) {
 
     // まだ生成していなければ初回生成
     if (!mapInstance) {
-        // ここでサイズと overflow の安全策を入れる
         mapDiv.style.width = '100%';
         mapDiv.style.maxWidth = '800px';
         mapDiv.style.height = mapDiv.style.height || '360px';
@@ -244,11 +181,9 @@ function initializeMap(lat, lng) {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(mapInstance);
 
-        // マーカーを1度だけ作る
         markerInstance = L.marker([lat, lng], { icon: customIcon }).addTo(mapInstance)
             .bindPopup('投稿場所').openPopup();
-
-        // クリックで場所を更新
+        
         mapInstance.on('click', function(e) {
             const newLat = e.latlng.lat;
             const newLng = e.latlng.lng;
@@ -258,8 +193,7 @@ function initializeMap(lat, lng) {
             statusMessage.textContent = `投稿場所が変更されました: ${newLat.toFixed(5)}, ${newLng.toFixed(5)} (マップをクリックで再設定可能)`;
             statusMessage.style.color = '#3b82f6';
         });
-
-        // レイアウト安定のため遅延してサイズ調整
+        
         setTimeout(() => {
             try { mapInstance.invalidateSize(); } catch (e) { /* ignore */ }
         }, 100);
@@ -267,7 +201,6 @@ function initializeMap(lat, lng) {
         return;
     }
 
-    // 2回目以降は setView と marker の位置更新のみ
     mapInstance.setView([lat, lng], 16);
     if (markerInstance) markerInstance.setLatLng([lat, lng]);
     setTimeout(() => { try { mapInstance.invalidateSize(); } catch (e){} }, 80);
@@ -317,7 +250,6 @@ function initializeMap(lat, lng) {
             return;
         }
 
-        // タイムアウト保険
         geoTimer = setTimeout(() => {
             if (!geoAttemptCompleted) handleLocationError('応答がありませんでした（システム強制タイムアウト）。');
         }, TIMEOUT_MS);

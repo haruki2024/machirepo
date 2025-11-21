@@ -65,12 +65,43 @@
 
 <main class="main-content report-detail">
     <a href="{% url "admin_post_list" %}" class="link-secondary">&lt; 一覧に戻る</a>
-    <h2 style="padding-top: -10rem; margin-left: 0rem;">報告の詳細</h2>
-    <div class="form-group">
-        <label>タイトル:</label>
-        <p>{{ post.title|default:"(タイトルなし)" }}</p> 
+    
+    
+
+    <div class="history-item-header">
+        <div>
+            <h2 style="padding-top: -10rem; margin-left: 0rem;">{{ post.title|default:"(タイトルなし)" }}</h2>
+        </div>
+        <div class="status-wrapper">
+            <span class="status-badge 
+                    {% if post.status == 'new' %}status-new
+                    {% elif post.status == 'in_progress' %}status-pending
+                    {% elif post.status == 'completed' %}status-complete
+                    {% elif post.status == 'not_required' %}status-not-applicable
+                    {% endif %}" style="margin-right: 1rem;">
+                {{ post.get_status_display }}
+            </span>
+            {% if post.priority %}
+                <span class="priority-badge priority-{{ post.priority }}">
+                    {{ post.get_priority_display }}
+                </span>
+            {% else %}
+                <span class="priority-badge priority-none">--</span>
+            {% endif %}
+        </div>
     </div>
+
     <div class="form-group">
+        <label>報告者:</label>
+        <p>{{ post.user.username|default:"(該当ユーザーなし)" }}</p> 
+    </div>
+    
+    <div class="form-group"style="margin-top:2rem;">
+        <label>投稿日時:</label>
+        <p>{{ post.posted_at|date:"Y/m/d H:i" }}</p> 
+    </div>
+    
+    <div class="form-group" style="margin-top:2rem;">
         <label>写真:</label>
         
         <div class="detail-placeholder-box">
@@ -103,7 +134,7 @@
         
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" style="margin-top:2rem;">
         <label>カテゴリ:</label>
         <p>
             {% if post.tag %}
@@ -113,12 +144,12 @@
             {% endif %}
         </p>
     </div>
-    <div class="form-group">
+    <div class="form-group" style="margin-top:2rem;">
         <label>詳細:</label>
         <p>{{ post.comment | linebreaks }}</p>
     </div>
     {% if post.admin_note %}
-    <div class="form-group">
+    <div class="form-group" style="margin-top:2rem;">
         <label>管理者からのコメント:</label>
         <p>{{ post.admin_note | linebreaks}}</p>
     </div>
@@ -174,9 +205,6 @@
     const deleteModal = document.getElementById('delete-modal');
     const postTitlePlaceholder = document.getElementById('postTitlePlaceholder');
 
-    /**
-     * 削除確認モーダルを表示し、報告タイトルをセットする関数。
-     */
     function openDeleteModal(postTitle) {
         if (postTitlePlaceholder) {
             postTitlePlaceholder.textContent = postTitle;
@@ -190,9 +218,6 @@
         }
     }
 
-    /**
-     * 削除確認モーダルを閉じる関数。
-     */
     function closeDeleteModal() {
         if (deleteModal) {
             deleteModal.classList.add('hidden');
@@ -200,16 +225,13 @@
         }
     }
     
-    // 互換性のため、closeModalをcloseDeleteModalにマップ
     function closeModal() {
         closeDeleteModal();
     }
 
-
-    // モーダル背景クリックでモーダルを閉じる機能
     if (deleteModal) {
         deleteModal.addEventListener('click', function(event) {
-            // イベントターゲットがdeleteModal自身（オーバーレイ）であるかチェック
+
             if (event.target === deleteModal) {
                 closeDeleteModal();
             }
@@ -220,53 +242,43 @@
 
 
 
-{% if post.latitude and post.longitude %}
+
     
-    // 投稿の位置情報 (Djangoのテンプレートタグで値を挿入)
     const lat = {{ post.latitude|default:"0" }}; 
     const lng = {{ post.longitude|default:"0" }};
     const locationName = "{% if post.location_name %}{{ post.location_name|escapejs }}{% else %}報告された場所{% endif %}";
     
-    // 💡 追加: L.divIcon を定義 💡
     const customIcon = L.divIcon({
-        className: 'custom-div-icon', // 上で定義したCSSクラス
-        iconSize: [15, 15],           // アイコンサイズ
-        iconAnchor: [7.5, 7.5],       // アイコンの中心（正確な位置合わせ）
-        popupAnchor: [0, -10]         // ポップアップ位置調整
+        className: 'custom-div-icon',
+        iconSize: [15, 15],
+        iconAnchor: [7.5, 7.5],
+        popupAnchor: [0, -10]
     });
 
-
     function initLeafletMap() {
-        // 緯度・経度が有効な値であるか確認
         if (lat === 0 && lng === 0 || typeof L === 'undefined') return; 
 
-        // 1. Mapオブジェクトの作成 (省略)
         const map = L.map('map-display').setView([lat, lng], 16); 
         
-        // 2. タイルレイヤーを追加 (省略)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19,
         }).addTo(map);
 
-        // 3. 💡 マーカー（記号）を追加 (L.divIconを使用) 💡
         const marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);
         
-        // 4. ポップアップ（吹き出し）を追加 (省略)
         marker.bindPopup(`<b>${locationName}</b><br>緯度: ${lat}<br>経度: ${lng}`).openPopup();
         
-        // 💡 Leafletにコンテナサイズを再認識させる
         map.invalidateSize();
         
         console.log(`Leaflet Map initialized at: ${lat}, ${lng} with custom div icon.`);
     }
 
-    // 遅延実行: レンダリングの安定化のため
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(initLeafletMap, 100);
     });
     
-{% endif %}
+
 </script>
 
 

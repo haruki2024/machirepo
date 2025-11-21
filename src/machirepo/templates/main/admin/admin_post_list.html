@@ -36,16 +36,13 @@
             </select>
         </div>
     </form>
-       
-
-
-
 
     {% if not posts %}
         <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
             <p style="color: #6b7280;">現在、新しい報告はありません。</p>
         </div>
     {% else %}
+  
         <div class="table-responsive">
             <table class="admin-table">
                 <thead class="bg-gray-100">
@@ -65,10 +62,8 @@
                         <tr>
                             <td>{{ post.title|default:"(タイトルなし)" }}</td>
                         
-                            <!-- 投稿日時 -->
                             <td>{{ post.posted_at|date:"Y/m/d H:i" }}</td>
                             
-                            <!-- タイトル / カテゴリ -->
                             <td>
                                 {% if post.tag %}
                                     {{ post.tag.name }}
@@ -77,7 +72,6 @@
                                 {% endif %}
                             </td>
                             
-                            <!-- 報告者 -->
                             <td>
                                 {% if post.user.username %}
                                     {{ post.user.username }}
@@ -86,7 +80,6 @@
                                 {% endif %}
                             </td>
                             
-                            <!-- ステータス (クラス名変更) -->
                             <td>
                                 <span class="status-badge 
                                     {% if post.status == 'new' %}status-new
@@ -98,7 +91,6 @@
                                 </span>
                             </td>
                             
-                            <!-- 優先度 (クラス名変更) -->
                             <td>
                                 {% if post.priority %}
                                     <span class="priority-badge priority-{{ post.priority }}">
@@ -109,9 +101,7 @@
                                 {% endif %}
                             </td>
 
-                            <!-- アクション -->
                             <td>
-                                <!-- URL修正済み: 'admin_post_detail' を直接使用 -->
                                 <a href="{% url 'admin_post_detail' post.id %}" class="link-primary">詳細を見る</a>
                             </td>
                         </tr>
@@ -129,30 +119,24 @@
 </main>
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 絞り込みを行うセレクトボックスの要素をすべて取得（クラス名で取得）
-            const filterSelects = document.querySelectorAll('.js-filter-select'); // ❗ 修正箇所 ❗
-            
-            // 絞り込み対象のフォームの要素を取得
-            const filterForm = document.getElementById('filter-form');
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterSelects = document.querySelectorAll('.js-filter-select');
+        
+        const filterForm = document.getElementById('filter-form');
 
-            // フォームが存在することを確認
-            if (filterForm) {
-                // 取得したすべてのセレクトボックスに対してイベントリスナーを設定
-                filterSelects.forEach(function(selectElement) {
-                    // セレクトボックスの値が変更されたときのイベントリスナーを設定
-                    selectElement.addEventListener('change', function() {
-                        // セレクトボックスの値が変わったら、即座にフォームを送信する
-                        filterForm.submit();
-                        console.log("セレクトボックスが変更されました。フォームを自動送信します。");
-                    });
+        if (filterForm) {
+            filterSelects.forEach(function(selectElement) {
+                selectElement.addEventListener('change', function() {
+                    filterForm.submit();
+                    console.log("セレクトボックスが変更されました。フォームを自動送信します。");
                 });
-                
-            } else {
-                console.error("ID 'filter-form' の要素が見つかりませんでした。HTMLを確認してください。");
-            }
-        });
-    </script>
-</body>
+            });
+            
+        } else {
+            console.error("ID 'filter-form' の要素が見つかりませんでした。HTMLを確認してください。");
+        }
+    });
+</script>
+
 {% endblock %}

@@ -1,12 +1,12 @@
 {% extends 'base.html' %} 
 {% load static %}
 
-{% block title %}新規登録 - まちレポ{% endblock %}
+{% block title %}新規登録{% endblock %}
 
 {% block content %}
 
 
-<main class="main-content">
+<main class="form-container">
     <form method="post" action="{% url 'signup' %}" style="display: contents;" >
         {% csrf_token %}
             <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; text-align: center; color: #1f2937;">新規登録</h2>
@@ -32,6 +32,11 @@
                     <p style="color: red; font-size: 0.85rem;">{{ form.password.errors.as_text }}</p>
                 {% endif %}
             </div>
+            
+            <p>{{ form.agree_terms }}<a href="{% url 'user_terms' %}" style="color:red; ">利用規約</a>に同意します</p>
+            
+                
+
 
             <div style="margin-top: 2.5rem; text-align: center;">
                 <button type="submit"class="btn btn-primary ">登録</button>
@@ -39,6 +44,7 @@
             </div>
     </form>
 </main>
+
 
 
 {% endblock content %}

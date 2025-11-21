@@ -6,28 +6,24 @@
 
 <main class="main-content">
     <h3>管理メニュー</h3>
-    <div class="menu-container">
-        <a href="{% url 'admin_post_list' %}" style="text-decoration: none;">
-            <div class="history-item menu-item-hover" style="margin-bottom: 1.5rem;">
-                <p class="history-item-title">報告の確認・記録</p>
-                <p class="history-item-date" style="margin-top: 0.5rem;">ユーザーから投稿された報告を確認し、対応状況を更新します。</p>
-            </div>
-        </a>
-        <a href="{% url 'admin_user_list' %}" style="text-decoration: none;">
-            <div class="history-item menu-item-hover" style="margin-bottom: 1.5rem;">
-                <p class="history-item-title">ユーザー管理</p>
-                <p class="history-item-date" style="margin-top: 0.5rem;">登録されているユーザー情報を閲覧・管理します。</p>
-            </div>
-        </a>
-        <a href="{% url 'admin_tag_list' %}" style="text-decoration: none;">
-            <div class="history-item menu-item-hover">
-                <p class="history-item-title">タグの管理</p>
-                <p class="history-item-date" style="margin-top: 0.5rem;">報告に使用されるカテゴリ（タグ）を編集・追加します。</p>
-            </div>
-        </a>
-    </div>
+    <a href="{% url 'admin_post_list' %}" style="text-decoration: none;">
+        <div class="history-item menu-item-hover" style="margin-bottom: 1.5rem;">
+            <p class="history-item-title">報告の確認・記録</p>
+            <p class="history-item-date" style="margin-top: 0.5rem;">ユーザーから投稿された報告を確認し、対応状況を更新します。</p>
+        </div>
+    </a>
+    <a href="{% url 'admin_user_list' %}" style="text-decoration: none;">
+        <div class="history-item menu-item-hover" style="margin-bottom: 1.5rem;">
+            <p class="history-item-title">ユーザー管理</p>
+            <p class="history-item-date" style="margin-top: 0.5rem;">登録されているユーザー情報を閲覧・管理します。</p>
+        </div>
+    </a>
+    <a href="{% url 'admin_tag_list' %}" style="text-decoration: none;">
+        <div class="history-item menu-item-hover">
+            <p class="history-item-title">タグの管理</p>
+            <p class="history-item-date" style="margin-top: 0.5rem;">報告に使用されるカテゴリ（タグ）を編集・追加します。</p>
+        </div>
+    </a>
 </main>
-
-
 
 {% endblock %}

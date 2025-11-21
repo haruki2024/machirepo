@@ -22,20 +22,30 @@
     display: inline-block;
     white-space: nowrap;
 }
-.status-new { background-color: #e0f2fe; color: #0ea5e9; } /* 新規 */
-.status-pending { background-color: #fffbe6; color: #f59e0b; } /* 対応中 */
-.status-complete { background-color: #ecfdf5; color: #10b981; } /* 対応完了 */
-.status-not-applicable { background-color: #f3f4f6; color: #6b7280; } /* 対応不可 */
+.status-new { 
+    background-color: #e0f2fe; 
+    color: #0ea5e9; 
+}
+.status-pending { 
+    background-color: #fffbe6; 
+    color: #f59e0b; 
+}
+.status-complete { 
+    background-color: #ecfdf5; 
+    color: #10b981; 
+}
+.status-not-applicable { 
+    background-color: #f3f4f6; 
+    color: #6b7280; 
+}
+
 .priority-badge {
+    padding: 0.3em 0.8em;
+    border-radius: 1em;
+    font-size: 0.8rem;
+    font-weight: bold;
     display: inline-block;
-    padding: 0.2em 0.6em;
-    font-size: 0.75rem;
-    font-weight: 700;
-    line-height: 1;
-    text-align: center;
     white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: 0.75rem;
 }
 .priority-high {
     background-color: #fee2e2;
@@ -56,88 +66,53 @@
 
 
 /* ===== テーブル ===== */
-.table-container {
-    max-height: 60vh;
-    overflow-y: auto;
+/* ★ SP対応のためのラッパー要素：このクラスでテーブルを囲んでください */
+.table-responsive {
+    /* SP表示時（メディアクエリ外）に横スクロールを有効にする */
     overflow-x: auto;
-    border-radius: 8px;
-    background-color: #fff;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    width: 100%;
+    /* スクロールバーを見やすくするために下に少し余白をとる */
+    padding-bottom: 0.5rem; 
+    margin-bottom: 1rem;
+    /* スクロールバーが表示されても、テーブルの影が途切れないようにする */
 }
-.admin-table,
-.report-table,
-.user-table,
-.tag-table {
-    width: 100%;
+
+
+/* テーブル本体 */
+.admin-table {
+    /* SP対応のため、widthを min-content に設定し、強制的に横に伸ばす */
+    width: min-content; 
+    min-width: 100%; /* 少なくともコンテナ幅は確保する */
+    
     border-collapse: collapse;
-    table-layout: fixed;
+    margin-top: 1.5rem;
     background-color: #fff;
-    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    border-radius: 8px;
+    overflow: hidden; 
 }
-.admin-table th, .admin-table td,
-.report-table th, .report-table td,
-.user-table th, .user-table td,
-.tag-table th, .tag-table td {
+.admin-table th, .admin-table td {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid #e5e7eb;
-    font-size: 0.9rem;
-    color: #374151;
-    word-wrap: break-word;
+    white-space: nowrap; /* テーブルセルの内容が折り返されないようにする */
 }
-.admin-table thead th,
-.report-table thead th,
-.user-table thead th,
-.tag-table thead th {
-    position: sticky;
-    top: 0;
+.admin-table th {
     background-color: #f9fafb;
     font-weight: 600;
     font-size: 0.875rem;
     color: #6b7280;
-    z-index: 5;
-    border-bottom: 2px solid #e5e7eb;
 }
-.admin-table tbody tr:nth-child(even),
-.report-table tbody tr:nth-child(even),
-.user-table tbody tr:nth-child(even),
-.tag-table tbody tr:nth-child(even) {
-    background-color: #f9fafb;
+.admin-table tr:last-child td {
+    border-bottom: none;
 }
-.admin-table tbody tr:hover,
-.report-table tbody tr:hover,
-.user-table tbody tr:hover,
-.tag-table tbody tr:hover {
-    background-color: #f3f4f6;
-}
-.admin-table a,
-.report-table a,
-.user-table a,
-.tag-table a {
+.admin-table a {
     color: var(--primary-hover-color);
     text-decoration: none;
     font-weight: 500;
 }
-.admin-table a:hover,
-.report-table a:hover,
-.user-table a:hover,
-.tag-table a:hover {
+.admin-table a:hover {
     text-decoration: underline;
 }
-.table-container::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-.table-container::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.25);
-    border-radius: 4px;
-}
-.table-container::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.4);
-}
-
-
 
 
 /* ===== 全体共通 ===== */
@@ -287,7 +262,6 @@ body.form-page-bg {
 .main-content {
     flex-grow: 1;
     padding: 2rem;
-    overflow: auto;
     flex-direction: column;
     align-items: flex-start !important;
     box-sizing: border-box;
@@ -307,6 +281,13 @@ body.form-page-bg {
     color: var(--primary-hover-color);
     align-self: flex-start;
 }
+.main-content h4 {
+    font-size: 2.0rem;
+    font-weight: 700;
+    color: var(--primary-hover-color);
+    align-self: flex-start;
+}
+
 
 
 /* ===== フォーム ===== */
@@ -405,7 +386,6 @@ body.form-page-bg {
 }
 .filter-container select {
     width: 100%;
-    min-width: 300px;
     padding: 0.6rem;
     border: 1px solid #ccc;
     border-radius: 6px;
@@ -671,7 +651,6 @@ body.form-page-bg {
 
 /* ===== カードデザイン ===== */
 .history-item {
-    width: 1000px;
     background-color: #ffffff;
     border-radius: 12px;
     padding: 1.5rem;
@@ -709,7 +688,7 @@ body.form-page-bg {
 .report-detail {
     align-items: flex-start !important;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 2rem 4rem;
     box-sizing: border-box;
@@ -718,7 +697,6 @@ body.form-page-bg {
     margin-left: 0;
     align-self: flex-start;
 }
-
 
 /* ===== 確認モーダル ===== */
 .modal-overlay {
@@ -739,11 +717,12 @@ body.form-page-bg {
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    width: 100%; /* 💡 幅は常に 100% (paddingがあるため) */
-    max-width: 400px; /* 💡 最大幅を設定 (スマホでもこの幅を超えない) */
+    width: 100%;
+    max-width: 400px;
     text-align: center;
-    box-sizing: border-box; /* 💡 paddingを含めて幅を計算させる */
+    box-sizing: border-box;
 }
+
 /* ボタン配置 */
 .modal-actions {
     display: flex;
@@ -774,7 +753,7 @@ body.form-page-bg {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    display: none; /* 初期状態では非表示 */
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: 1000;
@@ -849,6 +828,7 @@ body.form-page-bg {
 
 
     .history-item .history-item-title {
+       
         font-weight: 700;
         font-size: 1.2rem;
         color: var(--primary-hover-color);
@@ -859,13 +839,28 @@ body.form-page-bg {
 
     /* テーブルの横スクロールを無効化（タブレット以上の幅があるため） */
     .table-container {
-        overflow-x: visible;
+        overflow-x: auto;
         padding-bottom: 0;
     }
     .admin-table {
         width: 100%; /* コンテナいっぱいに広げる */
         min-width: initial;
     }
+
+    /* 3. セレクトボックスの調整 */
+    .filter-container select {
+        min-width: unset;
+        font-size: 1rem; 
+        padding: 0.8rem; 
+    }
+    
+    .admin-table {
+        width: 100%; /* コンテナいっぱいに広げる */
+    }
+
+
+    
+
 
 
 

@@ -20,32 +20,27 @@
             {{ form.username }}
         </div>
 
-        <div class="form-group">
-            <label for="edit-badge-select">保有バッジ (表示)</label>
+
+
+        <div class="badge-select-container">
+            {% for value, label in form.fields.badge_rank.choices %}
+            <label class="badge-radio-label">
+                <input type="radio" name="badge_rank" value="{{ value }}" {% if form.initial.badge_rank == value %}checked{% endif %}>
+                {% if value != 'none' %}
+                    <img src="/media/images/badge_{{ value }}.png" alt="{{ label }}" class="badge-image">
+                {% else %}
+                    <span class="badge-label-text">取得できているバッジは存在しません</span>
+                {% endif %}
+            </label>
+            {% endfor %}
+
             
-            <div class="badge-select-container">
-                <label class="badge-radio-label">
-                    <input type="radio" name="badge-select" value="bronze" checked>
-                    <img src="/media/images/badge_bronze.png" alt="銅バッジ" class="badge-image">
-                </label>
-        
-                <label class="badge-radio-label">
-                    <input type="radio" name="badge-select" value="silver">
-                    <img src="/media/images/badge_silver.png" alt="銀バッジ" class="badge-image">
-                </label>
-        
-                <label class="badge-radio-label disabled">
-                    <input type="radio" name="badge-select" value="gold" disabled>
-                    <img src="../images/badge_gold.png" alt="金バッジ" class="badge-image">
-                </label>
-        
-                <label class="badge-radio-label disabled">
-                    <input type="radio" name="badge-select" value="rainbow" disabled>
-                    <img src="../images/badge_rainbow.png" alt="虹バッジ" class="badge-image">
-                </label>
-        
-            </div>
         </div>
+
+
+
+
+
 
         <div class="form-group">
             <label for="edit-email">メールアドレス</label>

@@ -11,9 +11,6 @@
     <h2 class="page-title">投稿内容の確認</h2>
 </div>
 <main class="main-content list-page-main">
-    
-    
-    
     <div class="form-group">
         <label>タイトル</label>
         <p style="background-color: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; margin:0;">{{ post_data.title|default:"(タイトルなし)" }}</p> 
@@ -22,8 +19,8 @@
     <div class="form-group">
         <label>写真</label>
         <div class="photo-container">
-            {% if request.session.post_photo_data %}
-                <img src="{{ request.session.post_photo_data }}" alt="アップロードされた写真" class="uploaded-photo">
+            {% if post_data.photo_path %}
+                <img src="/media/{{ post_data.photo_path }}" alt="アップロードされた写真" style="max-width: 100%; height: auto; max-height: 400px; border-radius: 8px; object-fit: contain; border: 1px solid #ddd; margin-bottom: 1rem;">
             {% else %}
                 写真が見つかりません
             {% endif %}

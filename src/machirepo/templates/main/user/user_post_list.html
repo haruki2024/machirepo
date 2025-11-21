@@ -11,45 +11,45 @@
 
 <main class="main-content list-page-main">
             
-    
-{% if posts %}
-    {% for post in posts %}
-        <a href="{% url 'post_detail' post.id %}"  class="post-card-link" style="text-decoration: none;" >
-            
-            <div class="history-item">
-                <div class="history-item-header">
-                    <div>
-                        <p class="history-item-title">{{ post.title|default:"タイトルなし" }}</p>
-                        <p class="history-item-date">{{ post.posted_at|date:"Y/m/d H:i" }}</p>
-                    </div>
-                    
-                    <div class="status-wrapper">
+        
+    {% if posts %}
+        {% for post in posts %}
+            <a href="{% url 'post_detail' post.id %}"  class="post-card-link" style="text-decoration: none;" >
+                
+                <div class="history-item">
+                    <div class="history-item-header">
+                        <div>
+                            <p class="history-item-title">{{ post.title|default:"タイトルなし" }}</p>
+                            <p class="history-item-date">{{ post.posted_at|date:"Y/m/d H:i" }}</p>
+                        </div>
                         
-                        {# ステータスバッジ: get_status_display()で日本語の表示名を取得 #}
-                        <span class="status-badge 
-                                {% if post.status == 'new' %}status-new
-                                {% elif post.status == 'in_progress' %}status-pending
-                                {% elif post.status == 'completed' %}status-complete
-                                {% elif post.status == 'not_required' %}status-not-applicable
-                                {% endif %}">
-                            {{ post.get_status_display }}
-                        </span>
+                        <div class="status-wrapper">
+                            
+                            {# ステータスバッジ: get_status_display()で日本語の表示名を取得 #}
+                            <span class="status-badge 
+                                    {% if post.status == 'new' %}status-new
+                                    {% elif post.status == 'in_progress' %}status-pending
+                                    {% elif post.status == 'completed' %}status-complete
+                                    {% elif post.status == 'not_required' %}status-not-applicable
+                                    {% endif %}">
+                                {{ post.get_status_display }}
+                            </span>
+                        </div>
                     </div>
+                    {% if post.admin_note %}
+                        <div class="admin-comment">
+                            <p class="comment-title">管理者からのコメント</p>
+                            <p class="comment-body">{{ post.admin_note | linebreaks}}</p>
+                        </div>
+                    {% endif %}
                 </div>
-                {% if post.admin_note %}
-                    <div class="admin-comment">
-                        <p class="comment-title">管理者からのコメント</p>
-                        <p class="comment-body">{{ post.admin_note | linebreaks}}</p>
-                    </div>
-                {% endif %}
-            </div>
-        </a>
-    {% endfor %}
-{% else %}
-    <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
-        <p style="color: #6b7280;">現在、新しい報告はありません。</p>
-    </div>
-{% endif %}
+            </a>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
+            <p style="color: #6b7280;">現在、新しい報告はありません。</p>
+        </div>
+    {% endif %}
 
 </main>
 

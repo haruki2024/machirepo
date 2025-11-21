@@ -1,27 +1,12 @@
 {% extends 'top_base_admin.html' %} 
 
-{% load static %}
-
 {% block title %}ステータス記録・更新 | 管理者{% endblock %}
-
-{% block extra_head %}
-    <style>
-        /* 💡 共通のスタイルとTailwindのユーティリティを統合 */
-
-        .error-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; }
- 
-
-    </style>
-{% endblock %}
 
 {% block content %}
 
 
 <main class="main-content">
-    
-    
 
-    
     <form method="post" action="{% url 'admin_post_status_edit' post.id %}" class="space-y-6">
         {% csrf_token %}
         
@@ -60,9 +45,6 @@
             
         </div>
 
-            
-
-        
         <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">記録する</button>
     </form>
 </main>
