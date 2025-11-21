@@ -197,8 +197,6 @@ def post_list(request):
         except ValueError:
             logger.warning(f"無効なタグID: {tag_filter}")
 
-
-
     context = {
         'posts': posts,
         'status_filter': status_filter,
