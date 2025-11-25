@@ -24,6 +24,13 @@
                         <img src="/media/images/logout-icon.png" alt="ログアウト">
                         <span>ログアウト</span>
                     </a>
+                    {% comment %} <form method="POST" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="header-link" style="border:none;">
+                            <img src="/media/images/logout-icon.png" alt="ログアウト">
+                            ログアウト
+                        </button>
+                    </form> {% endcomment %}
 
                     <a id="hamburger-button" class="header-link" role="button">
                         <img src="/media/images/menu-icon.png" alt="メニュー"> <span>メニュー</span>

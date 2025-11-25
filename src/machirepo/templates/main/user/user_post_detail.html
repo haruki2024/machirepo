@@ -46,7 +46,7 @@
             {% if "none" == post.user.badge_rank%}
                 <p></p>
             {% else %}
-                <img src="/media/images/badge_{{ post.user.badge_rank }}.png" alt="銅バッジ" style="margin-left:0.5rem; width:30px; height:30px;">
+                <img src="/media/images/badge_{{ post.user.badge_rank }}.png" alt="バッジ" style="margin-left:0.5rem; width:30px; height:30px;">
             {% endif %}
             
         </div>
@@ -93,9 +93,7 @@
     {% if post.admin_note %}
         <div class="detail-group">
             <label>管理者からのコメント</label>
-            <div class="admin-comment" style="margin-top:0; background-color: #f9fafb; padding: 1rem; border-radius: 0.5rem;">
-                <p class="comment-body">{{ post.admin_note}}</p>
-            </div>
+            <p class="detail-data-box">{{ post.admin_note}}</p>
         </div>
     {% endif %}
     <div style="height: 2rem;"></div>
@@ -108,7 +106,6 @@
 
 <script>
 
-{% if post.latitude and post.longitude %}
     
     const lat = {{ post.latitude|default:"0" }}; 
     const lng = {{ post.longitude|default:"0" }};
@@ -147,7 +144,7 @@
         setTimeout(initLeafletMap, 100);
     });
     
-{% endif %}
+
 </script>
 
 

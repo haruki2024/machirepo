@@ -693,24 +693,7 @@ body.app-page .app-header h2 {
   flex-shrink: 0;
 }
 
-.admin-comment {
-  border-top: 1px solid #e5e7eb;
-  padding-top: 1rem;
-  margin-top: 1rem;
-  font-size: 0.875rem;
-}
 
-.admin-comment .comment-title {
-  font-weight: 700;
-  color: #374151;
-  margin: 0 0 0.25rem 0;
-}
-
-.admin-comment .comment-body {
-  color: #4b5563;
-  line-height: 1.6;
-  margin: 0;
-}
 
 /* ===== home.html (new posts) 用の追加CSS ===== */
 .post-feed-container {

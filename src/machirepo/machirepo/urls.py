@@ -13,6 +13,8 @@ from django.conf.urls.static import static # static関数をインポート
 from django.contrib.auth import views as auth_views 
 from main.forms import EmailAuthenticationForm 
 
+    
+
 urlpatterns = [
     # ここで admin が使用されています
     path('admin/', admin.site.urls),
@@ -25,7 +27,8 @@ urlpatterns = [
              authentication_form=EmailAuthenticationForm
          ), 
          name='login'),
-         
+        
+    path('main/', include('main.urls')), #"追加"
     # 標準認証URLをインクルード
     path('accounts/', include('django.contrib.auth.urls')), 
 ]

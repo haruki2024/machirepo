@@ -1,7 +1,7 @@
 import logging
 import os 
 import decimal
-
+from email.utils import formataddr
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.edit import CreateView
 from django.contrib.auth import get_user_model, logout,login
@@ -18,6 +18,7 @@ from . import models
 from .models import PhotoPost, Tag
 from .forms import TagForm, StatusUpdateForm, ResidentCreationForm, PhotoPostForm, ManualLocationForm, UserUpdateForm
 from django.views.generic.edit import UpdateView 
+from django.core.mail import BadHeaderError, send_mail
 
 logger = logging.getLogger(__name__)
 fs = FileSystemStorage()
@@ -44,6 +45,38 @@ def home_redirect(request):
     if request.user.is_staff:
         return redirect('admin_home')
     else:
+
+        
+        subject = "【まちレポ】ログインされました"
+        
+        login_time = request.user.last_login
+        # 表示用にフォーマット
+        login_time_str = timezone.localtime(login_time).strftime("%Y-%m-%d %H:%M:%S")
+        user_name = request.user.username
+
+        message =( 
+            f"{user_name} 様\n\n\n"
+
+            f"お客さまのアカウントを使ってまちレポに{login_time_str}にログインされました。\n"
+            f"お心当たりがある場合は、特に対応いただく必要はございません。\n\n"
+            f"【ログインに心当たりがない場合】\n"
+            f"このログインがお客さま自身で行ったものでない場合は、第三者が不正にログインを試みた可能性があります。\n"
+            f"安全のためパスワードの変更をお願いします。"
+            f"\n\n-------------------------------------------------------------\n"
+            f"【お問い合わせ】\n"
+            f"まちレポ運営\n"
+            f"■Mail:machirepo.app@gmail.com\n"
+            f"-------------------------------------------------------------"
+        )
+        """送信元メールアドレス"""
+        from_email = formataddr(('まちレポ', 'machirepo.app@gmail.com'))
+
+        """宛先メールアドレス"""
+        recipient_list = [request.user.email ]
+
+        send_mail(subject, message, from_email, recipient_list)
+
+
         return redirect('user_home')
 
 class ResidentRegisterView(CreateView):
@@ -237,7 +270,7 @@ class UserProfileUpdateView(UpdateView):
         card = 0
         posts = PhotoPost.objects.filter(user=user).order_by('-posted_at')
         for i in posts:
-            post_count += 1
+            post_count += 10
         card = post_count / 10
 
 
@@ -545,6 +578,23 @@ def post_detail(request, post_id):
     return render(request, 'main/user/user_post_detail.html', context)
 
 
+
+# def user_map(request):
+#     """題名"""
+#     subject = "題名"
+#     """本文"""
+#     message = "本文です\nこんにちは。メールを送信しました"
+#     """送信元メールアドレス"""
+#     from_email = "harukishougo96@gmail.com"
+#     """宛先メールアドレス"""
+#     recipient_list = [
+#         "harukishougo96@gmail.com"
+#     ]
+
+#     send_mail(subject, message, from_email, recipient_list)
+#     return render(request, 'main/user/user_map_list.html')
+
+
 # -----------------------------------------------------
 # 4. 管理者画面ビュー（スタッフ権限限定）
 # -----------------------------------------------------
@@ -580,16 +630,49 @@ def admin_user_delete_confirm(request, user_id):
     
     if request.method == 'POST':
         user_to_delete = get_object_or_404(User, pk=user_id)
-        
+
         if user_to_delete.pk == request.user.pk:
             messages.error(request, "自分自身のアカウントをこの画面から削除することはできません。")
             return redirect('admin_user_list')
-        
+
         try:
             username = user_to_delete.username
+            email_to_notify = user_to_delete.email  # 削除されるユーザーのメールアドレス
+
             user_to_delete.delete()
-            
-            messages.success(request, f"ユーザー「{username}」を削除しました。")
+
+            subject = "【重要】まちレポアカウント削除のお知らせ"
+
+            message = (
+                f"{username} 様\n\n\n"
+              
+
+                f"いつもまちレポをご利用いただき、誠にありがとうございます。\n"
+                f"運営の判断により、お客様のまちレポアカウントの削除をいたしましたので、ご連絡いたします。\n"
+                f"アカウントが削除されたと思われる理由は以下の通りです\n\n"
+                f"【アカウント削除理由】\n"
+                f"・ご本人様からの退会申請があったため\n"
+                f"・利用規約違反が確認されたため\n"
+                f"・不適切な投稿やまたは操作が行われたため\n\n"
+                f"このアカウント削除により、お客様はの本サービスのすべての機能をご利用いただけなくなります。\n"
+                f"アカウント削除理由に心当たりがない場合は運営にお問い合わせください。"
+                       
+                       
+                f"\n\n-------------------------------------------------------------\n"
+                f"【お問い合わせ】\n"
+                f"まちレポ運営\n"
+                f"■Mail:machirepo.app@gmail.com\n"
+                f"-------------------------------------------------------------"
+            )
+
+            from_email = formataddr(('まちレポ', 'machirepo.app@gmail.com'))
+
+
+            """宛先メールアドレス"""
+            recipient_list = [ email_to_notify ]
+
+            send_mail(subject, message, from_email, recipient_list)
+
             
             return redirect('admin_user_delete_complete')
             
@@ -663,7 +746,50 @@ def manage_post_status_edit(request, post_id):
         form = StatusUpdateForm(request.POST, instance=post) 
         if form.is_valid():
             updated_post = form.save() 
-            messages.success(request, f"報告 (ID: {post_id}) のステータスと優先順位を更新しました。")
+            username = updated_post.user.username
+            email_to_notify = updated_post.user.email
+
+           
+
+            subject = "報告に管理者からステータスの更新されました"
+
+            message = (
+                f"{username} 様\n\n\n"
+              
+
+                f"いつもまちレポをご利用いただき、誠にありがとうございます。\n"
+                f"以前投稿された報告に管理者からステータスがつけられましたのでご連絡いたします。\n"
+                f"ステータス内容は以下の通りです。\n\n"
+                f"【投稿タイトル】 {updated_post.title}\n"
+                f"【ステータス】 {updated_post.get_status_display()}\n"
+            )
+            if updated_post.admin_note :
+                message +=f"【管理者コメント】{updated_post.admin_note}\n"
+            
+            message +=(
+                f"\n詳細はご自身のアカウントでまちレポにログインしていただき、トップページにある投稿履歴から確認できます。\n"
+                f"この度はご報告いただきありがとうございました。"
+                       
+                       
+                f"\n\n-------------------------------------------------------------\n"
+                f"【お問い合わせ】\n"
+                f"まちレポ運営\n"
+                f"■Mail:machirepo.app@gmail.com\n"
+                f"-------------------------------------------------------------"
+            )
+
+            from_email = formataddr(('まちレポ', 'machirepo.app@gmail.com'))
+
+
+            """宛先メールアドレス"""
+            recipient_list = [ email_to_notify ]
+
+            send_mail(subject, message, from_email, recipient_list)
+
+
+
+
+
             
             return redirect('admin_status_edit_done', post_id=updated_post.pk) 
     else:

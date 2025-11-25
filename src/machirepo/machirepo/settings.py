@@ -31,8 +31,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
-    'main',  
+    'main',
 ]
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'machirepo.app@gmail.com'   # 自分の Gmail アドレス
+EMAIL_HOST_PASSWORD = 'dnod zifk oimg ambl'        # Gmail の「アプリパスワード」
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
