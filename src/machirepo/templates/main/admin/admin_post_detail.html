@@ -136,7 +136,7 @@
     </div>
     <div class="form-group" style="margin-top:2rem;">
         <label>カテゴリ:</label>
-        <p>
+        <p class="detail-data-box">
             {% if post.tag %}
                 {{ post.tag.name }}
             {% else %}
@@ -146,16 +146,16 @@
     </div>
     <div class="form-group" style="margin-top:2rem;">
         <label>詳細:</label>
-        <p>{{ post.comment | linebreaks }}</p>
+        <p class="detail-data-box">{{ post.comment}}</p>
     </div>
     {% if post.admin_note %}
     <div class="form-group" style="margin-top:2rem;">
         <label>管理者からのコメント:</label>
-        <p>{{ post.admin_note | linebreaks}}</p>
+        <p class="detail-data-box">{{ post.admin_note}}</p>
     </div>
     {% endif %}
 
-    
+    <div style="height: 2rem;"></div>
     <a href="{% url 'admin_post_status_edit' post_id=post.id %}" style="margin-bottom: 1rem;" class="btn btn-primary flex-1 text-center py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-semibold transition duration-150">
         ステータスを記録する
     </a>

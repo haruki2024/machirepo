@@ -18,7 +18,7 @@ from . import models
 from .models import PhotoPost, Tag
 from .forms import TagForm, StatusUpdateForm, ResidentCreationForm, PhotoPostForm, ManualLocationForm, UserUpdateForm
 from django.views.generic.edit import UpdateView 
-from django.core.mail import BadHeaderError, send_mail
+from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
 fs = FileSystemStorage()
@@ -45,12 +45,9 @@ def home_redirect(request):
     if request.user.is_staff:
         return redirect('admin_home')
     else:
-
-        
         subject = "【まちレポ】ログインされました"
         
         login_time = request.user.last_login
-        # 表示用にフォーマット
         login_time_str = timezone.localtime(login_time).strftime("%Y-%m-%d %H:%M:%S")
         user_name = request.user.username
 
@@ -68,10 +65,9 @@ def home_redirect(request):
             f"■Mail:machirepo.app@gmail.com\n"
             f"-------------------------------------------------------------"
         )
-        """送信元メールアドレス"""
+       
         from_email = formataddr(('まちレポ', 'machirepo.app@gmail.com'))
 
-        """宛先メールアドレス"""
         recipient_list = [request.user.email ]
 
         send_mail(subject, message, from_email, recipient_list)
@@ -89,11 +85,8 @@ class ResidentRegisterView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         
-        # ユーザーインスタンスをセッションに保存（ログイン処理）
         login(self.request, self.object) 
-        
-        messages.success(self.request, "アカウントが作成され、ログインしました！")
-        
+
         return response
 
 
@@ -107,7 +100,6 @@ class ResidentRegisterView(CreateView):
 def user_logout_view(request):
     """ユーザーログアウト (urls.pyの'logout/'に対応)"""
     logout(request)
-    messages.success(request, "ログアウトしました。")
     return redirect('index')
 
 # -----------------------------------------------------
@@ -126,24 +118,16 @@ def user_terms(request):
     latest_posts = models.PhotoPost.objects.order_by('-posted_at')[:2]
     
     context = {'latest_posts': latest_posts} 
-    
-    
+        
     return render(request, 'main/user/user_terms.html', context)
 
 @login_required
 def user_about(request):
     latest_posts = models.PhotoPost.objects.order_by('-posted_at')[:2]
-    
-
-
 
     context = {'latest_posts': latest_posts} 
-    
-
-
 
     return render(request, 'main/user/user_about.html', context)
-
 
 @login_required
 def user_stamp(request):
@@ -152,7 +136,7 @@ def user_stamp(request):
     
     posts = PhotoPost.objects.filter(user=request.user).order_by('-posted_at') 
     for i in posts:
-        post_count += 1
+        post_count += 11
     card = post_count / 10
     if post_count > 10:
         post_count -= (int(card)*10)
@@ -165,11 +149,6 @@ def user_stamp(request):
 
     print(post_count)
     return render(request, 'main/user/user_stamp.html', context)
-
-
-
-
-
 
 @login_required
 def my_page(request):
@@ -193,10 +172,6 @@ def my_page(request):
                 }
     
     return render(request, 'main/user/user_mypage.html', context)
-
-
-
-
 
 @login_required
 def post_history(request):
@@ -253,13 +228,7 @@ class UserProfileUpdateView(UpdateView):
 
     def get_object(self, queryset=None):
         return self.request.user
-    
-    def form_valid(self, form):
-        if not form.cleaned_data.get('badge_rank'):
-            form.instance.badge_rank = 'none'
-        return super().form_valid(form)
-
-
+   
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -270,10 +239,9 @@ class UserProfileUpdateView(UpdateView):
         card = 0
         posts = PhotoPost.objects.filter(user=user).order_by('-posted_at')
         for i in posts:
-            post_count += 10
+            post_count += 1
         card = post_count / 10
-
-
+        
         badge_choices = []
         if post_count > 10:
             post_count -= (int(card)*10)
@@ -293,15 +261,14 @@ class UserProfileUpdateView(UpdateView):
         # フォームに渡す
         kwargs['badge_choices'] = badge_choices
         return kwargs
-
+ 
+  
+        
     def form_valid(self, form):
-        # 選択肢が 'none' しかない場合は強制的に none をセット
-        choices = dict(form.fields['badge_rank'].choices)
-        if list(choices.keys()) == ['none']:
+        if not form.cleaned_data.get('badge_rank'):
             form.instance.badge_rank = 'none'
-
-        return super().form_valid(form)
-
+        self.object = form.save()
+        return redirect(self.get_success_url())
 
 
 
@@ -311,9 +278,6 @@ user_profile_edit = UserProfileUpdateView.as_view()
 def user_edit_complete(request):
     """アカウント情報編集完了画面"""
     return render(request, 'main/user/user_edit_complete.html', {})
-
-
-
 
 # -----------------------------------------------------
 # 3. 投稿フロービュー
@@ -637,7 +601,7 @@ def admin_user_delete_confirm(request, user_id):
 
         try:
             username = user_to_delete.username
-            email_to_notify = user_to_delete.email  # 削除されるユーザーのメールアドレス
+            email_to_notify = user_to_delete.email
 
             user_to_delete.delete()
 
@@ -667,8 +631,6 @@ def admin_user_delete_confirm(request, user_id):
 
             from_email = formataddr(('まちレポ', 'machirepo.app@gmail.com'))
 
-
-            """宛先メールアドレス"""
             recipient_list = [ email_to_notify ]
 
             send_mail(subject, message, from_email, recipient_list)
@@ -749,14 +711,10 @@ def manage_post_status_edit(request, post_id):
             username = updated_post.user.username
             email_to_notify = updated_post.user.email
 
-           
-
             subject = "報告に管理者からステータスの更新されました"
 
             message = (
                 f"{username} 様\n\n\n"
-              
-
                 f"いつもまちレポをご利用いただき、誠にありがとうございます。\n"
                 f"以前投稿された報告に管理者からステータスがつけられましたのでご連絡いたします。\n"
                 f"ステータス内容は以下の通りです。\n\n"
@@ -769,8 +727,6 @@ def manage_post_status_edit(request, post_id):
             message +=(
                 f"\n詳細はご自身のアカウントでまちレポにログインしていただき、トップページにある投稿履歴から確認できます。\n"
                 f"この度はご報告いただきありがとうございました。"
-                       
-                       
                 f"\n\n-------------------------------------------------------------\n"
                 f"【お問い合わせ】\n"
                 f"まちレポ運営\n"
@@ -780,16 +736,9 @@ def manage_post_status_edit(request, post_id):
 
             from_email = formataddr(('まちレポ', 'machirepo.app@gmail.com'))
 
-
-            """宛先メールアドレス"""
             recipient_list = [ email_to_notify ]
 
             send_mail(subject, message, from_email, recipient_list)
-
-
-
-
-
             
             return redirect('admin_status_edit_done', post_id=updated_post.pk) 
     else:

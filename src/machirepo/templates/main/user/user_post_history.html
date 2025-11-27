@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<div class="sub-header">
+<div class="sub-header" style="margin-bottom:1rem;">
     <a href="{% url 'user_home' %}" class="back-link">&lt; 戻る</a>
     <h2 class="page-title">投稿履歴</h2>
 </div>
@@ -31,6 +31,12 @@
                         </span>
                     </div>
                 </div>
+                    {% if post.admin_note %}
+                    <div class="admin-comment">
+                        <label class="comment-title">管理者からのコメント</label>
+                        <p class="comment-body">{{ post.admin_note | linebreaks}}</p>
+                    </div>
+                {% endif %}
             </a>
         {% endfor %}
     {% else %}

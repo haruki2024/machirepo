@@ -6,7 +6,7 @@
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     
-<div class="sub-header">
+<div class="sub-header" style="margin-bottom:1rem;">
     <a href="{% url "photo_post_create" %}" class="back-link">&lt; 修正する</a> 
     <h2 class="page-title">投稿内容の確認</h2>
 </div>
@@ -28,7 +28,7 @@
     </div>
 
     <div class="form-group">
-        <label>位置情報</label> 
+        <label>場所</label> 
         {% if post_data.latitude and post_data.longitude %}
             <div id="map-display"></div>
         {% else %}

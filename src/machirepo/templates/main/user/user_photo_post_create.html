@@ -37,7 +37,7 @@
 {% block content %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<div class="sub-header">
+<div class="sub-header" style="margin-bottom:1rem;">
     <a href="{% url "user_home" %}" class="back-link">&lt; 戻る</a>
     <h2 class="page-title">新規投稿</h2>
 </div>
@@ -151,7 +151,7 @@ let markerInstance = null;
         reader.onload = function(e) {
             photoElement.src = e.target.result;
             photoElement.style.display = 'block';
-            fileNameDisplay.textContent = `選択中のファイル: ${file.name} (サイズ: ${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            fileNameDisplay.textContent = `選択中のファイル: ${file.name} `;
         };
         reader.readAsDataURL(file);
     });

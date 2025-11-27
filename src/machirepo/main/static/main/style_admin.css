@@ -698,6 +698,18 @@ body.form-page-bg {
     align-self: flex-start;
 }
 
+.detail-data-box {
+  background-color: #ffffff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+  margin: 0;
+  font-size: 1rem;
+  color: #1f2937;
+  line-height: 1.6;
+}
+
+
 /* ===== 確認モーダル ===== */
 .modal-overlay {
     position: fixed;

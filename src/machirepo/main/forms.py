@@ -17,7 +17,7 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
     # Userモデルのusernameフィールドを氏名として再定義（ニックネームとして使用）
     username = forms.CharField(
         label='氏名',
-        max_length=50,
+        max_length=150,
         help_text='50文字以内で入力してください。',
         error_messages={
             'required': '氏名は必須です。',

@@ -21,22 +21,22 @@
         </div>
 
 
-
-        <div class="badge-select-container">
-            {% for value, label in form.fields.badge_rank.choices %}
-            <label class="badge-radio-label">
-                <input type="radio" name="badge_rank" value="{{ value }}" {% if form.initial.badge_rank == value %}checked{% endif %}>
-                {% if value != 'none' %}
-                    <img src="/media/images/badge_{{ value }}.png" alt="{{ label }}" class="badge-image">
-                {% else %}
-                    <span class="badge-label-text">取得できているバッジは存在しません</span>
-                {% endif %}
-            </label>
-            {% endfor %}
-
-            
+        
+        <div class="form-group">
+            <label for="edit-username">保有バッジ選択</label>
+            <div class="badge-select-container">
+                {% for value, label in form.fields.badge_rank.choices %}
+                <div class="badge-radio-label">
+                    <input type="radio" name="badge_rank" value="{{ value }}" {% if form.initial.badge_rank == value %}checked{% endif %}>
+                    {% if value != 'none' %}
+                        <img src="/media/images/badge_{{ value }}.png" alt="{{ label }}" class="badge-image">
+                    {% else %}
+                        <span class="badge-label-text">取得できているバッジは存在しません</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
         </div>
-
 
 
 
