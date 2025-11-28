@@ -158,17 +158,20 @@ def my_page(request):
     card = 0
     
     for i in posts:
-        post_count += 1
+        post_count += 8
     
     card = int(post_count / 10)
     
     if post_count > 10:
         post_count -= (card*10)
+    DUMMY_PASSWORD_LENGTH = 10
+    dummy_password = '・' * DUMMY_PASSWORD_LENGTH
     
     context = {
                 'user': request.user,
                 'posts': posts,
                 'card':int(card),
+                'dummy_password':dummy_password
                 }
     
     return render(request, 'main/user/user_mypage.html', context)
@@ -215,6 +218,7 @@ def post_list(request):
     }
 
     return render(request, 'main/user/user_post_list.html', context)
+
 
 @method_decorator(login_required, name='dispatch')
 class UserProfileUpdateView(UpdateView):
@@ -273,6 +277,83 @@ class UserProfileUpdateView(UpdateView):
 
 
 user_profile_edit = UserProfileUpdateView.as_view()
+
+
+
+
+@method_decorator(login_required, name='dispatch')
+class UserProfileUpdateView(UpdateView):
+    """ユーザー情報編集"""
+    model = get_user_model()
+    form_class = UserUpdateForm 
+    template_name = 'main/user/user_profile_edit.html'
+
+    def get_success_url(self):
+        return reverse('user_edit_complete')
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        if not form.cleaned_data.get('badge_rank'):
+            form.instance.badge_rank = 'none'
+        return super().form_valid(form)
+
+
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        user = self.request.user
+
+
+        post_count = 0
+        card = 0
+        posts = PhotoPost.objects.filter(user=user).order_by('-posted_at')
+        for i in posts:
+            post_count += 1
+            post_count += 10
+        card = post_count / 10
+
+
+        badge_choices = []
+        if post_count > 10:
+            post_count -= (int(card)*10)
+            badge_choices = []
+        if card >= 1:
+            badge_choices.append(('bronze', '銅バッジ'))
+        if card >= 2:
+            badge_choices.append(('silver', '銀バッジ'))
+        if card >= 3:
+            badge_choices.append(('gold', '金バッジ'))
+        if card >= 5:
+            badge_choices.append(('rainbow', '虹バッジ'))
+
+        if not badge_choices:
+            badge_choices = [('none', '表示しない')]
+
+        # フォームに渡す
+        kwargs['badge_choices'] = badge_choices
+        return kwargs
+
+    def form_valid(self, form):
+        # 選択肢が 'none' しかない場合は強制的に none をセット
+        choices = dict(form.fields['badge_rank'].choices)
+        if list(choices.keys()) == ['none']:
+            form.instance.badge_rank = 'none'
+
+        return super().form_valid(form)
+
+
+
+
+user_profile_edit = UserProfileUpdateView.as_view()
+
+
+
+
+
+
+
 
 @login_required
 def user_edit_complete(request):

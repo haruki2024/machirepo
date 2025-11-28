@@ -32,10 +32,10 @@
         <span class="detail-data-text">{{ user.email|default:"未設定" }}</span>
     </div>
     
-    <div class="form-group">
+    {% comment %} <div class="form-group">
         <label>パスワード</label>
-        <span class="detail-data-text">・・・・・・</span>
-    </div>
+        <span class="detail-data-text">{{dummy_password}}</span>
+    </div> {% endcomment %}
 
     <div class="form-group">
         <label>保有バッジ</label>

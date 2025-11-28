@@ -18,7 +18,7 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
     username = forms.CharField(
         label='氏名',
         max_length=150,
-        help_text='50文字以内で入力してください。',
+        help_text='150文字以内で入力してください。',
         error_messages={
             'required': '氏名は必須です。',
             'max_length': '氏名は50文字以内で入力してください。' 
@@ -31,7 +31,11 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
         required=True
     )
     
-    password = forms.CharField(label='パスワード', widget=forms.PasswordInput)
+    password = forms.CharField(
+        label='パスワード', 
+        widget=forms.PasswordInput,
+        max_length=128
+    )
   
 
 
@@ -74,11 +78,10 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
     # ------------------------------------------------------------------
     def clean(self):
         cleaned_data = super().clean()
-        # 💡 修正点: password2 の取得と一致チェックを削除しました
+        
         password = cleaned_data.get('password')
         email = cleaned_data.get('email')
 
-        # 💡 emailの重複チェック
         if email and User.objects.filter(email__iexact=email).exists():
             self.add_error('email', "このメールアドレスは既に使用されています。")
 
@@ -159,7 +162,7 @@ User = get_user_model()
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('username', 'email', 'badge_rank')  # ← 追加
+        fields = ('username', 'email', 'badge_rank')  
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-input'}),
             'email': forms.EmailInput(attrs={'class': 'form-input'}),
@@ -199,10 +202,9 @@ class PhotoPostForm(forms.ModelForm):
         label="報告のタイトル", 
         max_length=100,
         required=True, 
-        widget=forms.TextInput(attrs={'placeholder': '例：〇〇公園のベンチが壊れている', 'maxlength': 100}),
+        widget=forms.TextInput(attrs={'placeholder': '例：〇〇公園のベンチが壊れている', }),
         error_messages={
             'required': '報告のタイトルは必須です。', 
-            'max_length': 'タイトルは100文字以内で入力してください。'
         }
     )
 
@@ -293,7 +295,6 @@ class StatusUpdateForm(forms.ModelForm):
     """
     class Meta:
         model = PhotoPost
-        # 💡 PhotoPostモデルのフィールドを参照
         fields = ('status', 'priority', 'admin_note')
         labels = {
             'status': '対応ステータス',
@@ -306,13 +307,14 @@ class StatusUpdateForm(forms.ModelForm):
             'priority': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg'}),
         }
 
-
 class TagForm(forms.ModelForm):
     """タグ新規作成用のフォーム"""
+    name = forms.CharField(max_length=50) 
+    
     class Meta:
         model = Tag
         # nameフィールドのみを使用
-        fields = ('name',)
+        fields = ['name']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500',
