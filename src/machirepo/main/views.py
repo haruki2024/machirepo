@@ -158,20 +158,17 @@ def my_page(request):
     card = 0
     
     for i in posts:
-        post_count += 8
+        post_count += 1
     
     card = int(post_count / 10)
     
     if post_count > 10:
         post_count -= (card*10)
-    DUMMY_PASSWORD_LENGTH = 10
-    dummy_password = '・' * DUMMY_PASSWORD_LENGTH
     
     context = {
                 'user': request.user,
                 'posts': posts,
                 'card':int(card),
-                'dummy_password':dummy_password
                 }
     
     return render(request, 'main/user/user_mypage.html', context)
@@ -252,11 +249,11 @@ class UserProfileUpdateView(UpdateView):
             badge_choices = []
         if card >= 1:
             badge_choices.append(('bronze', '銅バッジ'))
-        if card >= 2:
-            badge_choices.append(('silver', '銀バッジ'))
-        if card >= 3:
-            badge_choices.append(('gold', '金バッジ'))
         if card >= 5:
+            badge_choices.append(('silver', '銀バッジ'))
+        if card >= 10:
+            badge_choices.append(('gold', '金バッジ'))
+        if card >= 50:
             badge_choices.append(('rainbow', '虹バッジ'))
 
         if not badge_choices:
@@ -311,7 +308,6 @@ class UserProfileUpdateView(UpdateView):
         posts = PhotoPost.objects.filter(user=user).order_by('-posted_at')
         for i in posts:
             post_count += 1
-            post_count += 10
         card = post_count / 10
 
 
@@ -321,11 +317,11 @@ class UserProfileUpdateView(UpdateView):
             badge_choices = []
         if card >= 1:
             badge_choices.append(('bronze', '銅バッジ'))
-        if card >= 2:
-            badge_choices.append(('silver', '銀バッジ'))
-        if card >= 3:
-            badge_choices.append(('gold', '金バッジ'))
         if card >= 5:
+            badge_choices.append(('silver', '銀バッジ'))
+        if card >= 10:
+            badge_choices.append(('gold', '金バッジ'))
+        if card >= 50:
             badge_choices.append(('rainbow', '虹バッジ'))
 
         if not badge_choices:
