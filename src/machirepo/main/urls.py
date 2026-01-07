@@ -70,5 +70,4 @@ urlpatterns = [
     path('manage/tags/edit/complete/', views.admin_tag_edit_complete, name='admin_tag_edit_complete'),
     path('manage/tags/delete/complete/', views.admin_tag_delete_complete, name='admin_tag_delete_complete'),
 
-
 ]

@@ -67,7 +67,15 @@
     <a href="{% url "admin_post_list" %}" class="link-secondary">&lt; 一覧に戻る</a>
     
     
-
+      
+        {% if is_valid %}
+            <div class="error-box">
+                <p style="color: red;">この投稿は信頼度の低い投稿になっています。</p>
+                <p>まちレポに関係のない写真である可能性があります。正しい写真か注意して確認してください。地域の不具合（{{ confidence }}%）</p>
+            </div>
+        {% endif %}
+    
+    
     <div class="history-item-header">
         <div>
             <h2 style="padding-top: -10rem; margin-left: 0rem;">{{ post.title|default:"(タイトルなし)" }}</h2>

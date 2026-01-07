@@ -1,7 +1,3 @@
-"""
-Django settings for machirepo project.
-"""
-
 import os
 from pathlib import Path
 
@@ -38,8 +34,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'machirepo.app@gmail.com'   # 自分の Gmail アドレス
-EMAIL_HOST_PASSWORD = 'dnod zifk oimg ambl'        # Gmail の「アプリパスワード」
+EMAIL_HOST_USER = 'machirepo.app@gmail.com'  
+EMAIL_HOST_PASSWORD = 'dnod zifk oimg ambl'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
@@ -60,7 +56,7 @@ ROOT_URLCONF = 'machirepo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], #templateファイル参照
+        'DIRS': [BASE_DIR / 'templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,7 +78,7 @@ WSGI_APPLICATION = 'machirepo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',#データベースはSQLITE3
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -128,7 +124,6 @@ ALLOWED_HOSTS = ['10.251.112.251', '127.0.0.1', 'localhost']
 
 STATIC_URL = '/static/'
 
-# settings.py
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
@@ -138,13 +133,8 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-
-# ログインURL 
 LOGIN_URL = '/accounts/login/'
 
-# ログイン成功後の遷移先
 LOGIN_REDIRECT_URL = 'home_redirect' 
 
-# ログアウト後の遷移先 
 LOGOUT_REDIRECT_URL = '/'

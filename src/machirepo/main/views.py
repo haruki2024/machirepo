@@ -20,18 +20,73 @@ from .forms import TagForm, StatusUpdateForm, ResidentCreationForm, PhotoPostFor
 from django.views.generic.edit import UpdateView 
 from django.core.mail import send_mail
 
+
+
+
+
+
+import torch 
+import torch.nn as nn 
+# torchvisionのmodelsを「torch_models」という名前に変えて読み込み、衝突を防ぎます
+from torchvision import transforms, models as torch_models 
+from django.shortcuts import render 
+from PIL import Image 
+import io 
+
+# あなたのプロジェクトのDBモデル（PhotoPost）を直接読み込みます
+# これにより「models.PhotoPost」と書かずに済み、エラーが消えます
+from .models import PhotoPost 
+
+
+
+
+
+
+
+
+
+
+
 logger = logging.getLogger(__name__)
 fs = FileSystemStorage()
 
-# -----------------------------------------------------
 # 権限チェック
-# -----------------------------------------------------
 def is_staff_user(user):
     return user.is_authenticated and user.is_staff
 
-# -----------------------------------------------------
+
+
+
+# --- 1. AIモデルの準備 (関数の外で定義) ---
+def load_model():
+    model = torch_models.mobilenet_v2(weights=None)
+    # Colabで作ったのと同じ数（4）にする
+    model.classifier[1] = nn.Linear(model.last_channel, 4) 
+    
+    # 特訓した結果を読み込む
+    model.load_state_dict(torch.load('main/machirepo_ai_v1.pth', map_location='cpu'))
+    model.eval()
+    return model
+# サーバー起動時に一度だけモデルを読み込む (関数の外、左端から書く)
+predict_model = load_model()
+
+
+# --- 2. 画像の前処理 (関数の外で定義) ---
+def preprocess_image(image_bytes):
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406], 
+            std=[0.229, 0.224, 0.225]
+        ),
+    ])
+    image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+    return transform(image).unsqueeze(0)
+
+
+
 # 1. 共通/認証関連ビュー
-# -----------------------------------------------------
 
 def index(request):
     if request.user.is_authenticated:
@@ -102,9 +157,9 @@ def user_logout_view(request):
     logout(request)
     return redirect('index')
 
-# -----------------------------------------------------
+
 # 2. ユーザー画面ビュー
-# -----------------------------------------------------
+
 @login_required
 def user_home(request):
     latest_posts = models.PhotoPost.objects.order_by('-posted_at')[:2]
@@ -219,7 +274,6 @@ def post_list(request):
 
 @method_decorator(login_required, name='dispatch')
 class UserProfileUpdateView(UpdateView):
-    """ユーザー情報編集"""
     model = get_user_model()
     form_class = UserUpdateForm 
     template_name = 'main/user/user_profile_edit.html'
@@ -259,7 +313,7 @@ class UserProfileUpdateView(UpdateView):
         if not badge_choices:
             badge_choices = [('none', '表示しない')]
 
-        # フォームに渡す
+
         kwargs['badge_choices'] = badge_choices
         return kwargs
  
@@ -280,7 +334,7 @@ user_profile_edit = UserProfileUpdateView.as_view()
 
 @method_decorator(login_required, name='dispatch')
 class UserProfileUpdateView(UpdateView):
-    """ユーザー情報編集"""
+
     model = get_user_model()
     form_class = UserUpdateForm 
     template_name = 'main/user/user_profile_edit.html'
@@ -327,12 +381,10 @@ class UserProfileUpdateView(UpdateView):
         if not badge_choices:
             badge_choices = [('none', '表示しない')]
 
-        # フォームに渡す
         kwargs['badge_choices'] = badge_choices
         return kwargs
 
     def form_valid(self, form):
-        # 選択肢が 'none' しかない場合は強制的に none をセット
         choices = dict(form.fields['badge_rank'].choices)
         if list(choices.keys()) == ['none']:
             form.instance.badge_rank = 'none'
@@ -348,17 +400,11 @@ user_profile_edit = UserProfileUpdateView.as_view()
 
 
 
-
-
-
 @login_required
 def user_edit_complete(request):
-    """アカウント情報編集完了画面"""
     return render(request, 'main/user/user_edit_complete.html', {})
 
-# -----------------------------------------------------
-# 3. 投稿フロービュー
-# -----------------------------------------------------
+# 3. 投稿
 @login_required
 def photo_post_create(request):
     post_data = request.session.get('post_data', {})
@@ -409,7 +455,6 @@ def photo_post_create(request):
                 
                 if 'photo_path' in post_data and post_data['photo_path']:
                     try:
-                        # ファイルパスがセッションに保存されていると仮定し、削除
                         fs.delete(post_data['photo_path'])
                         logger.info(f"--- OLD TEMP FILE DELETED: {post_data['photo_path']} ---")
                     except Exception:
@@ -554,8 +599,6 @@ def photo_post_confirm(request):
                 logger.error(f"FATAL: Temporary photo file not found at path: {photo_path}")
                 raise ValidationError({'photo': '一時的な写真ファイルが見つからないか、有効期限切れです。'})
             
-
-
             if tag_pk:
                 print(f"--- DEBUG SAVE: Tag PK={tag_pk} found. Tag instance ID to save: {new_post.tag.pk}")
             else:
@@ -572,7 +615,6 @@ def photo_post_confirm(request):
             return redirect('photo_post_done')
             
         except ValidationError as e:
-            # データ検証エラー：緯度経度や必須項目などのエラー
             error_messages = "\n".join([f"「{k}」: {v[0]}" for k, v in e.message_dict.items()])
             logger.error("投稿のfull_clean()が失敗しました: %s", error_messages)
             messages.error(request, f"**データ検証エラー**：投稿の保存に必要な情報が不足しています。不足フィールド:\n{error_messages}")
@@ -620,25 +662,7 @@ def post_detail(request, post_id):
 
 
 
-# def user_map(request):
-#     """題名"""
-#     subject = "題名"
-#     """本文"""
-#     message = "本文です\nこんにちは。メールを送信しました"
-#     """送信元メールアドレス"""
-#     from_email = "harukishougo96@gmail.com"
-#     """宛先メールアドレス"""
-#     recipient_list = [
-#         "harukishougo96@gmail.com"
-#     ]
-
-#     send_mail(subject, message, from_email, recipient_list)
-#     return render(request, 'main/user/user_map_list.html')
-
-
-# -----------------------------------------------------
 # 4. 管理者画面ビュー（スタッフ権限限定）
-# -----------------------------------------------------
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_home(request):
@@ -729,7 +753,6 @@ def admin_user_delete_complete(request):
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_list(request):
-
     status_filter = request.GET.get('status', None)
     tag_filter = request.GET.get('tag', None)
     priority_filter = request.GET.get('priority', None)
@@ -768,17 +791,51 @@ def admin_post_list(request):
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_detail(request, post_id):
     post = get_object_or_404(models.PhotoPost, pk=post_id)
+    
+    image_path = post.photo.path
+
+
+    if post.photo:
+        image_path = post.photo.path
+    else:
+        image_path = None
+
+
+
     form = StatusUpdateForm(instance=post)
-    context = {
-        'post': post,
-        'form': form
-    }
+    context = {'post': post,'form': form }
+
+    print("hello")
+    with open(image_path, 'rb') as f:
+        file_data = f.read()
+
+    input_tensor = preprocess_image(file_data)
+    
+    with torch.no_grad():
+        output = predict_model(input_tensor)
+        probabilities = torch.nn.functional.softmax(output, dim=1)
+        confidence, predicted_idx = torch.max(probabilities, 1)
+        
+        confidence_score = round(confidence.item() * 100, 1)
+        category_idx = predicted_idx.item()
+        
+        categories = ['倒木', '正常（対象外）', '道路のひび割れ', '水質汚濁']
+        result_label = categories[category_idx]
+
+    context.update({
+        'confidence': confidence_score,
+        'result_label': result_label,
+        'is_valid': result_label == '正常（対象外）' and confidence_score > 35,
+    })
+
+
+    
+    #     # return render(request, 'main/user/result.html', context)
     return render(request, 'main/admin/admin_post_detail.html', context)
 
 
 @user_passes_test(is_staff_user, login_url='/')
 def manage_post_status_edit(request, post_id):
-    """ステータス編集画面"""
     post = get_object_or_404(models.PhotoPost, pk=post_id)
 
     if request.method == 'POST':
@@ -830,14 +887,12 @@ def manage_post_status_edit(request, post_id):
 
 @user_passes_test(is_staff_user, login_url='/')
 def manage_status_edit_done(request, post_id): 
-    """ステータス編集完了画面"""
     post = get_object_or_404(models.PhotoPost, pk=post_id)
     context = {'post': post}
     return render(request, 'main/admin/admin_post_status_complete.html', context)
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_delete(request, post_id):
-    """報告の削除処理"""
     post = get_object_or_404(models.PhotoPost, pk=post_id)
 
     if request.method == 'POST':
@@ -861,25 +916,22 @@ def admin_post_delete(request, post_id):
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_delete_complete(request):
-    """報告削除完了画面"""
     context = {
         'app_name': '報告削除完了'
     }
     return render(request, 'main/admin/admin_post_delete_complete.html', context)
 
-# --------------------------------------------------
+
 # 5. 管理者向けタグ管理画面 (新規追加)
-# --------------------------------------------------
+
 @login_required
 def admin_tag_list(request):
-    """タグ一覧表示画面"""
     tags = Tag.objects.all().order_by('name')
     context = {'tags': tags}
     return render(request, 'main/admin/admin_tag_list.html', context)
 
 @login_required
 def admin_tag_create(request):
-    """タグ作成画面"""
     if request.method == 'POST':
         form = TagForm(request.POST)
         if form.is_valid():
@@ -896,7 +948,6 @@ def admin_tag_create(request):
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_tag_edit(request, pk):
-    """タグ編集ビュー"""
     tag = get_object_or_404(Tag, pk=pk)
     
     if request.method == 'POST':
@@ -912,7 +963,6 @@ def admin_tag_edit(request, pk):
 
 @login_required
 def admin_tag_delete(request, pk):
-    """タグ削除処理"""
     tag = get_object_or_404(Tag, pk=pk)
     
     if request.method == 'POST':
@@ -925,16 +975,13 @@ def admin_tag_delete(request, pk):
 
 @login_required
 def admin_tag_create_complete(request):
-    """タグの追加 完了画面"""
     return render(request, 'main/admin/admin_tag_create_complete.html', {'page_title': '完了'})
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_tag_edit_complete(request):
-    """タグの編集 完了画面"""
     return render(request, 'main/admin/admin_tag_edit_complete.html', {'page_title': '編集完了'})
 
 @login_required
 def admin_tag_delete_complete(request):
-    """タグの削除 完了画面"""
     return render(request, 'main/admin/admin_tag_delete_complete.html', {'page_title': '完了'})
 
