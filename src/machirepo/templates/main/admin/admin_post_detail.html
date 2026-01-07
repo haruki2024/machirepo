@@ -68,12 +68,12 @@
     
     
       
-        {% if is_valid %}
-            <div class="error-box">
-                <p style="color: red;">この投稿は信頼度の低い投稿になっています。</p>
-                <p>まちレポに関係のない写真である可能性があります。正しい写真か注意して確認してください。地域の不具合（{{ confidence }}%）</p>
-            </div>
-        {% endif %}
+    {% if not is_valid %}
+        <div class="error-box">
+            <p style="color: red;">この投稿は信頼度が低い投稿になっています。</p>
+            <p>まちレポに関係のない写真である可能性があります。正しい写真か注意して確認してください。（{{ confidence }}%）</p>
+        </div>
+    {% endif %}
     
     
     <div class="history-item-header">
