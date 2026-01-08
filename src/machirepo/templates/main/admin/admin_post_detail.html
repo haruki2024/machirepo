@@ -70,8 +70,10 @@
       
     {% if not is_valid %}
         <div class="error-box">
-            <p style="color: red;">この投稿は信頼度が低い投稿になっています。</p>
-            <p>まちレポに関係のない写真である可能性があります。正しい写真か注意して確認してください。（{{ confidence }}%）</p>
+            <p style="color: red; font-size: 20px; font-weight: 700;">【AI分析】この投稿は信頼度が低い投稿になっています。</p>
+            <p>まちレポに関係のない写真である可能性があります。正しい写真か注意して確認してください。（{{ confidence }}%）
+                <br>AIは間違った判定をすることがあるため、再確認するようにしてください。
+            </p>
         </div>
     {% endif %}
     

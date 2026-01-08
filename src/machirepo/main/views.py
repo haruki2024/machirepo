@@ -825,7 +825,7 @@ def admin_post_detail(request, post_id):
     context.update({
         'confidence': confidence_score,
         'result_label': result_label,
-        'is_valid': result_label != '正常（対象外）' and confidence_score > 35,
+        'is_valid': result_label != '正常（対象外）' and confidence_score > 30,
     })
 
 
