@@ -1,11 +1,9 @@
-/* ===== Google Fontsの読み込み ===== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
 
-/* ===== 色の変数を定義 ===== */
 :root {
-    --primary-color: #14b8a6; /* ティール (bg-teal-500) */
-    --primary-hover-color: #0d9488; /* 濃いティール (bg-teal-600) */
+    --primary-color: #14b8a6; 
+    --primary-hover-color: #0d9488;
 }
 
 .menu-item-hover:hover {
@@ -13,7 +11,6 @@
     box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 
-/* ===== ステータス・優先度 ===== */
 .status-badge {
     padding: 0.3em 0.8em;
     border-radius: 1em;
@@ -65,24 +62,16 @@
 }
 
 
-/* ===== テーブル ===== */
-/* ★ SP対応のためのラッパー要素：このクラスでテーブルを囲んでください */
 .table-responsive {
-    /* SP表示時（メディアクエリ外）に横スクロールを有効にする */
     overflow-x: auto;
-    /* スクロールバーを見やすくするために下に少し余白をとる */
     padding-bottom: 0.5rem; 
     margin-bottom: 1rem;
-    /* スクロールバーが表示されても、テーブルの影が途切れないようにする */
 }
 
 
-/* テーブル本体 */
 .admin-table {
-    /* SP対応のため、widthを min-content に設定し、強制的に横に伸ばす */
     width: min-content; 
-    min-width: 100%; /* 少なくともコンテナ幅は確保する */
-    
+    min-width: 100%; 
     border-collapse: collapse;
     margin-top: 1.5rem;
     background-color: #fff;
@@ -94,7 +83,7 @@
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid #e5e7eb;
-    white-space: nowrap; /* テーブルセルの内容が折り返されないようにする */
+    white-space: nowrap;
 }
 .admin-table th {
     background-color: #f9fafb;
@@ -114,8 +103,6 @@
     text-decoration: underline;
 }
 
-
-/* ===== 全体共通 ===== */
 body {
     font-family: 'Inter', 'Noto Sans JP', sans-serif;
     background-image: url('/media/images/haikei_desktop.png');
@@ -162,8 +149,6 @@ body.form-page-bg {
     min-height: 100vh;
 }
 
-
-/* ===== ページ全体 ===== */
 .page-container {
     display: flex;
     flex-direction: column;
@@ -172,8 +157,6 @@ body.form-page-bg {
     position: relative
 }
 
-
-/* ===== ヘッダー ===== */
 .app-header {
     background-color: var(--primary-color);
     color: #fff;
@@ -224,12 +207,10 @@ body.form-page-bg {
     font-weight: 700;
 }
 
-
-/* --- 戻るリンク --- */
 .link-secondary {
     display: inline-block;
     position: relative;
-    margin-left: 0 !important;   /* ✅ 負のマージンを削除 */
+    margin-left: 0 !important;  
     margin-bottom: 1rem;
     color: #0f766e;
     text-decoration: none;
@@ -257,8 +238,6 @@ body.form-page-bg {
     border-radius: 6px;
 }
 
-
-/* ===== メインコンテンツ ===== */
 .main-content {
     flex-grow: 1;
     padding: 2rem;
@@ -290,28 +269,27 @@ body.form-page-bg {
 
 
 
-/* ===== フォーム ===== */
+
 .form-container {
     width: 100%;
-    max-width: 1000px; /* 横幅を広く変更 */
+    max-width: 1000px;
     margin: auto;
-    padding: 2rem; /* フォーム内の余白 */
+    padding: 2rem;
 }
 
 .form-group input,
 .form-group textarea,
 .form-group select {
     width: 100%;
-    padding: 1rem 1.2rem; /* 高さを少し大きく */
-    font-size: 1.1rem;    /* 文字サイズも少し大きく */
+    padding: 1rem 1.2rem;
+    font-size: 1.1rem;
     border: 1px solid #d1d5db;
-    border-radius: 0.5rem; /* 角丸も調整 */
+    border-radius: 0.5rem;
     box-sizing: border-box;
     text-align: left;
     resize: vertical;
 }
 
-/*ステータス記録フォーム*/
 .form-group2 {
     margin-bottom: 1.5rem;
 }
@@ -336,7 +314,7 @@ body.form-page-bg {
     text-align: left;
     resize: vertical;
 }
-/* タグ追加フォーム */
+
 .form-group3 {
     margin-bottom: 1.5rem;
     text-align: center;
@@ -362,8 +340,6 @@ body.form-page-bg {
     margin: 0 auto;
 }
 
-
-/* フィルターカード */
 .filter-container {
     display: flex;
     justify-content: space-between;
@@ -399,8 +375,6 @@ body.form-page-bg {
     outline: none;
 }
 
-
-/* ===== フッター ===== */
 .app-footer {
     background-color: #ffffff;
     border-top: 1px solid #e5e7eb;
@@ -437,9 +411,6 @@ body.form-page-bg {
 }
 
 
-
-
-
 .btn {
     display: block;
     width: 100%;
@@ -463,11 +434,6 @@ body.form-page-bg {
 .btn-primary:hover {
     background-color: var(--primary-hover-color);
 }
-
-
-
-
-
 
 .btn-cancel {
     background-color: #e5e7eb;
@@ -493,8 +459,6 @@ body.form-page-bg {
     outline-offset: 2px;
 }
 
-
-/* 報告詳細画面：ステータス記録 */
 .rptbtn {
     display: inline-block;
     padding: 0.7rem 10rem;
@@ -520,7 +484,7 @@ body.form-page-bg {
     background-color: #047857;
     transform: translateY(0);
 }
-/* 報告詳細画面：削除 */
+
 .dltbtn {
     display: inline-block;
     padding: 0.7rem 10rem;
@@ -546,7 +510,7 @@ body.form-page-bg {
     background-color: #b91c1c;
     transform: translateY(0);
 }
-/*ステータス編集画面*/
+
 .stbtn {
     display: inline-block;
     padding: 0.7rem 30rem;
@@ -572,7 +536,7 @@ body.form-page-bg {
     background-color: #047857;
     transform: translateY(0);
 }
-/* ===== トップ画面：ログイン ===== */
+
 .loginbtn {
     display: inline-block;
     padding: 1rem 10rem;
@@ -598,14 +562,14 @@ body.form-page-bg {
     background-color: #047857;
     transform: translateY(0);
 }
-/*ログイン画面*/
+
 .login-buttons {
     display: flex;
     justify-content: center;
     gap: 1.5rem;
     margin-top: 2rem;
 }
-/* ログイン画面：ログイン */
+
 .userbtn,
 .userbtn, .adminbtn {
     padding: 0.8rem 2.5rem;
@@ -647,9 +611,6 @@ body.form-page-bg {
     transform: translateY(0);
 }
 
-
-
-/* ===== カードデザイン ===== */
 .history-item {
     background-color: #ffffff;
     border-radius: 12px;
@@ -680,11 +641,6 @@ body.form-page-bg {
     color: #6b7280;
 }
 
-
-
-
-
-/* ===== 報告詳細 ===== */
 .report-detail {
     align-items: flex-start !important;
     width: 100%;
@@ -709,8 +665,6 @@ body.form-page-bg {
   line-height: 1.6;
 }
 
-
-/* ===== 確認モーダル ===== */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -723,7 +677,7 @@ body.form-page-bg {
     align-items: center;
     z-index: 1000;
 }
-/* ===== 確認モーダル (スマホ/デフォルト) ===== */
+
 .modal-box {
     background-color: #fff;
     padding: 2rem;
@@ -735,7 +689,6 @@ body.form-page-bg {
     box-sizing: border-box;
 }
 
-/* ボタン配置 */
 .modal-actions {
     display: flex;
     gap: 1rem;
@@ -786,8 +739,6 @@ body.form-page-bg {
 }
 
 
-/* ===== エラー表示 ===== */
-
 .error-box {
     background-color: #fee2e2;
     border-left: 4px solid #ef4444;
@@ -827,11 +778,9 @@ body.form-page-bg {
         max-width: none; 
     }
 
-    /* フォームコンテナは中央寄せと幅制限を維持 */
     .form-container {
         padding: 40px; 
     }
-
 
     .history-item .history-item-title {
        
@@ -841,19 +790,15 @@ body.form-page-bg {
         margin: 0;
     }
 
-
-
-    /* テーブルの横スクロールを無効化（タブレット以上の幅があるため） */
     .table-container {
         overflow-x: auto;
         padding-bottom: 0;
     }
     .admin-table {
-        width: 100%; /* コンテナいっぱいに広げる */
+        width: 100%;
         min-width: initial;
     }
 
-    /* 3. セレクトボックスの調整 */
     .filter-container select {
         min-width: unset;
         font-size: 1rem; 
@@ -861,15 +806,8 @@ body.form-page-bg {
     }
     
     .admin-table {
-        width: 100%; /* コンテナいっぱいに広げる */
+        width: 100%;
     }
-
-
-    
-
-
-
-
 }
 
 @media (min-width: 1024px) {
@@ -877,16 +815,12 @@ body.form-page-bg {
         font-size: 15px;
     }
     
-    /* page-container: PCで幅いっぱい */
     .page-container {
         max-width: 100%;
         margin: 0; 
         box-shadow: none;
     }
     
-
-    
-    /* フォームコンテナ: 中央寄せと幅制限を維持 */
     .form-container {
         background-color: #fff;
         border-radius: 8px;
@@ -894,13 +828,12 @@ body.form-page-bg {
         padding: 40px;
     }
     
-    /* テーブルの横スクロールを無効化（PCの幅があるため） */
     .table-container {
         overflow-x: visible;
         padding-bottom: 0;
     }
     .admin-table {
-        width: 100%; /* コンテナいっぱいに広げる */
+        width: 100%;
         min-width: initial;
     }       
     .post-photo {

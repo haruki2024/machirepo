@@ -4,10 +4,7 @@
 
 {% block content %}
 
-
 <main class="main-content">
-    
-    
     <a href="{% url "admin_post_list" %}" class="link-secondary">&lt; 一覧に戻る</a>
     <div>
         <h2 style="padding-top: -10rem; margin-left: 0rem;">{{ post.title|default:"(タイトルなし)" }}</h2>
@@ -54,6 +51,5 @@
         <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">記録する</button>
     </form>
 </main>
-
 
 {% endblock %}

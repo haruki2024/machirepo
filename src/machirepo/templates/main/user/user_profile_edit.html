@@ -19,28 +19,6 @@
             <label for="edit-username">ユーザー名</label>
             {{ form.username }}
         </div>
-{% comment %} 
-        <div class="form-group">
-            <label for="edit-username">保有バッジ選択</label>
-            <div class="badge-select-container">
-                
-                {% for value, label in form.fields.badge_rank.choices %}
-                
-                <label class="badge-radio-label" for="{{ radio.id_for_label }}">
-                    
-                    <input type="radio" name="badge_rank" value="{{ value }}" {% if form.initial.badge_rank == value %}checked{% endif %}>
-
-                    {% if radio.choice_value != 'none' %}
-                        <img src="/media/images/badge_{{ value }}.png" alt="{{ label }}" class="badge-image">
-                    {% else %}
-                        <span class="badge-label-text">{{ radio.choice_label }}</span>
-                    {% endif %}
-                    
-                </label>
-                {% endfor %}
-
-            </div>
-        </div> {% endcomment %}
 
         <div class="form-group">
             <label for="edit-badge-select">保有バッジ選択</label>

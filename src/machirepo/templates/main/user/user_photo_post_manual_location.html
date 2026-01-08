@@ -149,8 +149,6 @@ document.addEventListener("DOMContentLoaded", function () {
         updateLocation(currentLat, currentLng, 16);
     }
 
-    // --- マーカー操作とクリックによる位置設定 ---
-
     marker.on("dragend", () => {
         const latlng = marker.getLatLng();
         updateLocation(latlng.lat, latlng.lng, map.getZoom());
@@ -160,7 +158,7 @@ document.addEventListener("DOMContentLoaded", function () {
         updateLocation(e.latlng.lat, e.latlng.lng, map.getZoom());
     });
 
-    // --- その他機能 ---
+    
     window.addEventListener("load", () => {
         setTimeout(() => {
             map.invalidateSize();

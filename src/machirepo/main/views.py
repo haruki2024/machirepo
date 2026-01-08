@@ -19,32 +19,13 @@ from .models import PhotoPost, Tag
 from .forms import TagForm, StatusUpdateForm, ResidentCreationForm, PhotoPostForm, ManualLocationForm, UserUpdateForm
 from django.views.generic.edit import UpdateView 
 from django.core.mail import send_mail
-
-
-
-
-
-
 import torch 
 import torch.nn as nn 
-# torchvisionのmodelsを「torch_models」という名前に変えて読み込み、衝突を防ぎます
 from torchvision import transforms, models as torch_models 
 from django.shortcuts import render 
 from PIL import Image 
 import io 
-
-# あなたのプロジェクトのDBモデル（PhotoPost）を直接読み込みます
-# これにより「models.PhotoPost」と書かずに済み、エラーが消えます
 from .models import PhotoPost 
-
-
-
-
-
-
-
-
-
 
 
 logger = logging.getLogger(__name__)
@@ -57,21 +38,15 @@ def is_staff_user(user):
 
 
 
-# --- 1. AIモデルの準備 (関数の外で定義) ---
+
 def load_model():
     model = torch_models.mobilenet_v2(weights=None)
-    # Colabで作ったのと同じ数（4）にする
     model.classifier[1] = nn.Linear(model.last_channel, 4) 
-    
-    # 特訓した結果を読み込む
     model.load_state_dict(torch.load('main/machirepo_ai_v1.pth', map_location='cpu'))
     model.eval()
     return model
-# サーバー起動時に一度だけモデルを読み込む (関数の外、左端から書く)
 predict_model = load_model()
 
-
-# --- 2. 画像の前処理 (関数の外で定義) ---
 def preprocess_image(image_bytes):
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -83,8 +58,6 @@ def preprocess_image(image_bytes):
     ])
     image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
     return transform(image).unsqueeze(0)
-
-
 
 # 1. 共通/認証関連ビュー
 
@@ -790,35 +763,23 @@ def admin_post_list(request):
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_post_detail(request, post_id):
-    post = get_object_or_404(models.PhotoPost, pk=post_id)
-    
+    post = get_object_or_404(models.PhotoPost, pk=post_id)    
     image_path = post.photo.path
-
-
-    if post.photo:
-        image_path = post.photo.path
-    else:
-        image_path = None
-
-
-
     form = StatusUpdateForm(instance=post)
     context = {'post': post,'form': form }
 
     print("hello")
     with open(image_path, 'rb') as f:
         file_data = f.read()
-
-    input_tensor = preprocess_image(file_data)
     
+    input_tensor = preprocess_image(file_data)
+
     with torch.no_grad():
         output = predict_model(input_tensor)
         probabilities = torch.nn.functional.softmax(output, dim=1)
         confidence, predicted_idx = torch.max(probabilities, 1)
-        
         confidence_score = round(confidence.item() * 100, 1)
-        category_idx = predicted_idx.item()
-        
+        category_idx = predicted_idx.item()        
         categories = ['倒木', '正常（対象外）', '道路のひび割れ', '水質汚濁']
         result_label = categories[category_idx]
 
@@ -828,9 +789,6 @@ def admin_post_detail(request, post_id):
         'is_valid': result_label != '正常（対象外）' and confidence_score > 30,
     })
 
-
-    
-    #     # return render(request, 'main/user/result.html', context)
     return render(request, 'main/admin/admin_post_detail.html', context)
 
 

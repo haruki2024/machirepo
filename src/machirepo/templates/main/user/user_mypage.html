@@ -4,9 +4,6 @@
 
 {% block content %}
 
-
-
-
 <div class="sub-header" style="margin-bottom:1rem;">
     <a href="{% url "user_home" %}" class="back-link">&lt; 戻る</a>
     <h2 class="page-title">マイページ</h2>
@@ -32,10 +29,6 @@
         <span class="detail-data-text">{{ user.email|default:"未設定" }}</span>
     </div>
     
-    {% comment %} <div class="form-group">
-        <label>パスワード</label>
-        <span class="detail-data-text">{{dummy_password}}</span>
-    </div> {% endcomment %}
 
     <div class="form-group">
         <label>保有バッジ</label>

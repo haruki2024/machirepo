@@ -157,9 +157,6 @@ let markerInstance = null;
     });
 })();
 
-/* ===========================================
-   地図の初期化（1回だけ生成する設計）
-   =========================================== */
 function initializeMap(lat, lng) {
     const mapDiv = document.getElementById('map');
     const latitudeInput = document.getElementById('latitude');
@@ -204,9 +201,7 @@ function initializeMap(lat, lng) {
     setTimeout(() => { try { mapInstance.invalidateSize(); } catch (e){} }, 80);
 }
 
-/* ===========================================
-   位置情報取得ロジック（タイムアウト付き）
-   =========================================== */
+
 (function setupGeolocation() {
     const TIMEOUT_MS = 5000;
     let geoAttemptCompleted = false;

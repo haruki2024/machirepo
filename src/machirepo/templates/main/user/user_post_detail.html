@@ -108,21 +108,16 @@
 
 
 
-<script>
-
-    
+<script>    
     const lat = {{ post.latitude|default:"0" }}; 
     const lng = {{ post.longitude|default:"0" }};
     const locationName = "{% if post.location_name %}{{ post.location_name|escapejs }}{% else %}報告された場所{% endif %}";
-    
-
     const customIcon = L.divIcon({
-        className: 'custom-div-icon', // 上で定義したCSSクラス
-        iconSize: [15, 15],           // アイコンサイズ
-        iconAnchor: [7.5, 7.5],       // アイコンの中心（正確な位置合わせ）
-        popupAnchor: [0, -10]         // ポップアップ位置調整
+        className: 'custom-div-icon', 
+        iconSize: [15, 15],
+        iconAnchor: [7.5, 7.5],
+        popupAnchor: [0, -10]
     });
-
 
     function initLeafletMap() {
         if (lat === 0 && lng === 0 || typeof L === 'undefined') return; 
@@ -143,12 +138,9 @@
         console.log(`Leaflet Map initialized at: ${lat}, ${lng} with custom div icon.`);
     }
 
-    // 遅延実行: レンダリングの安定化のため
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(initLeafletMap, 100);
     });
-    
-
 </script>
 
 
