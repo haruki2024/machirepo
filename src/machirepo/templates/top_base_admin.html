@@ -18,11 +18,11 @@
     <div class="page-container">
         <header class="app-header">
             <div class="title">まちレポ 管理者ページ</div>
-            <a href="{% url 'logout' %}" class="header-link">ログアウト</a>
-            {% comment %} <form method="POST" action="{% url 'logout' %}">
+            {% comment %} <a href="{% url 'logout' %}" class="header-link">ログアウト</a> {% endcomment %}
+            <form method="POST" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="header-link">ログアウト</button>
-            </form> {% endcomment %}
+            </form> 
         </header>
         
         {% block content %}{% endblock %}
