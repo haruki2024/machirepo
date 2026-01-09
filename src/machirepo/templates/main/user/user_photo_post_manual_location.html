@@ -88,18 +88,15 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // 緯度・経度を格納する変数
-    let currentLat = 34.8394; // 姫路城付近の初期緯度
-    let currentLng = 134.6835; // 姫路城付近の初期経度
+    let currentLat = 34.8394;
+    let currentLng = 134.6835;
 
     const map = L.map("map", { zoomControl: true }).setView([currentLat, currentLng], 16);
 
-    // OpenStreetMap タイルレイヤー
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors",
     }).addTo(map);
 
-    // カスタムマーカー
     const customIcon = L.divIcon({
         className: "custom-div-icon",
         iconSize: [15, 15],
@@ -107,7 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     const marker = L.marker([currentLat, currentLng], { icon: customIcon, draggable: true }).addTo(map);
 
-    // DOM要素の取得
     const latInput = document.getElementById("latitude");
     const lngInput = document.getElementById("longitude");
     const statusMessage = document.getElementById("location-status");
@@ -115,11 +111,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("location-search-input");
     const searchButton = document.getElementById("search-button");
 
-    // 緯度経度入力欄の更新とボタンの有効化を行う関数
     function updateLocation(lat, lng, zoom = 16) {
         currentLat = lat;
         currentLng = lng;
-        // name属性を付けたので、ここで値を設定すればPOSTされる
         latInput.value = lat.toFixed(6);
         lngInput.value = lng.toFixed(6); 
         
@@ -131,20 +125,18 @@ document.addEventListener("DOMContentLoaded", function () {
         statusMessage.textContent = `位置情報が設定されました。緯度: ${lat.toFixed(4)}, 経度: ${lng.toFixed(4)}`;
     }
 
-    // --- 現在地取得機能 ---
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
-                updateLocation(lat, lng, 16); // 現在地を取得して地図を更新
+                updateLocation(lat, lng, 16);
             },
             (error) => {
                 console.error("現在地取得エラー:", error);
                 statusMessage.classList.remove('bg-yellow-100', 'text-yellow-700');
                 statusMessage.classList.add('bg-red-100', 'text-red-700');
                 statusMessage.textContent = "現在地の取得に失敗しました。地図を操作するか地名検索で場所を指定してください。";
-                // 失敗した場合でも初期位置でボタンを有効化
                 updateLocation(currentLat, currentLng, 16); 
             },
             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
@@ -153,33 +145,26 @@ document.addEventListener("DOMContentLoaded", function () {
         statusMessage.classList.remove('bg-yellow-100', 'text-yellow-700');
         statusMessage.classList.add('bg-red-100', 'text-red-700');
         statusMessage.textContent = "お使いのブラウザは現在地取得に対応していません。地図を操作するか地名検索で場所を指定してください。";
-        // 非対応の場合でも初期位置でボタンを有効化
+
         updateLocation(currentLat, currentLng, 16);
     }
 
-    // --- マーカー操作とクリックによる位置設定 ---
-
-    // マーカーをドラッグしたときの処理
     marker.on("dragend", () => {
         const latlng = marker.getLatLng();
         updateLocation(latlng.lat, latlng.lng, map.getZoom());
     });
     
-    // 地図をクリックしたときの処理（マーカーの移動）
     map.on('click', (e) => {
         updateLocation(e.latlng.lat, e.latlng.lng, map.getZoom());
     });
 
-    // --- その他機能 ---
-
-    // ページ描画完了後に地図サイズを再計算
+    
     window.addEventListener("load", () => {
         setTimeout(() => {
             map.invalidateSize();
         }, 500);
     });
 
-    // 検索ボタン機能（Nominatim API使用）
     searchButton.addEventListener("click", async () => {
         const query = searchInput.value.trim();
         if (!query) return;
@@ -193,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.length > 0) {
                 const lat = parseFloat(data[0].lat);
                 const lon = parseFloat(data[0].lon);
-                updateLocation(lat, lon, 16); // 検索結果で地図を更新
+                updateLocation(lat, lon, 16);
             } else {
                 alert("場所が見つかりませんでした。");
                 statusMessage.classList.remove('bg-green-100', 'text-green-700');

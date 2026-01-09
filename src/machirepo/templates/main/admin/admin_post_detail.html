@@ -10,25 +10,24 @@
 
 
 <style>
-    /* .modal-overlay の必須スタイルを定義し、全画面に表示されるようにする */
     .modal-overlay {
-        position: fixed; /* 画面に固定 */
+        position: fixed;
         top: 0;
         right: 0;
         bottom: 0;
         left: 0;
         z-index: 50;
-        background-color: rgba(0, 0, 0, 0.6); /* 半透明の黒背景 */
+        background-color: rgba(0, 0, 0, 0.6);
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 1rem;
     }
-    /* hidden クラスがついていれば非表示にする */
+
     .modal-overlay.hidden {
         display: none !important; 
     }
-    /* .modal-box の基本的なスタイル */
+
     .modal-box {
         background-color: white;
         padding: 2rem;
@@ -38,13 +37,12 @@
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         position: relative; /* モーダルコンテンツが前面にくるように */
     }
-    /* モーダル内のボタン配置 */
+    
     .modal-actions {
         display: flex;
         gap: 1rem;
         margin-top: 1.5rem;
     }
-
 
     .custom-div-icon {
         background-color: #e53e3e; /* 赤 */
@@ -56,18 +54,20 @@
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     }
 
-
-    
 </style>
-
-
-
 
 <main class="main-content report-detail">
     <a href="{% url "admin_post_list" %}" class="link-secondary">&lt; 一覧に戻る</a>
+      
+    {% if not is_valid %}
+        <div class="error-box">
+            <p style="color: red; font-size: 20px; font-weight: 700;">【AI分析】この投稿は信頼度が低い投稿になっています。</p>
+            <p>まちレポに関係のない写真である可能性があります。正しい写真か注意して確認してください。
+                <br>AIは間違った判定をすることがあるため、再確認するようにしてください。
+            </p>
+        </div>
+    {% endif %}
     
-    
-
     <div class="history-item-header">
         <div>
             <h2 style="padding-top: -10rem; margin-left: 0rem;">{{ post.title|default:"(タイトルなし)" }}</h2>
@@ -136,7 +136,7 @@
     </div>
     <div class="form-group" style="margin-top:2rem;">
         <label>カテゴリ:</label>
-        <p>
+        <p class="detail-data-box">
             {% if post.tag %}
                 {{ post.tag.name }}
             {% else %}
@@ -146,16 +146,16 @@
     </div>
     <div class="form-group" style="margin-top:2rem;">
         <label>詳細:</label>
-        <p>{{ post.comment | linebreaks }}</p>
+        <p class="detail-data-box">{{ post.comment}}</p>
     </div>
     {% if post.admin_note %}
     <div class="form-group" style="margin-top:2rem;">
         <label>管理者からのコメント:</label>
-        <p>{{ post.admin_note | linebreaks}}</p>
+        <p class="detail-data-box">{{ post.admin_note}}</p>
     </div>
     {% endif %}
 
-    
+    <div style="height: 2rem;"></div>
     <a href="{% url 'admin_post_status_edit' post_id=post.id %}" style="margin-bottom: 1rem;" class="btn btn-primary flex-1 text-center py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-semibold transition duration-150">
         ステータスを記録する
     </a>
@@ -165,8 +165,6 @@
     </button>
 
 </main>
-
-
 
 
 
@@ -237,17 +235,10 @@
             }
         });
     }
-
-
-
-
-
-
     
     const lat = {{ post.latitude|default:"0" }}; 
     const lng = {{ post.longitude|default:"0" }};
     const locationName = "{% if post.location_name %}{{ post.location_name|escapejs }}{% else %}報告された場所{% endif %}";
-    
     const customIcon = L.divIcon({
         className: 'custom-div-icon',
         iconSize: [15, 15],
@@ -277,7 +268,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(initLeafletMap, 100);
     });
-    
 
 </script>
 

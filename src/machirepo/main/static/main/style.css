@@ -1,4 +1,4 @@
-/* ===== 抜本的な修正: CSSリセット ===== */
+
 *,
 *::before,
 *::after {
@@ -11,31 +11,25 @@ body {
   padding: 0;
 }
 
-/* ================================== */
-
-
-/* ===== Google Fontsの読み込み ===== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
 
-/* ===== 色の変数を定義 ===== */
+
 :root {
   --primary-color: #14b8a6;
   --primary-hover-color: #0d9488;
 }
 
-/* ===== 基本スタイル ===== */
+
 body {
   font-family: 'Inter', 'Noto Sans JP', sans-serif;
   background-color: #f3f4f6;
-  /* index.htmlなどの背景色 */
   color: #1f2937;
   margin: 0;
   padding: 0;
   font-size: 16px;
 }
 
-/* ===== ページ全体のコンテナ (index.html, login.html 用) ===== */
 .page-container {
   max-width: 28rem;
   margin: 0 auto;
@@ -46,7 +40,7 @@ body {
   flex-direction: column;
 }
 
-/* ===== ヘッダー (index.html, login.html 用) ===== */
+
 .app-header {
   background-color: #fff;
   padding: 1rem;
@@ -70,14 +64,13 @@ body {
   font-size: 0.875rem;
 }
 
-/* ===== メインコンテンツ (全ページ共通) ===== */
+
 .main-content {
   flex-grow: 1;
-  padding: 2rem; /* SPの左右パディング */
+  padding: 2rem;
   overflow-y: auto;
 }
 
-/* ===== フッター (index.html, login.html 用) ===== */
 .app-footer {
   padding: 1rem;
   background-color: #ffffff;
@@ -88,7 +81,6 @@ body {
   color: #6b7280;
 }
 
-/* ===== ログイン・新規登録フォーム用のコンテナ ===== */
 .form-container {
   width: 100%;
   max-width: 400px;
@@ -96,7 +88,6 @@ body {
   padding: 2rem;
 }
 
-/* index.html の <style> タグから背景画像スタイルを統合 */
 body.form-page-bg {
   display: flex;
   justify-content: center;
@@ -108,8 +99,6 @@ body.form-page-bg {
   background-attachment: fixed;
 }
 
-
-/* ===== ボタン ===== */
 .btn {
   display: block;
   width: 100%;
@@ -144,8 +133,6 @@ body.form-page-bg {
   display: flex;
 }
 
-
-/* ===== リンク ===== */
 .link-secondary {
   display: block;
   margin-top: 1rem;
@@ -155,10 +142,10 @@ body.form-page-bg {
   text-decoration: none;
 }
 
-/* ===== フォーム ===== */
 .form-group {
   margin-bottom: 1.5rem;
 }
+
 .form-group-title {
   margin-bottom: 1.5rem;
   display: flex;
@@ -185,7 +172,6 @@ body.form-page-bg {
   font-size: 1rem;
 }
 
-/* ===== エラー表示 ===== */
 .error-box {
   background-color: #fee2e2;
   border-left: 4px solid #ef4444;
@@ -194,7 +180,6 @@ body.form-page-bg {
   margin-bottom: 1.5rem;
 }
 
-/* ===== 投稿履歴 & 管理者メニューカード ===== */
 .history-item {
   background-color: #ffffff;
   padding: 1.5rem;
@@ -227,7 +212,6 @@ body.form-page-bg {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-/* ===== ステータスと優先度のバッジ ===== */
 .status-badge {
   border-radius: 1em;
   font-size: 0.8rem;
@@ -263,8 +247,25 @@ body.form-page-bg {
   color: #6b7280;
 }
 
+.admin-comment {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+}
 
-/* ===== テーブル ===== */
+.admin-comment .comment-title {
+  font-weight: 700;
+  color: #374151;
+  margin: 0 0 0.25rem 0;
+}
+
+.admin-comment .comment-body {
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;
@@ -303,7 +304,6 @@ body.form-page-bg {
   text-decoration: underline;
 }
 
-/* ===== 確認モーダル ===== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -336,9 +336,7 @@ body.form-page-bg {
   background-color: #dc2626;
 }
 
-/* ===== ログイン後専用スタイル (app-page) ===== */
 body.app-page {
-  /* background-color: #1f2937; */
   position: relative;
 }
 
@@ -427,8 +425,6 @@ body.app-page .app-footer {
   text-shadow: 0 0 4px rgba(255, 255, 255, 0.7), 0 0 2px rgba(255, 255, 255, 0.7);
 }
 
-
-/* ===== ハンバーガーメニュー関連 ===== */
 .header-icon-group {
   display: flex;
   align-items: center;
@@ -548,15 +544,12 @@ body.app-page .drawer-menu-list li a:hover {
   color: #1f2937;
 }
 
-
-/* ===== カードレイアウト / home.html 専用スタイル ===== */
 body.app-page .card-layout-main {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   padding: 1.5rem 1rem;
-  /* home.html用 (サブヘッダーなし) */
   box-sizing: border-box;
 }
 
@@ -610,7 +603,6 @@ body.app-page main.main-content .content-card p {
   margin-top: 1em;
 }
 
-/* ===== home.html のレイアウト調整 ===== */
 body.app-page .card-layout-main {
   justify-content: flex-start;
   position: relative;
@@ -655,8 +647,6 @@ body.app-page .card-layout-main {
   text-shadow: none;
 }
 
-
-/* ===== new-post.html 用の追加CSS ===== */
 body.app-page .app-header h2 {
   color: #1f2937;
   text-shadow: none;
@@ -679,8 +669,6 @@ body.app-page .app-header h2 {
   margin-top: 0;
 }
 
-
-/* ===== history.html 用の追加CSS ===== */
 .list-page-main {
   padding: 0 1rem;
 }
@@ -693,26 +681,6 @@ body.app-page .app-header h2 {
   flex-shrink: 0;
 }
 
-.admin-comment {
-  border-top: 1px solid #e5e7eb;
-  padding-top: 1rem;
-  margin-top: 1rem;
-  font-size: 0.875rem;
-}
-
-.admin-comment .comment-title {
-  font-weight: 700;
-  color: #374151;
-  margin: 0 0 0.25rem 0;
-}
-
-.admin-comment .comment-body {
-  color: #4b5563;
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* ===== home.html (new posts) 用の追加CSS ===== */
 .post-feed-container {
   width: 100%;
   max-width: 600px;
@@ -765,8 +733,6 @@ body.app-page .app-header h2 {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-
-/* ===== home.html (welcome) 用の追加CSS ===== */
 .home-welcome-container {
   display: flex;
   justify-content: space-between;
@@ -793,7 +759,7 @@ body.app-page .app-header h2 {
 }
 
 
-/* ===== post-detail.html 用の追加CSS ===== */
+
 .detail-group {
   margin-bottom: 1.5rem;
 }
@@ -863,7 +829,7 @@ body.app-page .app-header h2 {
 }
 
 
-/* ===== about.html 用の追加CSS ===== */
+
 .about-flow-container {
   display: flex;
   justify-content: center;
@@ -901,8 +867,6 @@ body.app-page .app-header h2 {
   margin: 0;
 }
 
-
-/* ===== mypage.html (スタンプ) 用の追加CSS ===== */
 .stamp-card {
   background-color: #ffffff;
   border: 1px solid #e5e7eb;
@@ -941,7 +905,6 @@ body.app-page .app-header h2 {
   object-fit: contain;
 }
 
-/* ===== points.html (バッジ表示) 用の追加CSS ===== */
 .badge-display-container {
   display: flex;
   flex-wrap: wrap;
@@ -988,8 +951,6 @@ body.app-page .app-header h2 {
   width: 100%;
 }
 
-
-/* ===== edit-profile.html (バッジ選択) 用の追加CSS ===== */
 .badge-select-container {
   display: flex;
   flex-wrap: wrap;
@@ -1043,17 +1004,11 @@ body.app-page .app-header h2 {
   border-radius: 2px;
 }
 
-/* ===== 新しいヘッダースタイル (user_86.md) ===== */
-
-/* .page-header-area は削除されました */
-
-/* 新しいサブヘッダー (戻るボタンとページタイトル用) */
 .sub-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: transparent;
-  /* ガラス効果を削除 */
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   padding: 0.5rem 1rem;
 }
@@ -1078,15 +1033,11 @@ body.app-page .app-header h2 {
   z-index: 1;
 }
 
-/* サブヘッダーがあるページのメインコンテンツの余白を調整 */
 .list-page-main,
 .form-page-main {
   padding: 0 1rem;
 }
 
-/* サブヘッダーの直後の最初の要素（カードやフォームグループ）が
-  サブヘッダーにめり込まないよう、マージンを追加 
-*/
 .sub-header+.history-item,
 .sub-header+.form-group,
 .sub-header+.content-card,
@@ -1096,17 +1047,10 @@ body.app-page .app-header h2 {
   margin-top: 1.5rem;
 }
 
-
-/* home.html (サブヘッダーなし) のメインコンテンツの余白 */
 body.app-page .card-layout-main {
   padding-top: 1.5rem;
 }
 
-/* ----------------------------------------------
- * 地図ページ（new-post-error-location.html）
- * ---------------------------------------------- */
-
-/* 地図を表示するコンテナ */
 #map {
   height: 300px;
   width: 100%;
@@ -1125,146 +1069,120 @@ body.app-page .card-layout-main {
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
-
-
-
-/* 地名検索フォームのコンテナ（入力欄とボタンを横並びにする） */
 .search-container {
   display: flex;
   gap: 0.5rem;
-  /* 入力欄とボタンの間隔 */
   margin-top: 0.5rem;
 }
 
-/* 検索コンテナ内のテキスト入力欄 */
+
 .search-container input[type="text"] {
   flex-grow: 1;
-  /* 入力欄を可能な限り広げる */
 }
 
-/* 検索ボタン（既存の .btn スタイルを流用・調整してもOK） */
 .btn-search {
   padding: 0.625rem 1rem;
   border: none;
   background-color: #2563eb;
-  /* 仮：プライマリカラー（アプリのテーマに合わせてください） */
   color: white;
   border-radius: 0.375rem;
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
-  /* 「検索」が改行しないように */
 }
 
-
-
 #map-display {
-    height: 400px !important;
-    width: 100%;
-    border-radius: 0.5rem;
-    border: 1px solid #ccc;
-    z-index: 0;
+  height: 400px !important;
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  z-index: 0;
 }
 
 
 .modal-overlay {
-        position: fixed; /* 画面に固定 */
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 50;
-        background-color: rgba(0, 0, 0, 0.6); /* 半透明の黒背景 */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1rem;
-}
-/* hidden クラスがついていれば非表示にする */
-.modal-overlay.hidden {
-    display: none !important; 
-}
-/* .modal-box の基本的なスタイル */
-.modal-box {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 0.5rem;
-    width: 100%;
-    max-width: 440px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    position: relative; /* モーダルコンテンツが前面にくるように */
-}
-/* モーダル内のボタン配置 */
-.modal-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  background-color: rgba(0, 0, 0, 0.6); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
+.modal-overlay.hidden {
+  display: none !important; 
+}
+
+.modal-box {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative; 
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
 
 .custom-div-icon {
-    background-color: #e53e3e; /* 赤 */
-    border: 3px solid #ffffff; /* 白い縁 */
-    width: 15px; /* サイズ */
-    height: 15px;
-    border-radius: 50%; /* 円形 */
-    opacity: 0.9;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  background-color: #e53e3e; 
+  border: 3px solid #ffffff; 
+  width: 15px; 
+  height: 15px;
+  border-radius: 50%; 
+  opacity: 0.9;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
-
-
-/* style.css の末尾付近にある .input-file-trick を以下の定義に置き換えます */
 
 .input-file-trick {
-    /* 🚨 修正: 絶対配置でレイアウトから除外し、見た目を完全に消す */
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-    /* 以下の2行は、一部ブラウザでレイアウトに影響を及ぼす可能性があるため削除 */
-    z-index: -1; 
-    opacity: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  z-index: -1; 
+  opacity: 0;
 }
 
-/* 補足: 念のため、カスタムボタンにも安全な定義を適用 */
 .btn-upload-mock {
-    width: auto;
-    display: inline-block;
-    margin-top: 0;
-    /* 💡 box-sizingを明示: 要素の幅計算が予期せぬズレを起こさないように */
-    box-sizing: border-box; 
+  width: auto;
+  display: inline-block;
+  margin-top: 0;
+  box-sizing: border-box; 
 }
 
 
 
-
-
-
-/* ===== PC表示 (幅768px以上) ===== */
 @media (min-width: 768px) {
   body {
     font-size: 15px;
   }
 
-  /* page-container: PCで幅いっぱい */
   .page-container {
-      max-width: 100%;
-      margin: 0; 
-      box-shadow: none;
+    max-width: 100%;
+    margin: 0; 
+    box-shadow: none;
   }
 
-  /* ログイン前 (index.html) 用のPC背景 */
   body.form-page-bg {
     background-image: url("/media/images/haikei_desktop.png");
   }
 
-  /* ログイン後 (app-page) 用のPC背景 */
   body.app-page::before {
     background-image: url("/media/images/haikei_desktop.png");
   }
@@ -1277,32 +1195,25 @@ body.app-page .card-layout-main {
     margin-right: auto;
   }
 
-  /* PC表示で、ログイン前ページ(.form-page-bg)の
-     コンテナ幅を 400px -> 550px に拡大 
-  */
   body.form-page-bg .form-container {
     max-width: 550px;
   }
 
-  /* PC表示で、ログイン前ページのタイトルを大きくする */
+
   body.form-page-bg .form-container h1 {
     font-size: 3rem;
-    /* 2.5remから変更 */
   }
 
-  /* PC表示で、ログイン前ページのサブタイトルを大きくする */
+  
   body.form-page-bg .form-container h1+p {
     font-size: 1.125rem;
-    /* 1remから変更 */
   }
 
 
 
   body.form-page-bg .form-container .link-secondary {
     font-size: 1rem;
-    /* 0.875rem から変更 */
-  }
 
-  /* ★★★ 修正ここまで ★★★ */
+  }
 
 }

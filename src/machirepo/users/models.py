@@ -11,27 +11,18 @@ class CustomUserManager(UserManager):
         
         email = self.normalize_email(email) if email else email
         
-        # is_active フィールドがないため、ここではユーザー作成フォームから渡される可能性のある
-        # 'is_active' を True として処理します。
         user = self.model(
             username=username, 
             email=email, 
             **extra_fields
         )
         
-        # パスワードのハッシュ化は BaseUserManager の継承で保証されますが、明示的に設定
         user.set_password(password)
-        
-        # AbstractBaseUser には is_active がデフォルトで含まれていないため、
-        # has_perm が正常に動作するために必要な is_active=True の状態を確保
-        # AbstractBaseUser は has_perm メソッド内で self.is_active をチェックしないため、
-        # モデルに is_active がなくても、このマネージャーで正しいインスタンスは作成可能です。
-        
+          
         user.save(using=self._db)
         return user
 
     def create_superuser(self, username, email, password=None, **extra_fields):
-        """スーパーユーザーを作成し、スタッフ、スーパーユーザーとして設定します。"""
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         
@@ -43,7 +34,7 @@ class CustomUserManager(UserManager):
         return self.create_user(username, email, password, **extra_fields)
     pass
 
-class CustomUser(AbstractBaseUser): # ここから PermissionsMixin を外す
+class CustomUser(AbstractBaseUser): 
     BADGE_CHOICES = [
         ('none', 'なし'),
         ('bronze', '銅バッジ'),
@@ -87,15 +78,11 @@ class CustomUser(AbstractBaseUser): # ここから PermissionsMixin を外す
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
     
-    # PermissionsMixin を外したため、権限チェックメソッドを明示的に実装
+   
     def has_perm(self, perm, obj=None):
-        "ユーザーが特定のパーミッションを持っているかどうかを返します。"
-        # is_superuser が True であれば、常に True を返します
         return self.is_superuser
     
     def has_module_perms(self, app_label):
-        "ユーザーが特定のアプリへのアクセス権を持っているかどうかを返します。"
-        # is_superuser または is_staff であれば、アクセスを許可します
         return self.is_superuser or self.is_staff
     
     def clean(self):

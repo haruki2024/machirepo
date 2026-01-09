@@ -37,7 +37,7 @@
 {% block content %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<div class="sub-header">
+<div class="sub-header" style="margin-bottom:1rem;">
     <a href="{% url "user_home" %}" class="back-link">&lt; 戻る</a>
     <h2 class="page-title">新規投稿</h2>
 </div>
@@ -54,7 +54,7 @@
 
         <div class="form-group">
             <label>不具合箇所の写真</label>
-            <img id="photo-preview" alt="アップロードされた写真のプレビュー" style="max-width: 100%; height: auto; max-height: 400px; border-radius: 8px; object-fit: contain; border: 1px solid #ddd; margin-bottom: 1rem; display: none;">
+            <img id="photo-preview" alt="アップロードされた写真のプレビュー" style="max-width: 100%;　border-radius: 8px; object-fit: contain; border: 1px solid #ddd; margin-bottom: 1rem; display: none;">
             <div class="photo-upload-area">
                 <div class="mt-3">
                     <label for="photo" class="btn btn-primary">
@@ -151,25 +151,20 @@ let markerInstance = null;
         reader.onload = function(e) {
             photoElement.src = e.target.result;
             photoElement.style.display = 'block';
-            fileNameDisplay.textContent = `選択中のファイル: ${file.name} (サイズ: ${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            fileNameDisplay.textContent = `選択中のファイル: ${file.name} `;
         };
         reader.readAsDataURL(file);
     });
 })();
 
-/* ===========================================
-   地図の初期化（1回だけ生成する設計）
-   =========================================== */
 function initializeMap(lat, lng) {
     const mapDiv = document.getElementById('map');
     const latitudeInput = document.getElementById('latitude');
     const longitudeInput = document.getElementById('longitude');
     const statusMessage = document.getElementById('location-status');
 
-    // 表示
     mapDiv.style.display = 'block';
-
-    // まだ生成していなければ初回生成
+    
     if (!mapInstance) {
         mapDiv.style.width = '100%';
         mapDiv.style.maxWidth = '800px';
@@ -206,9 +201,7 @@ function initializeMap(lat, lng) {
     setTimeout(() => { try { mapInstance.invalidateSize(); } catch (e){} }, 80);
 }
 
-/* ===========================================
-   位置情報取得ロジック（タイムアウト付き）
-   =========================================== */
+
 (function setupGeolocation() {
     const TIMEOUT_MS = 5000;
     let geoAttemptCompleted = false;

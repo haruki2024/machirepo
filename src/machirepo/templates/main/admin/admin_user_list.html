@@ -7,15 +7,11 @@
 <main class="main-content">
     <a href="{% url 'admin_home' %}" class="link-secondary">&lt; 管理メニューに戻る</a>
     <h2>ユーザー管理</h2>
-    
-
-
 
     {% if not users %}
         <div style="text-align: center; padding: 4rem; background-color: #f9fafb; border-radius: 8px; margin-top: 2rem;">
             <p style="color: #6b7280;">現在、ユーザーはいません。</p>
         </div>
-
     {% else %}
     <div class="table-responsive">
         <table class="admin-table">
@@ -35,7 +31,6 @@
                     <td>{{ user.date_joined|date:"Y/m/d" }}</td>
                     
                     <td>
-                        <!-- 削除リンク: JS関数を呼び出し、URLを渡す -->
                         <a href="#" 
                         onclick="confirmDelete('{{ user.username }}', '{% url 'admin_user_delete_confirm' user_id=user.id %}')" 
                         style="color: #ef4444;">削除</a>
@@ -69,29 +64,18 @@
         </div>
     </div>
 </div>
-
-    <!-- ★★★ JavaScript (モーダル制御) ★★★ -->
     <script>
         const modal = document.getElementById('deleteModal');
         const deleteForm = document.getElementById('deleteForm');
-
-        // モーダルを表示する関数
         function confirmDelete(userName, deleteUrl) {
-            // ユーザー名を表示するテキストを更新
-            
-            // フォームの送信先URLを設定 (admin_user_delete_confirmへ)
             deleteForm.action = deleteUrl;
-
-            // モーダルを表示
             modal.style.display = 'flex';
         }
 
-        // モーダルを閉じる関数
         function closeModal() {
             modal.style.display = 'none';
         }
 
-        // モーダルの外側をクリックで閉じる
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 closeModal();

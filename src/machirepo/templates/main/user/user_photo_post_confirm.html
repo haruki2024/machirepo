@@ -4,12 +4,14 @@
 
 {% block content %}
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     
-<div class="sub-header">
+<div class="sub-header" style="margin-bottom:1rem;">
     <a href="{% url "photo_post_create" %}" class="back-link">&lt; 修正する</a> 
     <h2 class="page-title">投稿内容の確認</h2>
 </div>
+
+
 <main class="main-content list-page-main">
     <div class="form-group">
         <label>タイトル</label>
@@ -20,7 +22,7 @@
         <label>写真</label>
         <div class="photo-container">
             {% if post_data.photo_path %}
-                <img src="/media/{{ post_data.photo_path }}" alt="アップロードされた写真" style="max-width: 100%; height: auto; max-height: 400px; border-radius: 8px; object-fit: contain; border: 1px solid #ddd; margin-bottom: 1rem;">
+                <img src="/media/{{ post_data.photo_path }}" alt="アップロードされた写真" style="max-width: 100%; border-radius: 8px; object-fit: contain; border: 1px solid #ddd; margin-bottom: 1rem;">
             {% else %}
                 写真が見つかりません
             {% endif %}
@@ -28,7 +30,7 @@
     </div>
 
     <div class="form-group">
-        <label>位置情報</label> 
+        <label>場所</label> 
         {% if post_data.latitude and post_data.longitude %}
             <div id="map-display"></div>
         {% else %}
@@ -69,37 +71,34 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // 💡 カスタムマーカーアイコンを定義
     const customIcon = L.divIcon({
-        className: 'custom-div-icon', // 上で定義したCSSクラスを使用
-        iconSize: [15, 15],           // アイコンサイズ
-        iconAnchor: [7.5, 7.5],       // アイコンの中心に合わせる
-        popupAnchor: [0, -10]         // ポップアップ位置調整
+        className: 'custom-div-icon',
+        iconSize: [15, 15],
+        iconAnchor: [7.5, 7.5],
+        popupAnchor: [0, -10]
     });
 
     const lat = parseFloat("{{ post_data.latitude|default:"0" }}"); 
     const lng = parseFloat("{{ post_data.longitude|default:"0" }}");
     
-    // DOMContentLoaded後に地図を初期化
     document.addEventListener('DOMContentLoaded', function() {
         if (lat !== 0 || lng !== 0) {
-            // 地図コンテナが存在することを確認
+
             const mapContainer = document.getElementById('map-display');
             if (mapContainer) {
-                // 1. Mapオブジェクトの作成
+
                 const map = L.map('map-display').setView([lat, lng], 16); 
                 
-                // 2. タイルレイヤーを追加
+
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
 
-                // 3. マーカーを追加 - 💡 customIconを使用
                 L.marker([lat, lng], {icon: customIcon}).addTo(map)
                     .bindPopup('投稿場所')
                     .openPopup();
                     
-                // 4. サイズを再評価 (念のため)
+
                 setTimeout(() => { map.invalidateSize(); }, 100);
             }
         }

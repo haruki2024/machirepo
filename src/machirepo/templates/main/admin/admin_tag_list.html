@@ -62,42 +62,26 @@
 
 </main>
 
-
-{# ★★★ JavaScript (モーダル制御) ★★★ #}
 <script>
-    let modal, deleteForm; // グローバル変数を宣言
-
+    let modal, deleteForm;
     window.openDeleteModal = function(link) {
-        
-
         const tagId = link.getAttribute('data-tag-id');
         const tagName = link.getAttribute('data-tag-name');
-        
-        
-        // フォームのアクションURLを動的に設定
-        // 例: /manage/tags/1/delete/
         deleteForm.action = `/manage/tags/${tagId}/delete/`; 
-        
-        // モーダルを表示 (style.displayを使用)
         modal.style.display = 'flex';
     }
 
-    // モーダルを閉じる関数 (ユーザー提供の closeModal 関数名を採用)
     window.closeModal = function() {
         if (modal) {
             modal.style.display = 'none';
         }
     }
-    
-    // 既存のonclick属性からcloseModalが呼ばれるようにエイリアスを設定
-    window.closeDeleteModal = window.closeModal;
 
-    // DOMContentLoadedで要素を取得し、イベントリスナーを設定
+    window.closeDeleteModal = window.closeModal;
     document.addEventListener('DOMContentLoaded', () => {
         modal = document.getElementById('deleteModal');
         deleteForm = document.getElementById('deleteForm');
 
-        // モーダルの外側をクリックで閉じる
         if (modal) {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {

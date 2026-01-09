@@ -46,7 +46,7 @@
             {% if "none" == post.user.badge_rank%}
                 <p></p>
             {% else %}
-                <img src="/media/images/badge_{{ post.user.badge_rank }}.png" alt="銅バッジ" style="margin-left:0.5rem; width:30px; height:30px;">
+                <img src="/media/images/badge_{{ post.user.badge_rank }}.png" alt="バッジ" style="margin-left:0.5rem; width:30px; height:30px;">
             {% endif %}
             
         </div>
@@ -65,24 +65,28 @@
         </div>
     </div>
 
+
     <div class="detail-group">
-        <label>場所</label>
-        <div class="bg-gray-50 rounded-md border border-gray-300 p-3">
-            <p class="text-gray-800">
-                {% if post.location_name %}
-                    {{ post.location_name }}
-                {% elif post.latitude and post.longitude %}
-                    {% if post.latitude and post.longitude %}
-                        <div class="form-group mb-6">
-                            <label class="block text-gray-700 font-medium mb-2">地図表示 (OpenStreetMap):</label>
-                            <div id="map-display"></div>
-                        </div>
-                    {% endif %}
-                {% else %}
-                    位置情報は記録されていません
-                {% endif %}
-            </p>
-        </div>
+        <label>場所</label> 
+        {% if post.latitude and post.longitude  %}
+            <div id="map-display"></div>
+        {% else %}
+            位置情報は記録されていません
+        {% endif %}
+    </div>
+
+    <div class="detail-group">
+        <label>カテゴリ</label>
+        <p style="background-color: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; margin:0;">
+            {% if post.tag %}
+                <span>{{ post.tag.name }}</span>
+            {% elif post.tag is not None %}
+                カテゴリ情報にエラー
+            {% else %}
+                カテゴリなし
+            {% endif %}
+            
+        </p>
     </div>
 
     <div class="detail-group">
@@ -93,9 +97,7 @@
     {% if post.admin_note %}
         <div class="detail-group">
             <label>管理者からのコメント</label>
-            <div class="admin-comment" style="margin-top:0; background-color: #f9fafb; padding: 1rem; border-radius: 0.5rem;">
-                <p class="comment-body">{{ post.admin_note}}</p>
-            </div>
+            <p class="detail-data-box">{{ post.admin_note}}</p>
         </div>
     {% endif %}
     <div style="height: 2rem;"></div>
@@ -106,22 +108,16 @@
 
 
 
-<script>
-
-{% if post.latitude and post.longitude %}
-    
+<script>    
     const lat = {{ post.latitude|default:"0" }}; 
     const lng = {{ post.longitude|default:"0" }};
     const locationName = "{% if post.location_name %}{{ post.location_name|escapejs }}{% else %}報告された場所{% endif %}";
-    
-
     const customIcon = L.divIcon({
-        className: 'custom-div-icon', // 上で定義したCSSクラス
-        iconSize: [15, 15],           // アイコンサイズ
-        iconAnchor: [7.5, 7.5],       // アイコンの中心（正確な位置合わせ）
-        popupAnchor: [0, -10]         // ポップアップ位置調整
+        className: 'custom-div-icon', 
+        iconSize: [15, 15],
+        iconAnchor: [7.5, 7.5],
+        popupAnchor: [0, -10]
     });
-
 
     function initLeafletMap() {
         if (lat === 0 && lng === 0 || typeof L === 'undefined') return; 
@@ -142,12 +138,9 @@
         console.log(`Leaflet Map initialized at: ${lat}, ${lng} with custom div icon.`);
     }
 
-    // 遅延実行: レンダリングの安定化のため
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(initLeafletMap, 100);
     });
-    
-{% endif %}
 </script>
 
 

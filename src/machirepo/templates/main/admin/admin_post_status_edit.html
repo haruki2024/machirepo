@@ -4,8 +4,11 @@
 
 {% block content %}
 
-
 <main class="main-content">
+    <a href="{% url "admin_post_list" %}" class="link-secondary">&lt; 一覧に戻る</a>
+    <div>
+        <h2 style="padding-top: -10rem; margin-left: 0rem;">{{ post.title|default:"(タイトルなし)" }}</h2>
+    </div>
 
     <form method="post" action="{% url 'admin_post_status_edit' post.id %}" class="space-y-6">
         {% csrf_token %}
@@ -21,7 +24,7 @@
 
         <div class="form-group2">
             <label for="{{ form.status.id_for_label }}" class="form-label">
-                対応状況<span class="text-red-500">*</span>
+                ステータス
             </label>
             {{ form.status }}
             {% if form.status.errors %}
@@ -30,7 +33,7 @@
         </div>
 
         <div class="form-group2" id="priority-group">
-            <label for="{{ form.priority.id_for_label }}" class="form-label">{{ form.priority.label }}</label>
+            <label for="{{ form.priority.id_for_label }}" class="form-label">優先度</label>
             {{ form.priority }}
             {% if form.priority.errors %}
                 <div class="error-message">{{ form.priority.errors.0 }}</div>
@@ -48,6 +51,5 @@
         <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">記録する</button>
     </form>
 </main>
-
 
 {% endblock %}
