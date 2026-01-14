@@ -30,14 +30,6 @@ INSTALLED_APPS = [
     'main',
 ]
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'machirepo.app@gmail.com'  
-# EMAIL_HOST_PASSWORD = 'dnod zifk oimg ambl'
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -125,7 +117,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-ALLOWED_HOSTS = ['10.251.112.251', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['10.251.112.235', '127.0.0.1', 'localhost']
 # ALLOWED_HOSTS = ['192.168.68.51', '127.0.0.1', 'localhost']
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/

@@ -1,5 +1,8 @@
 import logging
 import os 
+import io 
+import torch 
+import torch.nn as nn 
 import decimal
 from email.utils import formataddr
 from django.shortcuts import render, redirect, get_object_or_404
@@ -19,19 +22,17 @@ from .models import PhotoPost, Tag
 from .forms import TagForm, StatusUpdateForm, ResidentCreationForm, PhotoPostForm, ManualLocationForm, UserUpdateForm
 from django.views.generic.edit import UpdateView 
 from django.core.mail import send_mail
-import torch 
-import torch.nn as nn 
 from torchvision import transforms, models as torch_models 
 from django.shortcuts import render 
 from PIL import Image 
-import io 
+
 from .models import PhotoPost 
 
 
 logger = logging.getLogger(__name__)
 fs = FileSystemStorage()
 
-# 権限チェック
+
 def is_staff_user(user):
     return user.is_authenticated and user.is_staff
 
@@ -59,7 +60,9 @@ def preprocess_image(image_bytes):
     image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
     return transform(image).unsqueeze(0)
 
-# 1. 共通/認証関連ビュー
+
+
+
 
 def index(request):
     if request.user.is_authenticated:
@@ -164,8 +167,9 @@ def user_stamp(request):
     
     posts = PhotoPost.objects.filter(user=request.user).order_by('-posted_at') 
     for i in posts:
-        post_count += 11
+        post_count += 1
     card = post_count / 10
+    
     if post_count > 10:
         post_count -= (int(card)*10)
 
@@ -377,7 +381,7 @@ user_profile_edit = UserProfileUpdateView.as_view()
 def user_edit_complete(request):
     return render(request, 'main/user/user_edit_complete.html', {})
 
-# 3. 投稿
+
 @login_required
 def photo_post_create(request):
     post_data = request.session.get('post_data', {})
@@ -635,7 +639,7 @@ def post_detail(request, post_id):
 
 
 
-# 4. 管理者画面ビュー（スタッフ権限限定）
+
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_home(request):
@@ -880,7 +884,7 @@ def admin_post_delete_complete(request):
     return render(request, 'main/admin/admin_post_delete_complete.html', context)
 
 
-# 5. 管理者向けタグ管理画面 (新規追加)
+
 
 @login_required
 def admin_tag_list(request):

@@ -14,7 +14,7 @@ Resident = get_user_model()
 class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
     username = forms.CharField(
         label='氏名',
-        max_length=150,
+        max_length=50,
         help_text='150文字以内で入力してください。',
         error_messages={
             'required': '氏名は必須です。',
@@ -24,14 +24,14 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
 
     email = forms.EmailField(
         label='メールアドレス', 
-        max_length=254, 
+        max_length=150, 
         required=True
     )
     
     password = forms.CharField(
         label='パスワード', 
         widget=forms.PasswordInput,
-        max_length=128
+        max_length=254
     )
   
 
@@ -262,16 +262,31 @@ class StatusUpdateForm(forms.ModelForm):
             'priority': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg'}),
         }
 
-class TagForm(forms.ModelForm):
-    name = forms.CharField(max_length=50) 
+# class TagForm(forms.ModelForm):
+#     name = forms.CharField(max_length=50) 
     
+#     class Meta:
+#         model = Tag
+#         fields = ['name']
+#         widgets = {
+#             'name': forms.TextInput(attrs={
+#                 'class': 'form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500',
+#                 'placeholder': '例：ゴミ問題',
+#                 'required': 'required',
+#             })
+#         }
+
+ 
+class TagForm(forms.ModelForm):
+    name = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={
+            'class': 'form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500',
+            'placeholder': '例：ゴミ問題',
+            'required': 'required',
+        })
+    )
+
     class Meta:
         model = Tag
         fields = ['name']
-        widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500',
-                'placeholder': '例：ゴミ問題',
-                'required': 'required',
-            })
-        }
