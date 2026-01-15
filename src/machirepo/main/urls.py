@@ -2,6 +2,8 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
+from .forms import SingleErrorPasswordChangeForm
+
 urlpatterns = [
     # --------------------------------------------------
     # 1. 共通/認証関連
@@ -31,10 +33,15 @@ urlpatterns = [
     # --------------------------------------------------
     path('mypage/', views.my_page, name='my_page'), 
     path('mypage/edit/', views.user_profile_edit, name='user_profile_edit'), 
-    path('mypage/password/change/', auth_views.PasswordChangeView.as_view(
-        template_name='main/user/user_password_change.html', 
-        success_url=reverse_lazy('user_edit_complete')
-    ), name='user_password_change'),
+    path(
+        'mypage/password/change/',
+        auth_views.PasswordChangeView.as_view(
+            template_name='main/user/user_password_change.html',
+            success_url=reverse_lazy('user_edit_complete'),
+            form_class=SingleErrorPasswordChangeForm  
+        ),
+        name='user_password_change'
+    ),
     path('mypage/complete/', views.user_edit_complete, name='user_edit_complete'), 
 
     # --------------------------------------------------

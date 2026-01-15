@@ -9,6 +9,17 @@
     
     <form method="post" >
         {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="error-box">
+                <p class="error-message">{{ form.non_field_errors }}</p>
+            </div>
+            
+        {% endif %}
+
+
+
+
         <div class="form-group">
             <label for="login-email">メールアドレス</label>
             {{ form.username }}

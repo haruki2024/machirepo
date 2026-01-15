@@ -15,6 +15,15 @@
     
     <form method="post" style="padding-top: 2rem; ">
         {% csrf_token %}
+        {% if form.username.errors or form.email.errors%}
+            <div class="error-box">
+                {% if form.username.errors %}
+                    <p class="error">{{ form.username.errors }}</p>
+                {% elif form.email.errors %}
+                    <p class="error">{{ form.email.errors }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
         <div class="form-group">
             <label for="edit-username">ユーザー名</label>
             {{ form.username }}

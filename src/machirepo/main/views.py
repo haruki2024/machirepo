@@ -340,7 +340,7 @@ class UserProfileUpdateView(UpdateView):
         for i in posts:
             post_count += 1
         card = post_count / 10
-
+        
 
         badge_choices = []
         if post_count > 10:

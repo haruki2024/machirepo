@@ -5,11 +5,18 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import ValidationError
 from .models import PhotoPost, Tag 
 from . import models 
+from django.contrib.auth.forms import PasswordChangeForm
+from django.core.exceptions import ValidationError
 
 User = get_user_model() 
 Resident = get_user_model()
 
 # 1. 新規登録フォーム (ResidentCreationForm)
+
+
+
+
+
 
 class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
     username = forms.CharField(
@@ -34,14 +41,11 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
         max_length=254
     )
   
-
-
     agree_terms = forms.BooleanField(
         label='利用規約に同意する',
         required=True,
         error_messages={'required': '利用規約への同意が必要です。'}
     )
-
 
 
     class Meta:
@@ -103,7 +107,7 @@ class ResidentCreationForm(forms.ModelForm): # ModelFormを継承
 class EmailAuthenticationForm(AuthenticationForm):
     error_messages = {
         'invalid_login': 'メールアドレスまたはパスワードが正しくありません。',
-        'inactive': 'このアカウントは非アクティブです。'
+        
     }
 
     def __init__(self, *args, **kwargs):
@@ -165,7 +169,24 @@ class UserUpdateForm(forms.ModelForm):
         return username
     
 
+class SingleErrorPasswordChangeForm(PasswordChangeForm):
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # エラーが複数ある場合、最初の1つだけ残す
+        if self.errors:
+            first_field = list(self.errors.keys())[0]
+            first_error = self.errors[first_field][0]
+
+            # 既存のエラーを全部消して、最初の1つだけ残す
+            self._errors = {first_field: self.error_class([first_error])}
+
+            # 全体エラーの場合
+            if first_field == '__all__':
+                raise ValidationError(first_error)
+
+        return cleaned_data
 
 
 # 3. 投稿作成フォーム (PhotoPostForm)

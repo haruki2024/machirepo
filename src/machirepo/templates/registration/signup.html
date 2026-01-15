@@ -11,26 +11,29 @@
         {% csrf_token %}
             <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; text-align: center; color: #1f2937;">新規登録</h2>
             
+            {% if form.username.errors or form.email.errors or form.password.errors %}
+                <div class="error-box">
+                    {% if form.username.errors %}
+                        <p class="error">{{ form.username.errors }}</p>
+                    {% elif form.email.errors %}
+                        <p class="error">{{ form.email.errors }}</p>
+                    {% elif form.password.errors %}
+                        <p class="error">{{ form.password.errors.as_text }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
             <div class="form-group">
                 <label for="signup-name">ユーザー名</label>
                 {{ form.username }}
-                {% if form.username.errors %}
-                    <p class="text-red-500 text-xs italic">{{ form.username.errors }}</p>
-                {% endif %}
             </div>
             <div class="form-group">
                 <label for="signup-email">メールアドレス</label>
                 {{ form.email }}
-                {% if form.email.errors %}
-                    <p style="color: red; font-size: 0.85rem;">{{ form.email.errors.as_text }}</p>
-                {% endif %}
             </div>
             <div class="form-group">
                 <label for="signup-password">パスワード</label>
                 {{ form.password }}
-                {% if form.password.errors %}
-                    <p style="color: red; font-size: 0.85rem;">{{ form.password.errors.as_text }}</p>
-                {% endif %}
             </div>
             
             <p>{{ form.agree_terms }}<a href="{% url 'user_terms' %}" style="color:red; ">利用規約</a>に同意します</p>
