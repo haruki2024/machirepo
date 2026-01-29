@@ -86,7 +86,9 @@
             <input type="hidden" id="longitude" name="longitude" value="{{ default_lng }}">
             <input type="hidden" id="location_name" name="location_name" value="">
             
-            {% if form.non_field_errors %}<div class="errorlist text-red-500 text-sm mt-1 list-none p-0">{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>{% endif %}
+            {% if form.non_field_errors %}
+                <div class="errorlist text-red-500 text-sm mt-1 list-none p-0">{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>
+            {% endif %}
         </div>
         
         <div class="form-group">

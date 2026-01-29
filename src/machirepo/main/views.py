@@ -169,7 +169,7 @@ def user_stamp(request):
     for i in posts:
         post_count += 1
     card = post_count / 10
-    
+    # card=1
     if post_count > 10:
         post_count -= (int(card)*10)
 
@@ -193,7 +193,7 @@ def my_page(request):
         post_count += 1
     
     card = int(post_count / 10)
-    
+    # card=1
     if post_count > 10:
         post_count -= (card*10)
     
@@ -273,7 +273,7 @@ class UserProfileUpdateView(UpdateView):
         for i in posts:
             post_count += 1
         card = post_count / 10
-        
+        # card=1
         badge_choices = []
         if post_count > 10:
             post_count -= (int(card)*10)
@@ -340,7 +340,7 @@ class UserProfileUpdateView(UpdateView):
         for i in posts:
             post_count += 1
         card = post_count / 10
-        
+        # card=1
 
         badge_choices = []
         if post_count > 10:

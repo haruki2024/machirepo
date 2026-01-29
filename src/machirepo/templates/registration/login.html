@@ -7,7 +7,7 @@
 <div class="form-container">
     <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; text-align:center; color: #1f2937;">まちレポ ログイン</h2>
     
-    <form method="post" >
+    <form method="post" action="">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
