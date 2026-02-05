@@ -162,14 +162,14 @@ def user_about(request):
 
 @login_required
 def user_stamp(request):
-    post_count = 0
+    post_count = 9
     card = 0
     
     posts = PhotoPost.objects.filter(user=request.user).order_by('-posted_at') 
     for i in posts:
         post_count += 1
     card = post_count / 10
-    # card=1
+    card=1
     if post_count > 10:
         post_count -= (int(card)*10)
 
@@ -186,7 +186,7 @@ def user_stamp(request):
 def my_page(request):
     posts = models.PhotoPost.objects.filter(user=request.user).order_by('-posted_at')
     
-    post_count = 0
+    post_count = 9
     card = 0
     
     for i in posts:
@@ -267,7 +267,7 @@ class UserProfileUpdateView(UpdateView):
         user = self.request.user
        
 
-        post_count = 0
+        post_count = 9
         card = 0
         posts = PhotoPost.objects.filter(user=user).order_by('-posted_at')
         for i in posts:
@@ -334,7 +334,7 @@ class UserProfileUpdateView(UpdateView):
         user = self.request.user
 
 
-        post_count = 0
+        post_count = 9
         card = 0
         posts = PhotoPost.objects.filter(user=user).order_by('-posted_at')
         for i in posts:
