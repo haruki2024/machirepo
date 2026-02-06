@@ -162,14 +162,14 @@ def user_about(request):
 
 @login_required
 def user_stamp(request):
-    post_count = 9
+    post_count = 0
     card = 0
     
     posts = PhotoPost.objects.filter(user=request.user).order_by('-posted_at') 
     for i in posts:
         post_count += 1
     card = post_count / 10
-    card=1
+    #card=1
     if post_count > 10:
         post_count -= (int(card)*10)
 
@@ -186,7 +186,7 @@ def user_stamp(request):
 def my_page(request):
     posts = models.PhotoPost.objects.filter(user=request.user).order_by('-posted_at')
     
-    post_count = 9
+    post_count = 0
     card = 0
     
     for i in posts:
@@ -267,7 +267,7 @@ class UserProfileUpdateView(UpdateView):
         user = self.request.user
        
 
-        post_count = 9
+        post_count = 0
         card = 0
         posts = PhotoPost.objects.filter(user=user).order_by('-posted_at')
         for i in posts:
@@ -334,7 +334,7 @@ class UserProfileUpdateView(UpdateView):
         user = self.request.user
 
 
-        post_count = 9
+        post_count = 0
         card = 0
         posts = PhotoPost.objects.filter(user=user).order_by('-posted_at')
         for i in posts:
@@ -663,6 +663,8 @@ def admin_user_list(request):
     }
     return render(request, 'main/admin/admin_user_list.html', context)
 
+
+
 @user_passes_test(is_staff_user, login_url='/')
 def admin_user_delete_confirm(request, user_id):
     User = get_user_model()
@@ -671,8 +673,14 @@ def admin_user_delete_confirm(request, user_id):
         return redirect('admin_user_list')
     
     if request.method == 'POST':
-        user_to_delete = get_object_or_404(User, pk=user_id)
+        # 404 を出さない安全な取得方法
+        user_to_delete = User.objects.filter(pk=user_id).first()
 
+        # すでに削除済み or 存在しない場合 → そのまま完了画面へ
+        if not user_to_delete:
+            return redirect('admin_user_delete_complete')
+
+        # 自分自身の削除は禁止
         if user_to_delete.pk == request.user.pk:
             messages.error(request, "自分自身のアカウントをこの画面から削除することはできません。")
             return redirect('admin_user_list')
@@ -681,14 +689,14 @@ def admin_user_delete_confirm(request, user_id):
             username = user_to_delete.username
             email_to_notify = user_to_delete.email
 
+            # 先に削除
             user_to_delete.delete()
 
+            # メール送信（同期のままでも OK。ただし非同期推奨）
             subject = "【重要】まちレポアカウント削除のお知らせ"
 
             message = (
                 f"{username} 様\n\n\n"
-              
-
                 f"いつもまちレポをご利用いただき、誠にありがとうございます。\n"
                 f"運営の判断により、お客様のまちレポアカウントの削除をいたしましたので、ご連絡いたします。\n"
                 f"アカウントが削除されたと思われる理由は以下の通りです\n\n"
@@ -698,8 +706,6 @@ def admin_user_delete_confirm(request, user_id):
                 f"・不適切な投稿やまたは操作が行われたため\n\n"
                 f"このアカウント削除により、お客様はの本サービスのすべての機能をご利用いただけなくなります。\n"
                 f"アカウント削除理由に心当たりがない場合は運営にお問い合わせください。"
-                       
-                       
                 f"\n\n-------------------------------------------------------------\n"
                 f"【お問い合わせ】\n"
                 f"まちレポ運営\n"
@@ -708,18 +714,23 @@ def admin_user_delete_confirm(request, user_id):
             )
 
             from_email = formataddr(('まちレポ', 'machirepo.app@gmail.com'))
-
-            recipient_list = [ email_to_notify ]
+            recipient_list = [email_to_notify]
 
             send_mail(subject, message, from_email, recipient_list)
 
-            
             return redirect('admin_user_delete_complete')
             
         except Exception as e:
             logger.error(f"ユーザーID {user_id} の削除中にエラーが発生: {e}", exc_info=True)
             messages.error(request, f"削除中に予期せぬエラーが発生しました。詳細: {e}")
             return redirect('admin_user_list')
+
+
+
+
+
+
+
 
 @user_passes_test(is_staff_user, login_url='/')
 def admin_user_delete_complete(request):
