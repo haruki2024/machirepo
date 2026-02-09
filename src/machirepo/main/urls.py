@@ -1,36 +1,28 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
 from .forms import SingleErrorPasswordChangeForm
 
+
+
 urlpatterns = [
-    # --------------------------------------------------
-    # 1. 共通/認証関連
-    # --------------------------------------------------
     path('', views.index, name='index'),
     path('redirect/', views.home_redirect, name='home_redirect'),
     path('signup/', views.ResidentRegisterView.as_view(), name='signup'),
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('logout/', views.user_logout_view, name='logout'), # カスタムログアウトビューを使用
+    path('logout/', views.user_logout_view, name='logout'),
 
-    # --------------------------------------------------
-    # 2. ユーザー画面
-    # --------------------------------------------------
     path('home/', views.user_home, name='user_home'),
     path('mypage/', views.my_page, name='my_page'),
     path('mypage/history/', views.post_history, name='post_history'),
     path('posts/', views.post_list, name='post_list'),
     path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
-    # path('maps/', views.user_map, name='user_map'),
     
     path('terms/', views.user_terms, name='user_terms'),
     path('about/', views.user_about, name='user_about'),    
     path('stamp/', views.user_stamp, name='user_stamp'),
 
-    # --------------------------------------------------
-    # 2. ユーザー画面ビュー (user_home, my_pageなど)
-    # --------------------------------------------------
     path('mypage/', views.my_page, name='my_page'), 
     path('mypage/edit/', views.user_profile_edit, name='user_profile_edit'), 
     path(
@@ -44,17 +36,11 @@ urlpatterns = [
     ),
     path('mypage/complete/', views.user_edit_complete, name='user_edit_complete'), 
 
-    # --------------------------------------------------
-    # 3. 投稿フロー
-    # --------------------------------------------------
     path('post/create/', views.photo_post_create, name='photo_post_create'),
     path('post/location/', views.photo_post_manual_location, name='photo_post_location'),
     path('post/confirm/', views.photo_post_confirm, name='photo_post_confirm'),
     path('post/done/', views.photo_post_done, name='photo_post_done'),
-
-    # --------------------------------------------------
-    # 4. 管理者画面 (manage/ に統一)
-    # --------------------------------------------------
+    
     path('manage/home/', views.admin_home, name='admin_home'),
     path('manage/users/', views.admin_user_list, name='admin_user_list'),
     path('manage/users/<int:user_id>/delete/', views.admin_user_delete_confirm, name='admin_user_delete_confirm'),
@@ -66,9 +52,6 @@ urlpatterns = [
     path('manage/posts/<int:post_id>/delete/', views.admin_post_delete, name='admin_post_delete'),
     path('manage/posts/delete/complete/', views.admin_post_delete_complete, name='admin_post_delete_complete'),
 
-    # --------------------------------------------------
-    # 3. 管理者向けタグ管理画面 (新規追加)
-    # --------------------------------------------------
     path('manage/tags/', views.admin_tag_list, name='admin_tag_list'),
     path('manage/tags/add/', views.admin_tag_create, name='admin_tag_create'),
     path('manage/tags/<int:pk>/edit/', views.admin_tag_edit, name='admin_tag_edit'), 
@@ -76,5 +59,7 @@ urlpatterns = [
     path('manage/tags/create/complete/', views.admin_tag_create_complete, name='admin_tag_create_complete'),
     path('manage/tags/edit/complete/', views.admin_tag_edit_complete, name='admin_tag_edit_complete'),
     path('manage/tags/delete/complete/', views.admin_tag_delete_complete, name='admin_tag_delete_complete'),
+
+
 
 ]

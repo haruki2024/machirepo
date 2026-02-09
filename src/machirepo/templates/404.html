@@ -3,12 +3,20 @@
 {% block title %}404{% endblock %} 
 
 {% block content %}
-    <header class="app-header">
-        <div class="title">まちレポ 管理者ページ</div>
-    </header>
-    <div>
-        <h1>ページが見つかりませんでした</h1>
+    <body class="form-page-bg">
+
+    <div class="form-container">
+        
+        <div style="text-align: center;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; color: #1f2937; margin-bottom: 1rem;">404</h1>
+            
+            <p style="color: #374151;">ページが見つかりませんでした。</p>
+            
+            <a href="{% url 'index' %}" class="btn btn-primary ">トップに戻る</a>
+        </div>
+        
         
     </div>
+    
 
 {% endblock %}

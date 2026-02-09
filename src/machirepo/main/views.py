@@ -958,3 +958,13 @@ def admin_tag_edit_complete(request):
 def admin_tag_delete_complete(request):
     return render(request, 'main/admin/admin_tag_delete_complete.html', {'page_title': '完了'})
 
+
+
+
+
+
+def custom_404_view(request, exception=None):
+    """
+    DEBUG=TrueでもFalseでも自作404テンプレートを返す
+    """
+    return render(request, '404.html', status=404)
