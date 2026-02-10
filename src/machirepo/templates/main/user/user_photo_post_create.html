@@ -132,7 +132,7 @@ let markerInstance = null;
         const MEDIA_URL_PREFIX = '/media/';
         photoElement.src = MEDIA_URL_PREFIX + photoFileName;
         photoElement.style.display = 'block';
-        if (fileNameDisplay) fileNameDisplay.textContent = '過去の投稿データから写真を読み込みました。';
+        if (fileNameDisplay) fileNameDisplay.textContent = '過去の投稿データから写真を読み込みました';
     } else {
         photoElement.style.display = 'none';
         if (fileNameDisplay) fileNameDisplay.textContent = 'ファイルが選択されていません。';
@@ -214,7 +214,7 @@ function initializeMap(lat, lng) {
         if (geoAttemptCompleted) return;
         geoAttemptCompleted = true;
         if (geoTimer) clearTimeout(geoTimer);
-        statusMessage.textContent = '位置情報の取得に失敗しました。次の画面で手動で位置を登録してください';
+        statusMessage.textContent = '位置情報の取得に失敗しました。次の画面で手動で位置を登録してください。';
         statusMessage.style.color = 'red';
 
     }

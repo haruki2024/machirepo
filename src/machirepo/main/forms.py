@@ -204,7 +204,7 @@ class PhotoPostForm(forms.ModelForm):
 
     tag = forms.ModelChoiceField(
         queryset=models.Tag.objects.all().order_by('name'),
-        empty_label="カテゴリーを選択してください",
+        empty_label="カテゴリを選択してください",
         label="カテゴリ",
         widget=forms.Select(attrs={'class': 'form-select'}),
         required=True 

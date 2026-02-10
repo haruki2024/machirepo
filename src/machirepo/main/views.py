@@ -37,6 +37,15 @@ def is_staff_user(user):
     return user.is_authenticated and user.is_staff
 
 
+def user_only(function):
+    def wrap(request, *args, **kwargs):
+        if request.user.is_authenticated and not request.user.is_staff:
+            return function(request, *args, **kwargs)
+        else:
+            return redirect('admin_home') 
+    return wrap
+
+
 
 
 
@@ -136,7 +145,7 @@ def user_logout_view(request):
 
 # 2. ユーザー画面ビュー
 
-@login_required
+@user_only
 def user_home(request):
     latest_posts = models.PhotoPost.objects.order_by('-posted_at')[:2]
     
@@ -152,7 +161,7 @@ def user_terms(request):
         
     return render(request, 'main/user/user_terms.html', context)
 
-@login_required
+@user_only
 def user_about(request):
     latest_posts = models.PhotoPost.objects.order_by('-posted_at')[:2]
 
@@ -160,7 +169,7 @@ def user_about(request):
 
     return render(request, 'main/user/user_about.html', context)
 
-@login_required
+@user_only
 def user_stamp(request):
     post_count = 0
     card = 0
@@ -182,7 +191,7 @@ def user_stamp(request):
     print(post_count)
     return render(request, 'main/user/user_stamp.html', context)
 
-@login_required
+@user_only
 def my_page(request):
     posts = models.PhotoPost.objects.filter(user=request.user).order_by('-posted_at')
     
@@ -205,7 +214,7 @@ def my_page(request):
     
     return render(request, 'main/user/user_mypage.html', context)
 
-@login_required
+@user_only
 def post_history(request):
     posts = PhotoPost.objects.filter(user=request.user).order_by('-posted_at') 
 
@@ -371,18 +380,18 @@ class UserProfileUpdateView(UpdateView):
 
 
 
-user_profile_edit = UserProfileUpdateView.as_view()
+# user_profile_edit = UserProfileUpdateView.as_view()
 
 
 
 
 
-@login_required
+@user_only
 def user_edit_complete(request):
     return render(request, 'main/user/user_edit_complete.html', {})
 
 
-@login_required
+@user_only
 def photo_post_create(request):
     post_data = request.session.get('post_data', {})
     
@@ -465,7 +474,7 @@ def photo_post_create(request):
     return render(request, 'main/user/user_photo_post_create.html', {'form': form, 'step': 1})
 
 
-@login_required
+@user_only
 def photo_post_manual_location(request):
     post_data = request.session.get('post_data')
     
@@ -515,7 +524,7 @@ def photo_post_manual_location(request):
     return render(request, 'main/user/user_photo_post_manual_location.html', context)
 
 
-@login_required
+@user_only
 def photo_post_confirm(request):
     post_data = request.session.get('post_data')
     
@@ -619,7 +628,7 @@ def photo_post_confirm(request):
     }
     return render(request, 'main/user/user_photo_post_confirm.html', context)
 
-@login_required
+@user_only
 def photo_post_done(request):
     return render(request, 'main/user/user_photo_post_complete.html', {})
 
